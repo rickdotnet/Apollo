@@ -13,7 +13,6 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
     private readonly INatsConnection connection;
     private readonly NatsSubscriptionConfig config;
     private readonly ILogger<NatsJetStreamSubscriber> logger;
-    //private readonly string filterSubject;
     private readonly NatsSubOpts? opts;
     private readonly CancellationToken cancellationToken;
 
@@ -35,23 +34,20 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
         var js = new NatsJSContext((NatsConnection)connection);
 
         // namespace without the message type
-        var streamNameClean = config.EndpointSubject.Replace(".", "_").Replace("*","").Replace(">","").TrimEnd('_');
-        
-        // create or get the stream
-        //var jsSubject = $"{config.Namespace}.>";
-        //var filterSubject = $"{this.filterSubject}.>";
+        var streamNameClean =
+            config
+                .EndpointSubject
+                .Replace(".", "_")
+                .Replace("*", "")
+                .Replace(">", "")
+                .TrimEnd('_');
 
-        // TODO: the client doesn't handle errors well here
-        //       for instance, a stream can't have overlapping subjects
-        //       either we need to fix the client
-        //       or validate the stream config is properly set up
-        // var test = await js.CreateStreamAsync(new StreamConfig(streamNameClean, new[] { "wtf22.>" }),
-        //     cancellationToken);
-        
         logger.LogInformation("Creating stream {StreamName} for {Subjects}", streamNameClean, config.EndpointSubject);
-        await js.CreateStreamAsync(new StreamConfig(streamNameClean, new[] { config.EndpointSubject }), cancellationToken);
+        await js.CreateStreamAsync(
+            new StreamConfig(streamNameClean, new[] { config.EndpointSubject }),
+            cancellationToken);
+        
         logger.LogInformation("Stream {StreamName} created for {Subjects}", streamNameClean, config.EndpointSubject);
-
         logger.LogInformation("Creating consumer {ConsumerName} for stream {StreamName}", config.ConsumerName,
             streamNameClean);
 
@@ -60,7 +56,6 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
         var consumer = await js.CreateOrUpdateConsumerAsync(streamNameClean, consumerConfig, cancellationToken);
         logger.LogInformation("Consumer {ConsumerName} for stream {StreamName} created", config.ConsumerName,
             streamNameClean);
-
 
         await foreach (var msg in consumer.ConsumeAsync<byte[]>().WithCancellation(cancellationToken))
         {
@@ -75,18 +70,20 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
         }
     }
 
-    private async Task ProcessMessage(NatsJSMsg<byte[]> msg, Func<NatsMessageReceivedEvent, CancellationToken, Task<bool>> handler)
+    private async Task ProcessMessage(NatsJSMsg<byte[]> msg,
+        Func<NatsMessageReceivedEvent, CancellationToken, Task<bool>> handler)
     {
         var json = Encoding.UTF8.GetString(msg.Data);
         logger.LogInformation("JSON: {Json}", json);
 
         var type = config.MessageTypes[msg.Subject];
-        
+
         logger.LogInformation("Deserializing message to {TypeName}", type.Name);
         var messageType = type.GetMessageType();
-        
+
         // this will eventually be a configured serializer
-        var deserialized = JsonSerializer.Deserialize(json, messageType, new JsonSerializerOptions{ PropertyNameCaseInsensitive = true });
+        var deserialized = JsonSerializer.Deserialize(json, messageType,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         var message = new NatsMessageReceivedEvent
         {
             Subject = msg.Subject,

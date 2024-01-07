@@ -6,6 +6,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHost", "TestHost\TestHo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsole", "TestConsole\TestConsole.csproj", "{54B1C31C-7A2B-4E50-B145-6D52B5F4D78B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{9E34B6B7-D3F1-4129-AF13-2303F7C86636}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +31,10 @@ Global
 		{54B1C31C-7A2B-4E50-B145-6D52B5F4D78B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54B1C31C-7A2B-4E50-B145-6D52B5F4D78B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54B1C31C-7A2B-4E50-B145-6D52B5F4D78B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9BDF9386-096A-43B1-AE6B-85EDE94AC743} = {FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}
+		{54B1C31C-7A2B-4E50-B145-6D52B5F4D78B} = {FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}
+		{2B8117B5-CE91-4797-AF88-20973E51510D} = {FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}
 	EndGlobalSection
 EndGlobal

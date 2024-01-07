@@ -1,36 +1,37 @@
 <Project>
 
-  <PropertyGroup>
-		<VersionMajor>0</VersionMajor>
-		<VersionMinor>0</VersionMinor>
-		<VersionPatch>1</VersionPatch>
-		<VersionQuality></VersionQuality>
-		<VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</VersionPrefix>
-	</PropertyGroup>
+    <PropertyGroup>
+        <VersionMajor>0</VersionMajor>
+        <VersionMinor>0</VersionMinor>
+        <VersionPatch>1</VersionPatch>
+        <VersionQuality>-preview</VersionQuality>
+        <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)$(VersionQuality)</VersionPrefix>
+    </PropertyGroup>
 
-  <PropertyGroup Label="Package">
-    <Product>Apollo</Product>
-	<Nullable>enable</Nullable>
-    <Authors>RickDotNet</Authors>
-    <RepositoryUrl>https://github.com/rickdotnet/Apollo</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
-    <PackageProjectUrl>https://github.com/rickdotnet/Apollo</PackageProjectUrl>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>Apollo;NATS;Distributed Messaging;Distributed transaction</PackageTags>
-    <Description>Distributed messaging built on top of NATS.</Description>
-  </PropertyGroup>
+    <PropertyGroup Label="Package">
+        <PackageId>RickDotNet.Apollo</PackageId>
+        <Nullable>enable</Nullable>
+        <Authors>RickDotNet</Authors>
+        <RepositoryUrl>https://github.com/rickdotnet/Apollo</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+        <PackageProjectUrl>https://github.com/rickdotnet/Apollo</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>Apollo NATS "Distributed Messaging" "Distributed transaction"</PackageTags>
+        <Description>Distributed messaging built on top of NATS.</Description>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
 
-  <!-- Using SourceLink -->
-  <PropertyGroup>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-	<PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-  </PropertyGroup>
+    <!-- Using SourceLink -->
+    <PropertyGroup>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
 
-  <ItemGroup>
-	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    </ItemGroup>
 
 </Project>

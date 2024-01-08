@@ -14,7 +14,7 @@ builder.Services
         { 
             //endpoints.AddEndpoint<MyEndpoint>();
             //endpoints.AddEndpoint<MyOtherEndpoint>(cfg => cfg.IsLocalEndpoint = true);
-            //endpoints.AddEndpoint<MyReplyEndpoint>(cfg=>cfg.DurableConfig.IsDurableConsumer = true);
+            endpoints.AddEndpoint<MyReplyEndpoint>();
             endpoints.AddEndpoint<MyEndpoint>(cfg=>cfg.DurableConfig.IsDurableConsumer = true);
             endpoints.AddEndpoint<MyOtherEndpoint>();
         });

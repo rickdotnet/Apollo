@@ -49,6 +49,18 @@ public static class ApolloDispatcherExtensions
         var method = GetOrAddDispatcherMethod(commandType, nameof(IApolloDispatcher.SendCommandToRemoteEndpointsAsync));
         return InvokeDispatcherMethod(dispatcher, method, commandMessage, cancellationToken);
     }
+    public static ValueTask SendCommandToSingleRemoteEndpointsAsync(
+        this IApolloDispatcher dispatcher,
+        EndpointRegistration registration,
+        Type commandType,
+        object commandMessage, CancellationToken cancellationToken = default)
+    {
+        if (!commandType.ImplementsInterface(typeof(ICommand)))
+            throw new ArgumentException("The provided type does not implement ICommand.", nameof(commandType));
+
+        var method = GetOrAddDispatcherMethod(commandType, nameof(IApolloDispatcher.SendCommandToSingleRemoteEndpointsAsync));
+        return InvokeDispatcherMethodForSingleRegistration(dispatcher, method, registration, commandMessage, cancellationToken);
+    }
 
     public static ValueTask BroadcastToRemoteEndpointsAsync(this IApolloDispatcher dispatcher, Type eventType,
         object eventMessage, CancellationToken cancellationToken = default)

@@ -67,6 +67,15 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
                 await ProcessMessage(msg, handler);
                 await msg.AckAsync(cancellationToken: cancellationToken);
             }
+            else
+            {
+                logger.LogWarning("No handler found for {Subject} in endpoint ({Endpoint})", msg.Subject, config.EndpointName);
+                
+                // TODO: need to makes sure this doesn't stop the server from
+                //       redelivering the message to other processors outside
+                //       of this application
+                await msg.AckTerminateAsync(cancellationToken: cancellationToken);
+            }
         }
     }
 
@@ -76,13 +85,11 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
         var json = Encoding.UTF8.GetString(msg.Data);
         logger.LogInformation("JSON: {Json}", json);
 
-        var type = config.MessageTypes[msg.Subject];
+        var type = config.MessageTypes[msg.Subject].GetMessageType();
 
         logger.LogInformation("Deserializing message to {TypeName}", type.Name);
-        var messageType = type.GetMessageType();
-
         // this will eventually be a configured serializer
-        var deserialized = JsonSerializer.Deserialize(json, messageType,
+        var deserialized = JsonSerializer.Deserialize(json, type,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         var message = new NatsMessageReceivedEvent
         {

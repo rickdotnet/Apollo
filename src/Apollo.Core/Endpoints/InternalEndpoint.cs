@@ -34,7 +34,7 @@ internal class InternalEndpoint(
                 if (handler.IsListener())
                     await dispatcher.BroadcastToSingleRemoteEndpointAsync(registration, messageType, wrapper.Message, cancellationToken);
                 if (handler.IsCommandHandler())
-                    await dispatcher.SendCommandToRemoteEndpointsAsync(messageType, wrapper.Message, cancellationToken);
+                    await dispatcher.SendCommandToSingleRemoteEndpointsAsync(registration, messageType, wrapper.Message, cancellationToken);
                 if (handler.IsRequestHandler())
                 {
                     var response = await dispatcher.SendRequestToRemoteEndpointsAsync(messageType, wrapper.Message, cancellationToken);

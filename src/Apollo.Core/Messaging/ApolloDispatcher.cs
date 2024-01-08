@@ -11,13 +11,13 @@ public class ApolloDispatcher : IApolloDispatcher
 {
     private readonly ILogger<ApolloDispatcher> logger;
     private readonly IEndpointRegistry endpointRegistry;
-    private readonly IServiceScopeFactory serviceScopeFactory;
+    private readonly IServiceProvider serviceProvider;
 
     public ApolloDispatcher(IServiceProvider serviceProvider)
     {
         logger = serviceProvider.GetRequiredService<ILogger<ApolloDispatcher>>();
         endpointRegistry = serviceProvider.GetRequiredService<IEndpointRegistry>();
-        serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        this.serviceProvider = serviceProvider;
     }
 
     public ValueTask<TResponse> SendRequestToLocalEndpointsAsync<TRequest, TResponse>(TRequest requestMessage,
@@ -88,8 +88,7 @@ public class ApolloDispatcher : IApolloDispatcher
             throw new InvalidOperationException(
                 $"Multiple endpoints registered for request {typeof(TRequest).Name}");
 
-        using var scope = serviceScopeFactory.CreateScope();
-        var endpointInstance = scope.ServiceProvider.GetRequiredService(endpoints.First().EndpointType);
+        var endpointInstance = serviceProvider.GetRequiredService(endpoints.First().EndpointType);
 
         if (endpointInstance is IReplyTo<TRequest, TResponse> requestHandler)
         {
@@ -155,8 +154,7 @@ public class ApolloDispatcher : IApolloDispatcher
     {
         try
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            var endpointInstance = scope.ServiceProvider.GetRequiredService(endpointRegistration.EndpointType);
+            var endpointInstance = serviceProvider.GetRequiredService(endpointRegistration.EndpointType);
 
             // Check if the message is a command and the handler can handle this command type.
             if (message is ICommand command)

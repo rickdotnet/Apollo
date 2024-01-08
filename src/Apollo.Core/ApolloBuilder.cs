@@ -40,8 +40,8 @@ public class EndpointBuilder : IEndpointBuilder
     {
         this.services = services;
         this.config = config;
-        services.AddSingleton<IApolloDispatcher, ApolloDispatcher>();
-        services.AddSingleton<ILocalPublisher, LocalPublisher>();
+        services.AddScoped<IApolloDispatcher, ApolloDispatcher>();
+        services.AddScoped<ILocalPublisher, LocalPublisher>();
         services.AddSingleton(endpointRegistry);
         services.AddHostedService<SubscriptionBackgroundService>();
     }

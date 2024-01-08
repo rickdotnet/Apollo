@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 
-namespace Apollo.Core.Hosting;
+namespace Apollo.Core;
 
 public interface IStateObserver
 {

@@ -4,7 +4,7 @@
         <VersionMajor>0</VersionMajor>
         <VersionMinor>0</VersionMinor>
         <VersionPatch>1</VersionPatch>
-        <VersionQuality>-preview2</VersionQuality>
+        <VersionQuality></VersionQuality>
         <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)$(VersionQuality)</VersionPrefix>
     </PropertyGroup>
 
@@ -17,7 +17,7 @@
         <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
         <PackageProjectUrl>https://github.com/rickdotnet/Apollo</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageTags>Apollo NATS "Distributed Messaging" "Distributed transaction"</PackageTags>
+        <PackageTags>Apollo;NATS;Distributed-Messaging;Distributed-Transaction</PackageTags>
         <Description>Distributed messaging built on top of NATS.</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>

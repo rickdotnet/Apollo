@@ -7,15 +7,29 @@ using Microsoft.Extensions.Logging;
 
 namespace Apollo.Endpoints;
 
-internal class InternalEndpoint(
-    IApolloDispatcher dispatcher,
-    IEndpointRegistry endpointRegistry,
-    ILogger<InternalEndpoint> logger
-    )
-    : IListenFor<NatsMessageReceivedEvent>
+internal class InternalEndpoint : IListenFor<NatsMessageReceivedEvent>
 {
+    private readonly IApolloDispatcher dispatcher;
+    private readonly IEndpointRegistry endpointRegistry;
+    private readonly ILogger<InternalEndpoint> logger;
+
+    public InternalEndpoint(IApolloDispatcher dispatcher,
+        IEndpointRegistry endpointRegistry,
+        ILogger<InternalEndpoint> logger)
+    {
+        this.dispatcher = dispatcher;
+        this.endpointRegistry = endpointRegistry;
+        this.logger = logger;
+    }
+
     public async ValueTask HandleEventAsync(NatsMessageReceivedEvent wrapper, CancellationToken cancellationToken = default)
     {
+        if (wrapper.Message is null)
+        {
+            logger.LogWarning("Discarding null message from {Subject}", wrapper.Subject);
+            return;
+        }
+
         var messageType = wrapper.Message.GetType();
 
         logger.LogInformation("InternalEndpoint Received: {MessageType} from {Subject}", messageType.Name, wrapper.Subject);

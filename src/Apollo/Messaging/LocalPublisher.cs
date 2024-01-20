@@ -1,20 +1,24 @@
-﻿using Apollo.Abstractions.Messaging.Commands;
+﻿using Apollo.Abstractions.Messaging;
+using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
-using Apollo.Endpoints;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Apollo.Messaging;
 
 public interface ILocalPublisher : IPublisher;
 
-public class LocalPublisher(IServiceProvider serviceProvider) : ILocalPublisher
+internal class LocalPublisher : ILocalPublisher
 {
-    private readonly ILogger<LocalPublisher> logger = serviceProvider.GetRequiredService<ILogger<LocalPublisher>>();
-    private readonly IApolloDispatcher dispatcher = serviceProvider.GetRequiredService<IApolloDispatcher>();
+    private readonly ILogger<LocalPublisher> logger;
+    private readonly IApolloDispatcher dispatcher;
 
-    public ValueTask SendCommandAsync<TCommand>(TCommand commandMessage,
+    public LocalPublisher(ILogger<LocalPublisher> logger, IApolloDispatcher dispatcher)
+    {
+        this.logger = logger;
+        this.dispatcher = dispatcher;
+    }
+    public Task SendCommandAsync<TCommand>(TCommand commandMessage,
         CancellationToken cancellationToken = default)
         where TCommand : ICommand
     {
@@ -22,7 +26,7 @@ public class LocalPublisher(IServiceProvider serviceProvider) : ILocalPublisher
         return dispatcher.SendCommandToLocalEndpointsAsync(commandMessage, cancellationToken);
     }
 
-    public ValueTask BroadcastAsync<TEvent>(TEvent eventMessage,
+    public Task BroadcastAsync<TEvent>(TEvent eventMessage,
         CancellationToken cancellationToken = default)
         where TEvent : IEvent
     {
@@ -30,7 +34,7 @@ public class LocalPublisher(IServiceProvider serviceProvider) : ILocalPublisher
         return dispatcher.BroadcastToLocalEndpointsAsync(eventMessage, cancellationToken);
     }
 
-    public ValueTask<TResponse> SendRequestAsync<TRequest, TResponse>(
+    public Task<TResponse> SendRequestAsync<TRequest, TResponse>(
         TRequest requestMessage, CancellationToken cancellationToken)
         where TRequest : IRequest<TResponse>
     {

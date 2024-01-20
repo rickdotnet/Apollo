@@ -7,12 +7,19 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Apollo;
 
-public class ApolloBuilder(IServiceCollection services, ApolloConfig config)
+public class ApolloBuilder
 {
-    private readonly IServiceCollection services = services;
-    private readonly ApolloConfig config = config;
+    private readonly IServiceCollection services;
+    private readonly ApolloConfig config;
 
-    private readonly IEndpointBuilder endpointBuilder = new EndpointBuilder(services, config);
+    private readonly IEndpointBuilder endpointBuilder;
+
+    public ApolloBuilder(IServiceCollection services, ApolloConfig config)
+    {
+        this.services = services;
+        this.config = config;
+        endpointBuilder = new EndpointBuilder(services, config);
+    }
 
     public void WithEndpoints(Action<IEndpointBuilder> action)
     {

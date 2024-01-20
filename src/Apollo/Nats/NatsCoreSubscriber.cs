@@ -10,7 +10,7 @@ internal class NatsCoreSubscriber : INatsSubscriber
 {
     private readonly INatsConnection connection;
     private readonly NatsSubscriptionConfig config;
-    private readonly ILogger<NatsCoreSubscriber> logger;
+    private readonly ILogger logger;
     private readonly string subject;
     private readonly string? queueGroup;
     private readonly INatsDeserialize<byte[]>? serializer;
@@ -21,7 +21,7 @@ internal class NatsCoreSubscriber : INatsSubscriber
     internal NatsCoreSubscriber(
         INatsConnection connection,
         NatsSubscriptionConfig config,
-        ILogger<NatsCoreSubscriber> logger,
+        ILogger logger,
         CancellationToken cancellationToken = default)
     {
         this.connection = connection;

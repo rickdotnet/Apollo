@@ -12,14 +12,14 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
 {
     private readonly INatsConnection connection;
     private readonly NatsSubscriptionConfig config;
-    private readonly ILogger<NatsJetStreamSubscriber> logger;
+    private readonly ILogger logger;
     private readonly NatsSubOpts? opts;
     private readonly CancellationToken cancellationToken;
 
     internal NatsJetStreamSubscriber(
         INatsConnection connection,
         NatsSubscriptionConfig config,
-        ILogger<NatsJetStreamSubscriber> logger,
+        ILogger logger,
         CancellationToken cancellationToken = default)
     {
         this.connection = connection;
@@ -104,6 +104,9 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
         // leaving this point here in case we decide to handle replies here
         // I don't think we will, but, it's here if we need it
         // we might even do some logging based on the result of the handler
+        // other things to consider:
+        // - handle errors here?
+        // - (not)block the thread until the handler is done?
         var result = await handler(message, cancellationToken);
     }
 }

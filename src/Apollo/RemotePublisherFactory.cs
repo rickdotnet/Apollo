@@ -11,12 +11,17 @@ public interface IRemotePublisherFactory
     IRemotePublisher CreatePublisher(string endpointName);
 }
 
-internal class RemotePublisherFactory(IServiceProvider serviceProvider) : IRemotePublisherFactory
+internal class RemotePublisherFactory : IRemotePublisherFactory
 {
-    private readonly IServiceProvider serviceProvider =
-        serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly IServiceProvider serviceProvider;
 
-    private readonly ApolloConfig config = serviceProvider.GetRequiredService<ApolloConfig>();
+    private readonly ApolloConfig config;
+
+    public RemotePublisherFactory(IServiceProvider serviceProvider)
+    {
+        this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        config = serviceProvider.GetRequiredService<ApolloConfig>();
+    }
 
     public IRemotePublisher CreatePublisher(string endpointName)
     {

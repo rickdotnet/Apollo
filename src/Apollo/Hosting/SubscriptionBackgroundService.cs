@@ -8,12 +8,16 @@ using NATS.Client.Core;
 
 namespace Apollo.Hosting;
 
-public class SubscriptionBackgroundService(IServiceProvider serviceProvider) : BackgroundService
+public class SubscriptionBackgroundService : BackgroundService
 {
-    private readonly ILogger<SubscriptionBackgroundService> logger =
-        serviceProvider.GetRequiredService<ILogger<SubscriptionBackgroundService>>();
+    private readonly ILogger<SubscriptionBackgroundService> logger;
+    private readonly IServiceScopeFactory scopeFactory;
 
-    private readonly IServiceScopeFactory scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+    public SubscriptionBackgroundService(IServiceProvider serviceProvider)
+    {
+        logger = serviceProvider.GetRequiredService<ILogger<SubscriptionBackgroundService>>();
+        scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -34,13 +38,12 @@ public class SubscriptionBackgroundService(IServiceProvider serviceProvider) : B
             var subjectTypeMapping = new Dictionary<string, Type>();
             foreach (var handlerType in endpoint.HandlerTypes)
             {
-                
                 var subject =
                     $"{endpoint.Config.Namespace}.{endpointName}.{handlerType.GetMessageType().Name}".ToLower();
-                
+
                 subjectTypeMapping.Add(subject, handlerType);
             }
-            
+
             var config = new NatsSubscriptionConfig
             {
                 Namespace = endpoint.Config.Namespace,
@@ -52,11 +55,12 @@ public class SubscriptionBackgroundService(IServiceProvider serviceProvider) : B
                 Serializer = null, // get from service provider
                 NatsSubOpts = null
             };
-            
+
             subscribers.Add(
                 endpoint.Config.DurableConfig.IsDurableConsumer
-                    ? new NatsJetStreamSubscriber(connection, config, GetLogger<NatsJetStreamSubscriber>(), stoppingToken)
-                    : new NatsCoreSubscriber(connection, config, GetLogger<NatsCoreSubscriber>(), stoppingToken)
+                    ? new NatsJetStreamSubscriber(connection, config, scope.GetLogger<NatsJetStreamSubscriber>(),
+                        stoppingToken)
+                    : new NatsCoreSubscriber(connection, config, scope.GetLogger<NatsCoreSubscriber>(), stoppingToken)
             );
         }
 
@@ -73,10 +77,7 @@ public class SubscriptionBackgroundService(IServiceProvider serviceProvider) : B
         {
             // TODO: figure out if we need this extensibility point or if we can simply fire and forget
             await localPublisher.BroadcastAsync(message, cancellationToken);
-            
             return true;
         }
     }
-
-    private ILogger<T> GetLogger<T>() => serviceProvider.GetRequiredService<ILogger<T>>();
 }

@@ -2,6 +2,7 @@
 using Apollo.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NATS.Client.Core;
 using NATS.Client.Hosting;
 
@@ -31,6 +32,9 @@ public static class HostingExtensions
         builder.WithEndpoints(x => x.AddEndpoint<InternalEndpoint>(cfg => cfg.IsLocalEndpoint = true));
         return builder;
     }
+        public static ILogger GetLogger<T>(this IServiceScope scope)
+            => scope.ServiceProvider.GetService<ILogger<T>>()
+               ?? (ILogger)NullLogger.Instance;
 }
 
 public class FakeFactory : ILoggerFactory

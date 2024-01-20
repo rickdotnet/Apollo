@@ -3,7 +3,7 @@ using Apollo.Hosting;
 using Microsoft.Extensions.Hosting;
 using TestHost;
 
-var config = new ApolloConfig();
+var config = new ApolloConfig("nats://nats.rhinostack.com:4222");
 
 var builder = Host.CreateApplicationBuilder(args);
 

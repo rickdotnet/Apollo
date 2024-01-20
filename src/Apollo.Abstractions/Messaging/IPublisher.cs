@@ -4,17 +4,17 @@ using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 
-namespace Apollo.Messaging;
+namespace Apollo.Abstractions.Messaging;
 
 public interface IPublisher
 {
-    ValueTask SendCommandAsync<TCommand>(TCommand commandMessage, CancellationToken cancellationToken)
+    Task SendCommandAsync<TCommand>(TCommand commandMessage, CancellationToken cancellationToken)
         where TCommand : ICommand;
 
-    ValueTask BroadcastAsync<TEvent>(TEvent eventMessage, CancellationToken cancellationToken)
+    Task BroadcastAsync<TEvent>(TEvent eventMessage, CancellationToken cancellationToken)
         where TEvent : IEvent;
 
-    ValueTask<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
+    Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
         CancellationToken cancellationToken)
         where TRequest : IRequest<TResponse>;
 }
@@ -23,7 +23,7 @@ public static class PublisherExtensions
 {
     private static readonly ConcurrentDictionary<(Type requestType, Type responseType), MethodInfo> requestMethodCache = new();
     private static readonly ConcurrentDictionary<Type, MethodInfo> broadcastMethodCache = new();
-    public static ValueTask<TResult> SendRequestAsync<TResult>(this IPublisher publisher, IRequest<TResult> request,
+    public static Task<TResult> SendRequestAsync<TResult>(this IPublisher publisher, IRequest<TResult> request,
         CancellationToken cancellationToken = default)
     {
         var requestType = request.GetType();
@@ -48,13 +48,13 @@ public static class PublisherExtensions
 
         var task = method.Invoke(publisher, new object[] { request, cancellationToken });
 
-        if (task is ValueTask<TResult> resultTask)
+        if (task is Task<TResult> resultTask)
             return resultTask;
 
         throw new InvalidOperationException(
-            $"The result is not of the expected type ValueTask<{typeof(TResult).FullName}>.");
+            $"The result is not of the expected type Task<{typeof(TResult).FullName}>.");
     }
-    // public static ValueTask BroadcastFromRemoteAsync(this ILocalPublisher publisher, Type eventType, object eventMessage, CancellationToken cancellationToken = default)
+    // public static Task BroadcastFromRemoteAsync(this ILocalPublisher publisher, Type eventType, object eventMessage, CancellationToken cancellationToken = default)
     // {
     //     if (!typeof(IEvent).IsAssignableFrom(eventType))
     //         throw new ArgumentException("The provided type does not implement IEvent.", nameof(eventType));
@@ -75,7 +75,7 @@ public static class PublisherExtensions
     //     if (result == null)
     //         throw new InvalidOperationException("The result of the BroadcastAsync method cannot be null.");
     //
-    //     var task = (ValueTask)result;
+    //     var task = (Task)result;
     //     return task;
     // }
 }

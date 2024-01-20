@@ -57,11 +57,34 @@ static async Task SimulateHeartbeatAsync(IRemotePublisher remoteDispatcher, Hear
 }
 
 //await host.RunAsync();
-public record TestMessage(string Message) : IEvent
+public record TestMessage : IEvent
 {
-    public string Message { get; set; } = Message;
+    public TestMessage(string Message)
+    {
+        this.Message = Message;
+    }
+
+    public string Message { get; set; }
+
+    public void Deconstruct(out string Message)
+    {
+        Message = this.Message;
+    }
 }
-public record MyRequest(string Message) : IRequest<bool>;
+public record MyRequest : IRequest<bool>
+{
+    public MyRequest(string Message)
+    {
+        this.Message = Message;
+    }
+
+    public string Message { get; init; }
+
+    public void Deconstruct(out string Message)
+    {
+        Message = this.Message;
+    }
+}
 
 public record HeartbeatEvent : IEvent
 {

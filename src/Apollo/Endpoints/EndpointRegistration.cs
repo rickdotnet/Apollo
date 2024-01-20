@@ -1,6 +1,6 @@
-﻿using Apollo.Core.Configuration;
+﻿using Apollo.Configuration;
 
-namespace Apollo.Core.Endpoints;
+namespace Apollo.Endpoints;
 
 public class EndpointRegistration<T>(EndpointConfig config)
     : EndpointRegistration(typeof(T), config);

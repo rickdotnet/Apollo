@@ -2,7 +2,7 @@
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 
-namespace Apollo.Core.Endpoints;
+namespace Apollo.Endpoints;
 
 internal static class TypeExtensions
 {

@@ -1,12 +1,12 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Apollo.Core.Endpoints;
+using Apollo.Endpoints;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
 
-namespace Apollo.Core.Nats;
+namespace Apollo.Nats;
 
 internal class NatsJetStreamSubscriber : INatsSubscriber
 {

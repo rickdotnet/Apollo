@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Apollo.Abstractions.Messaging.Events;
-using Apollo.Core.Messaging;
-using Apollo.Core.Nats;
+using Apollo.Messaging;
+using Apollo.Nats;
 using Microsoft.Extensions.Logging;
 
-namespace Apollo.Core.Endpoints;
+namespace Apollo.Endpoints;
 
 internal class InternalEndpoint(
     IApolloDispatcher dispatcher,

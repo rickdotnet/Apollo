@@ -1,4 +1,4 @@
-﻿namespace Apollo.Core.Configuration;
+﻿namespace Apollo.Configuration;
 
 public class DurableConfig
 {

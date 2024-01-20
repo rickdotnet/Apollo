@@ -1,4 +1,4 @@
-﻿namespace Apollo.Core.Nats;
+﻿namespace Apollo.Nats;
 
 public interface INatsSubscriber
 {

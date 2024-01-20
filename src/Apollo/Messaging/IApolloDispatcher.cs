@@ -3,9 +3,9 @@ using System.Reflection;
 using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
-using Apollo.Core.Endpoints;
+using Apollo.Endpoints;
 
-namespace Apollo.Core.Messaging;
+namespace Apollo.Messaging;
 
 public interface IApolloDispatcher
 {

@@ -1,10 +1,10 @@
-﻿using Apollo.Core.Configuration;
-using Apollo.Core.Messaging;
+﻿using Apollo.Configuration;
+using Apollo.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.Core;
+namespace Apollo;
 
 public interface IRemotePublisherFactory
 {

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Core", "Apollo.Core\Apollo.Core.csproj", "{9BDF9386-096A-43B1-AE6B-85EDE94AC743}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo", "Apollo\Apollo.csproj", "{9BDF9386-096A-43B1-AE6B-85EDE94AC743}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHost", "TestHost\TestHost.csproj", "{2B8117B5-CE91-4797-AF88-20973E51510D}"
 EndProject

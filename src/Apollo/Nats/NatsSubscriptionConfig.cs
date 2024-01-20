@@ -1,6 +1,6 @@
 ﻿using NATS.Client.Core;
 
-namespace Apollo.Core.Nats;
+namespace Apollo.Nats;
 
 public class NatsSubscriptionConfig
 {

@@ -1,10 +1,10 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Apollo.Core.Endpoints;
+using Apollo.Endpoints;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.Core.Nats;
+namespace Apollo.Nats;
 
 internal class NatsCoreSubscriber : INatsSubscriber
 {

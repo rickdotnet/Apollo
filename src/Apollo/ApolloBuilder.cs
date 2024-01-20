@@ -1,11 +1,11 @@
-﻿using Apollo.Core.Configuration;
-using Apollo.Core.Endpoints;
-using Apollo.Core.Hosting;
-using Apollo.Core.Messaging;
+﻿using Apollo.Configuration;
+using Apollo.Endpoints;
+using Apollo.Hosting;
+using Apollo.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Apollo.Core;
+namespace Apollo;
 
 public class ApolloBuilder(IServiceCollection services, ApolloConfig config)
 {

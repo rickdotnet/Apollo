@@ -1,12 +1,12 @@
-﻿using Apollo.Core.Endpoints;
-using Apollo.Core.Messaging;
-using Apollo.Core.Nats;
+﻿using Apollo.Endpoints;
+using Apollo.Messaging;
+using Apollo.Nats;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.Core.Hosting;
+namespace Apollo.Hosting;
 
 public class SubscriptionBackgroundService(IServiceProvider serviceProvider) : BackgroundService
 {

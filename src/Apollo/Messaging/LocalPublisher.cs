@@ -1,11 +1,11 @@
 ﻿using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
-using Apollo.Core.Endpoints;
+using Apollo.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Apollo.Core.Messaging;
+namespace Apollo.Messaging;
 
 public interface ILocalPublisher : IPublisher;
 

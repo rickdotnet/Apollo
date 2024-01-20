@@ -1,7 +1,7 @@
-﻿using Apollo.Core;
-using Apollo.Core.Configuration;
-using Apollo.Core.Hosting;
-using Apollo.Core.Messaging;
+﻿using Apollo;
+using Apollo.Configuration;
+using Apollo.Hosting;
+using Apollo.Messaging;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 using Microsoft.Extensions.DependencyInjection;

@@ -6,7 +6,7 @@ using Apollo.Abstractions.Messaging.Requests;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.Core.Messaging;
+namespace Apollo.Messaging;
 
 public interface IRemotePublisher : IPublisher
 {

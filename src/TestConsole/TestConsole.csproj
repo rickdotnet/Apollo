@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Apollo.Core\Apollo.Core.csproj" />
+      <ProjectReference Include="..\Apollo\Apollo.csproj" />
     </ItemGroup>
 
 </Project>

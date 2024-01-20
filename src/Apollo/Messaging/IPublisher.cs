@@ -4,7 +4,7 @@ using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 
-namespace Apollo.Core.Messaging;
+namespace Apollo.Messaging;
 
 public interface IPublisher
 {

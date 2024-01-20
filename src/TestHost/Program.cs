@@ -1,5 +1,5 @@
-﻿using Apollo.Core.Configuration;
-using Apollo.Core.Hosting;
+﻿using Apollo.Configuration;
+using Apollo.Hosting;
 using Microsoft.Extensions.Hosting;
 using TestHost;
 

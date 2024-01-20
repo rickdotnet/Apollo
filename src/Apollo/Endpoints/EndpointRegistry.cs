@@ -3,7 +3,7 @@ using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 
-namespace Apollo.Core.Endpoints;
+namespace Apollo.Endpoints;
 
 public interface IEndpointRegistry
 {

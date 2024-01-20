@@ -1,11 +1,11 @@
-﻿using Apollo.Core.Configuration;
-using Apollo.Core.Endpoints;
+﻿using Apollo.Configuration;
+using Apollo.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.Hosting;
 
-namespace Apollo.Core.Hosting;
+namespace Apollo.Hosting;
 
 public static class HostingExtensions
 {

@@ -1,11 +1,9 @@
-﻿using System.Threading.Channels;
-using Apollo.Core.Configuration;
+﻿using Apollo.Core.Configuration;
 using Apollo.Core.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.Hosting;
-using NATS.Client.Serializers.Json;
 
 namespace Apollo.Core.Hosting;
 
@@ -17,22 +15,28 @@ public static class HostingExtensions
         services.AddNats(configureOpts: opts => opts with
         {
             Url = config.Url,
-            //SerializerRegistry = NatsJsonSerializerRegistry.Default,
             //LoggerFactory = new FakeFactory(),
             ConnectTimeout = TimeSpan.FromSeconds(10),
-            RequestTimeout = TimeSpan.FromSeconds(10)
+            RequestTimeout = TimeSpan.FromSeconds(10),
+            AuthOpts = NatsAuthOpts.Default with
+            {
+                Token = config.Token,
+                NKey = config.NKey,
+                Seed = config.Seed,
+                Jwt = config.Jwt,
+            }
         });
+
         var builder = new ApolloBuilder(services, config);
-        builder.WithEndpoints(x=>x.AddEndpoint<InternalEndpoint>(cfg=>cfg.IsLocalEndpoint = true));
+        builder.WithEndpoints(x => x.AddEndpoint<InternalEndpoint>(cfg => cfg.IsLocalEndpoint = true));
         return builder;
     }
 }
 
-public class FakeFactory: ILoggerFactory
+public class FakeFactory : ILoggerFactory
 {
     public void Dispose()
     {
-        return;
     }
 
     public ILogger CreateLogger(string categoryName)
@@ -42,13 +46,13 @@ public class FakeFactory: ILoggerFactory
 
     public void AddProvider(ILoggerProvider provider)
     {
-        
     }
 }
 
 public class OopsiePoopsie : ILogger
 {
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+        Func<TState, Exception?, string> formatter)
     {
         Console.WriteLine(state);
     }
@@ -68,6 +72,5 @@ public class JesusChrist : IDisposable
 {
     public void Dispose()
     {
-        
     }
 }

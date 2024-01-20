@@ -3,6 +3,7 @@ using Apollo.Core.Endpoints;
 using Apollo.Core.Hosting;
 using Apollo.Core.Messaging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Apollo.Core;
 
@@ -20,7 +21,7 @@ public class ApolloBuilder(IServiceCollection services, ApolloConfig config)
 
     public void WithRemotePublishing()
     {
-        services.AddSingleton<IRemotePublisherFactory, RemotePublisherFactory>();
+        services.TryAddSingleton<IRemotePublisherFactory, RemotePublisherFactory>();
     }
 }
 
@@ -40,9 +41,9 @@ public class EndpointBuilder : IEndpointBuilder
     {
         this.services = services;
         this.config = config;
-        services.AddScoped<IApolloDispatcher, ApolloDispatcher>();
-        services.AddScoped<ILocalPublisher, LocalPublisher>();
-        services.AddSingleton(endpointRegistry);
+        services.TryAddScoped<IApolloDispatcher, ApolloDispatcher>();
+        services.TryAddScoped<ILocalPublisher, LocalPublisher>();
+        services.TryAddSingleton(endpointRegistry);
         services.AddHostedService<SubscriptionBackgroundService>();
     }
 
@@ -55,8 +56,6 @@ public class EndpointBuilder : IEndpointBuilder
         action(endpointConfig);
 
         endpointRegistry.RegisterEndpoint(new EndpointRegistration<T>(endpointConfig));
-
         services.AddScoped(typeof(T));
-        //services.AddScoped<IEndpoint>(x=>x.GetRequiredService<T>());
     }
 }

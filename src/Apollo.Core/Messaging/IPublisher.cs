@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-using Apollo.Core.Messaging.Commands;
-using Apollo.Core.Messaging.Events;
-using Apollo.Core.Messaging.Requests;
+using Apollo.Abstractions.Messaging.Commands;
+using Apollo.Abstractions.Messaging.Events;
+using Apollo.Abstractions.Messaging.Requests;
 
 namespace Apollo.Core.Messaging;
 

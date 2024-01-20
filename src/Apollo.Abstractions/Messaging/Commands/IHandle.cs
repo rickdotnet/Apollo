@@ -1,4 +1,4 @@
-﻿namespace Apollo.Core.Messaging.Commands;
+﻿namespace Apollo.Abstractions.Messaging.Commands;
 
 public interface IHandle
 {

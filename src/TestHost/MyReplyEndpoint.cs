@@ -1,4 +1,4 @@
-﻿using Apollo.Core.Messaging.Requests;
+﻿using Apollo.Abstractions.Messaging.Requests;
 using Microsoft.Extensions.Logging;
 
 namespace TestHost;

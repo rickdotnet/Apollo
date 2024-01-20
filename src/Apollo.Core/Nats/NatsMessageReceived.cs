@@ -1,5 +1,4 @@
-﻿using Apollo.Core.Messaging.Commands;
-using Apollo.Core.Messaging.Events;
+﻿using Apollo.Abstractions.Messaging.Events;
 using Microsoft.Extensions.Primitives;
 using NATS.Client.Core;
 

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Apollo.Abstractions.Messaging.Events;
 using Apollo.Core.Messaging;
-using Apollo.Core.Messaging.Events;
 using Apollo.Core.Nats;
 using Microsoft.Extensions.Logging;
 

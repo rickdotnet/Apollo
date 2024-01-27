@@ -3,6 +3,9 @@ using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.KeyValueStore;
 
+var owner = Guid.NewGuid().ToString();
+Console.WriteLine($"Owner: {owner}");
+
 var opts = new NatsOpts { Url = "nats://nats.rhinostack.com:4222" };
 await using var nats = new NatsConnection(opts);
 
@@ -10,7 +13,7 @@ var js = new NatsJSContext(nats);
 var kv = new NatsKVContext(js);
 
 var lockFactory = new DistributedLockStoreFactory(kv);
-var store = await lockFactory.CreateAsync();
+var store = await lockFactory.CreateAsync(owner);
 
 var t1 = TestLock();
 var t2 = TestLock2();

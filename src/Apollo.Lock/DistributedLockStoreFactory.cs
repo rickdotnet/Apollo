@@ -15,7 +15,7 @@ public class DistributedLockStoreFactory
     {
         this.kvContext = kvContext ?? throw new ArgumentNullException(nameof(kvContext));
         this.ttl = ttl == default ? TimeSpan.FromSeconds(30) : ttl;
-        this.timeout = timeout == default ? TimeSpan.FromSeconds(10) : timeout;
+        this.timeout = timeout == default ? TimeSpan.FromSeconds(30) : timeout;
     }
 
     public async Task<IDistributedLockStore> CreateAsync(string owner = "apollo", string bucketName = "apollo", CancellationToken cancellationToken = default)

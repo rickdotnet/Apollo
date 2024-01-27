@@ -2,9 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo", "Apollo\Apollo.csproj", "{9BDF9386-096A-43B1-AE6B-85EDE94AC743}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHost", "TestHost\TestHost.csproj", "{2B8117B5-CE91-4797-AF88-20973E51510D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHost", "..\demo\TestHost\TestHost.csproj", "{2B8117B5-CE91-4797-AF88-20973E51510D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsole", "TestConsole\TestConsole.csproj", "{54B1C31C-7A2B-4E50-B145-6D52B5F4D78B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsole", "..\demo\TestConsole\TestConsole.csproj", "{54B1C31C-7A2B-4E50-B145-6D52B5F4D78B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}"
 EndProject
@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Lock", "Apollo.Lock\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{98A3833B-F645-4B0A-B404-C7B00C7D261D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDemo", "LockDemo\LockDemo.csproj", "{BBFE4D8E-187B-4F89-8DDC-9B56091D5B32}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockDemo", "..\demo\LockDemo\LockDemo.csproj", "{BBFE4D8E-187B-4F89-8DDC-9B56091D5B32}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

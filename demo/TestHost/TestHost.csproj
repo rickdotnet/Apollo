@@ -12,7 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Apollo\Apollo.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Abstractions\Apollo.Abstractions.csproj" />
+      <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
     </ItemGroup>
 
 </Project>

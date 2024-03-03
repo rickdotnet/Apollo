@@ -21,14 +21,19 @@ public class ApolloBuilder
         endpointBuilder = new EndpointBuilder(services, config);
     }
 
-    public void WithEndpoints(Action<IEndpointBuilder> action)
+    public ApolloBuilder WithEndpoints(Action<IEndpointBuilder> action)
     {
         action(endpointBuilder);
+        return this;
     }
 
     public void WithRemotePublishing()
     {
         services.TryAddSingleton<IRemotePublisherFactory, RemotePublisherFactory>();
+    }
+    public void WithService(Action<IServiceCollection> action)
+    {
+        action(services);
     }
 }
 

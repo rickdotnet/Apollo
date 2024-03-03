@@ -6,12 +6,19 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Label="Package">
+        <PackageId>RickDotNet.Apollo.Lock</PackageId>
+    </PropertyGroup>
+    
     <ItemGroup>
-      <ProjectReference Include="..\Apollo\Apollo.csproj" />
+        <ProjectReference Include="..\Apollo\Apollo.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="MessagePack" Version="2.5.140" />
+        <PackageReference Include="MessagePack" Version="2.5.140"/>
     </ItemGroup>
-
+    
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 </Project>

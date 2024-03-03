@@ -5,16 +5,16 @@ namespace Apollo.Lock;
 public class DistributedLockStoreFactory
 {
     private readonly INatsKVContext kvContext;
-    private readonly TimeSpan ttl;
+    private readonly TimeSpan maxTtl;
     private readonly TimeSpan timeout;
 
     public DistributedLockStoreFactory(
         INatsKVContext kvContext,
-        TimeSpan ttl = default,
+        TimeSpan maxTtl = default,
         TimeSpan timeout = default)
     {
         this.kvContext = kvContext ?? throw new ArgumentNullException(nameof(kvContext));
-        this.ttl = ttl == default ? TimeSpan.FromSeconds(30) : ttl;
+        this.maxTtl = maxTtl == default ? TimeSpan.FromSeconds(30) : maxTtl;
         this.timeout = timeout == default ? TimeSpan.FromSeconds(30) : timeout;
     }
 
@@ -22,10 +22,19 @@ public class DistributedLockStoreFactory
     {
         // TODO: test the TTL and lease time in the lock store
         
-        // TTL not available in NATS KV?
-        var config = new NatsKVConfig(bucketName);
+        var config = new NatsKVConfig(bucketName)
+        {
+            Description = "Apollo Distributed Lock Store",
+            History = 1,
+
+            // TODO: make this apparent to the user
+            //       this sets a hard limit at the server level
+            //       need to make sure that updates reset this
+            //MaxAge = maxTtl, // can't set until DuplicateWindow error PR gets merged
+            Storage = NatsKVStorageType.Memory,
+        };
         
         var kvStore = await kvContext.CreateStoreAsync(config, cancellationToken);
-        return new DistributedLockStore(kvStore, owner, ttl, timeout);
+        return new DistributedLockStore(kvStore, owner, maxTtl, timeout);
     }
 }

@@ -3,8 +3,8 @@
     <PropertyGroup>
         <VersionMajor>0</VersionMajor>
         <VersionMinor>0</VersionMinor>
-        <VersionPatch>2</VersionPatch>
-        <VersionQuality>-preview3</VersionQuality>
+        <VersionPatch>3</VersionPatch>
+        <VersionQuality />
         <VersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)$(VersionQuality)</VersionPrefix>
     </PropertyGroup>
 

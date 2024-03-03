@@ -14,15 +14,16 @@ public class DistributedAsyncLock
         this.timeout = timeout;
     }
 
-    public async Task<IAsyncDisposable> LockAsync(CancellationToken cancellationToken = default)
+    public async Task<IAsyncDisposable> LockAsync(TimeSpan leaseTime = default, CancellationToken cancellationToken = default)
     {
+        leaseTime = leaseTime == default ? lockStore.MaxLeaseTime : leaseTime;
+        
         // Use a local lock to prevent multiple local tasks from trying to acquire the distributed lock simultaneously
         var releaser = await localLock.LockAsync(timeout, cancellationToken);
-
         try
         {
             // Attempt to acquire the distributed lock
-            await lockStore.AcquireLockAsync(key, cancellationToken);
+            await lockStore.AcquireLockAsync(key, leaseTime, cancellationToken);
         }
         catch
         {

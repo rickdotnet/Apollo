@@ -1,6 +1,5 @@
 ﻿using Apollo.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Apollo;
 
@@ -13,9 +12,8 @@ public class ApolloBuilder
 
     public ApolloBuilder(IServiceCollection services, ApolloConfig config)
     {
-        this.Services = services;
-        this.Config = config;
-        //endpointBuilder = new EndpointBuilder(services, config);
+        Services = services;
+        Config = config;
     }
    
     public void WithService(Action<IServiceCollection> action)

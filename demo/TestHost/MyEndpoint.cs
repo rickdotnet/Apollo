@@ -1,5 +1,6 @@
 ﻿using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
+using Apollo.Messaging.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace TestHost;
@@ -19,24 +20,24 @@ public record TestCommand : ICommand
     }
 }
 
-public class MyEndpoint : IListenFor<TestMessage>, IHandle<TestCommand>
+public class MyEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>
 {
-    private readonly ILogger<MyEndpoint> logger1;
+    private readonly ILogger<MyEndpoint> logger;
 
     public MyEndpoint(ILogger<MyEndpoint> logger)
     {
-        logger1 = logger;
+        this.logger = logger;
     }
 
-    public ValueTask HandleEventAsync(TestMessage message, CancellationToken cancellationToken = default)
+    public Task HandleEventAsync(TestEvent message, CancellationToken cancellationToken = default)
     {
-        logger1.LogInformation("MyEndpoint Received: {Message}", message.Message);
-        return ValueTask.CompletedTask;
+        logger.LogInformation("MyEndpoint Received TestEvent: {Message}", message.Message);
+        return Task.CompletedTask;
     }
 
-    public ValueTask HandleCommandAsync(TestCommand message, CancellationToken cancellationToken)
+    public Task HandleCommandAsync(TestCommand message, CancellationToken cancellationToken)
     {
-        logger1.LogInformation("MyEndpoint Received: {Message}", message.Message);
-        return ValueTask.CompletedTask;
+        logger.LogInformation("MyEndpoint Received: {Message}", message.Message);
+        return Task.CompletedTask;
     }
 }

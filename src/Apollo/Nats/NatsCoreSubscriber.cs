@@ -1,12 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Apollo.Endpoints;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
 namespace Apollo.Nats;
 
-internal class NatsCoreSubscriber : INatsSubscriber
+public class NatsCoreSubscriber : INatsSubscriber
 {
     private readonly INatsConnection connection;
     private readonly NatsSubscriptionConfig config;
@@ -18,7 +17,7 @@ internal class NatsCoreSubscriber : INatsSubscriber
     private readonly CancellationToken cancellationToken;
 
 
-    internal NatsCoreSubscriber(
+    public NatsCoreSubscriber(
         INatsConnection connection,
         NatsSubscriptionConfig config,
         ILogger logger,

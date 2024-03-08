@@ -1,24 +1,10 @@
 ﻿using Apollo.Abstractions.Messaging.Events;
+using Apollo.Messaging.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace TestHost;
 
-public record TestMessage : IEvent
-{
-    public TestMessage(string Message)
-    {
-        this.Message = Message;
-    }
-
-    public string Message { get; init; }
-
-    public void Deconstruct(out string Message)
-    {
-        Message = this.Message;
-    }
-}
-
-public class MyOtherEndpoint : IListenFor<TestMessage>
+public class MyOtherEndpoint : IListenFor<TestEvent>
 {
     private readonly ILogger<MyOtherEndpoint> logger1;
 
@@ -27,9 +13,9 @@ public class MyOtherEndpoint : IListenFor<TestMessage>
         logger1 = logger;
     }
 
-    public ValueTask HandleEventAsync(TestMessage message, CancellationToken cancellationToken = default)
+    public Task HandleEventAsync(TestEvent message, CancellationToken cancellationToken = default)
     {
         logger1.LogInformation("MyOtherEndpoint: {Message}", message.Message);
-        return ValueTask.CompletedTask;
+        return Task.CompletedTask;
     }
 }

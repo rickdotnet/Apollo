@@ -8,12 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\src\Apollo.Messaging\Apollo.Messaging.csproj" />
-      <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
+      <PackageReference Include="Bullseye" Version="5.0.0" />
+      <PackageReference Include="SimpleExec" Version="12.0.0" />
     </ItemGroup>
 
 </Project>

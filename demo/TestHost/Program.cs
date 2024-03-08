@@ -1,7 +1,8 @@
 ﻿using System.Text;
+using Apollo;
 using Apollo.Caching;
 using Apollo.Configuration;
-using Apollo.Hosting;
+using Apollo.Messaging;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,17 +11,19 @@ using TestHost;
 var config = new ApolloConfig("nats://nats.rhinostack.com:4222");
 
 var builder = Host.CreateApplicationBuilder(args);
-
 builder.Services
-    .AddApollo(config)
-    .AddCaching()
-    .WithEndpoints(
-        endpoints =>
-        { 
-            endpoints.AddEndpoint<MyReplyEndpoint>();
-            endpoints.AddEndpoint<MyEndpoint>(cfg=>cfg.DurableConfig.IsDurableConsumer = true);
-            endpoints.AddEndpoint<MyOtherEndpoint>();
-        });
+    .AddApollo(config, apolloBuilder =>
+    {
+        apolloBuilder
+            .AddCaching()
+            .WithEndpoints(
+                endpoints =>
+                {
+                    endpoints.AddEndpoint<MyReplyEndpoint>();
+                    endpoints.AddEndpoint<MyEndpoint>(cfg => cfg.DurableConfig.IsDurableConsumer = true);
+                    endpoints.AddEndpoint<MyOtherEndpoint>();
+                });
+    });
 
 var host = builder.Build();
 

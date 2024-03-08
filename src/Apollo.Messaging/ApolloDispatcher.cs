@@ -3,6 +3,7 @@ using Apollo.Abstractions.Messaging.Commands;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 using Apollo.Endpoints;
+using Apollo.Messaging.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

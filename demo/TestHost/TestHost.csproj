@@ -14,6 +14,8 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Apollo.Abstractions\Apollo.Abstractions.csproj" />
       <ProjectReference Include="..\..\src\Apollo.Caching\Apollo.Caching.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging.Contracts\Apollo.Messaging.Contracts.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging\Apollo.Messaging.csproj" />
       <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
     </ItemGroup>
 

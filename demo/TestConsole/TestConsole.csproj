@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Apollo.Messaging\Apollo.Messaging.csproj" />
       <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
     </ItemGroup>
 

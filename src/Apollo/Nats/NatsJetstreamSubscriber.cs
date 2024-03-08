@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Apollo.Endpoints;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
@@ -8,7 +7,7 @@ using NATS.Client.JetStream.Models;
 
 namespace Apollo.Nats;
 
-internal class NatsJetStreamSubscriber : INatsSubscriber
+public class NatsJetStreamSubscriber : INatsSubscriber
 {
     private readonly INatsConnection connection;
     private readonly NatsSubscriptionConfig config;
@@ -16,7 +15,7 @@ internal class NatsJetStreamSubscriber : INatsSubscriber
     private readonly NatsSubOpts? opts;
     private readonly CancellationToken cancellationToken;
 
-    internal NatsJetStreamSubscriber(
+    public NatsJetStreamSubscriber(
         INatsConnection connection,
         NatsSubscriptionConfig config,
         ILogger logger,

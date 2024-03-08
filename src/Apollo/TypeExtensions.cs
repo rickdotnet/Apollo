@@ -2,9 +2,9 @@
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 
-namespace Apollo.Endpoints;
+namespace Apollo;
 
-internal static class TypeExtensions
+public static class TypeExtensions
 {
     public static bool ImplementsInterface(this Type type, Type interfaceType)
     {

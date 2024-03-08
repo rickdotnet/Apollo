@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Apollo.Abstractions.Messaging.Events;
-using Apollo.Messaging;
+using Apollo.Endpoints;
 using Apollo.Nats;
 using Microsoft.Extensions.Logging;
 
-namespace Apollo.Endpoints;
+namespace Apollo.Messaging.Endpoints;
 
 internal class InternalEndpoint : IListenFor<NatsMessageReceivedEvent>
 {
@@ -22,7 +22,7 @@ internal class InternalEndpoint : IListenFor<NatsMessageReceivedEvent>
         this.logger = logger;
     }
 
-    public async ValueTask HandleEventAsync(NatsMessageReceivedEvent wrapper, CancellationToken cancellationToken = default)
+    public async Task HandleEventAsync(NatsMessageReceivedEvent wrapper, CancellationToken cancellationToken = default)
     {
         if (wrapper.Message is null)
         {

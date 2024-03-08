@@ -1,16 +1,15 @@
 ﻿using Apollo.Configuration;
-using Apollo.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NATS.Client.Core;
 using NATS.Client.Hosting;
 
-namespace Apollo.Hosting;
+namespace Apollo;
 
-public static class HostingExtensions
+public static class Setup
 {
-    public static ApolloBuilder AddApollo(this IServiceCollection services, ApolloConfig config)
+    public static IServiceCollection AddApollo(this IServiceCollection services, ApolloConfig config, Action<ApolloBuilder> builderAction)
     {
         services.AddSingleton(config);
         services.AddNats(configureOpts: opts => opts with
@@ -29,8 +28,10 @@ public static class HostingExtensions
         });
 
         var builder = new ApolloBuilder(services, config);
-        builder.WithEndpoints(x => x.AddEndpoint<InternalEndpoint>(cfg => cfg.IsLocalEndpoint = true));
-        return builder;
+        builderAction?.Invoke(builder);
+        
+        
+        return services;
     }
         public static ILogger GetLogger<T>(this IServiceScope scope)
             => scope.ServiceProvider.GetService<ILogger<T>>()

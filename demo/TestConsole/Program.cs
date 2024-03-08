@@ -1,28 +1,27 @@
 ﻿using Apollo;
 using Apollo.Configuration;
-using Apollo.Hosting;
 using Apollo.Messaging;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var config = new ApolloConfig
-{
-    // Jwt = "ey...",
-    // Seed = "SU..." 
-};
+var config = new ApolloConfig("nats://nats.rhinostack.com:4222");
+
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
-    .AddApollo(config)
-    .WithRemotePublishing();
+    .AddApollo(config, x => x.WithRemotePublishing());
 
 var host = builder.Build();
 var publisherFactory = host.Services.GetRequiredService<IRemotePublisherFactory>();
 
-var remoteDispatcher = publisherFactory.CreatePublisher("DashboardEndpoint");
+var remoteDispatcher = publisherFactory.CreatePublisher("MyEndpoint");
+await remoteDispatcher.BroadcastAsync(new TestEvent("My Event"), default);
 
+//var remoteDispatcher = publisherFactory.CreatePublisher("DashboardEndpoint");
+
+return;
 Console.WriteLine("Sending remote events...");
 
 var systems = new List<HeartbeatEvent>
@@ -37,7 +36,8 @@ var systemTasks = new List<Task>
 {
     SimulateHeartbeatAsync(remoteDispatcher, new HeartbeatEvent { Id = "System1", DisplayName = "Main System" }, 5),
     SimulateHeartbeatAsync(remoteDispatcher, new HeartbeatEvent { Id = "System2", DisplayName = "Backup System" }, 5),
-    SimulateHeartbeatAsync(remoteDispatcher, new HeartbeatEvent { Id = "System3", DisplayName = "Analytics System" }, 15)
+    SimulateHeartbeatAsync(remoteDispatcher, new HeartbeatEvent { Id = "System3", DisplayName = "Analytics System" },
+        15)
 };
 
 Console.WriteLine("Sent remote event");
@@ -56,6 +56,8 @@ static async Task SimulateHeartbeatAsync(IRemotePublisher remoteDispatcher, Hear
     }
 }
 
+public record TestEvent(string Message) : IEvent;
+
 //await host.RunAsync();
 public record TestMessage : IEvent
 {
@@ -71,6 +73,7 @@ public record TestMessage : IEvent
         Message = this.Message;
     }
 }
+
 public record MyRequest : IRequest<bool>
 {
     public MyRequest(string Message)

@@ -1,4 +1,6 @@
-﻿namespace Apollo.Configuration;
+﻿using Apollo.Configuration;
+
+namespace Apollo.Messaging.Endpoints;
 
 public class EndpointConfig
 {

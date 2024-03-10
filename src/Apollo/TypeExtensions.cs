@@ -6,20 +6,19 @@ namespace Apollo;
 
 public static class TypeExtensions
 {
-    public static bool ImplementsInterface(this Type type, Type interfaceType)
+    public static bool IsCommand(this Type type)
     {
-        return interfaceType.IsAssignableFrom(type);
+        return type.ImplementsInterface(typeof(ICommand));
     }
-
-    public static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType)
+    public static bool IsEvent(this Type type)
     {
-        return type.GetInterfaces().Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == genericInterfaceType);
+        return type.ImplementsInterface(typeof(IEvent));
     }
-
-    public static Type? GetGenericInterface(this Type type, Type genericInterfaceType)
+    public static bool IsRequest(this Type type)
     {
-        return type.GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericInterfaceType);
+        return type.ImplementsGenericInterface(typeof(IRequest<>));
     }
+ 
     
     public static IEnumerable<Type> MessageHandlerTypes(this Type endpointType)
     {
@@ -34,12 +33,17 @@ public static class TypeExtensions
         // TODO: make this safer
         return handlerType.GetGenericArguments()[0];
     }
-    public static Type GetResponseType(this Type handlerType)
+    
+    private static bool ImplementsInterface(this Type type, Type interfaceType)
     {
-        // TODO: make this safer
-        return handlerType.GetGenericArguments()[1];
+        return interfaceType.IsAssignableFrom(type);
     }
 
+    private static bool ImplementsGenericInterface(this Type type, Type genericInterfaceType)
+    {
+        return type.GetInterfaces().Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == genericInterfaceType);
+    }
+    
     private static IEnumerable<Type> EventHandlerTypes(this Type endpointType)
     {
         return endpointType.GetInterfaces()
@@ -56,14 +60,6 @@ public static class TypeExtensions
     {
         return endpointType.GetInterfaces()
             .Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IReplyTo<,>));
-    }
-    public static bool IsListener(this Type handlerType)
-    {
-        return handlerType.IsGenericType && handlerType.GetGenericTypeDefinition() == typeof(IListenFor<>);
-    }
-    public static bool IsCommandHandler(this Type handlerType)
-    {
-        return handlerType.IsGenericType && handlerType.GetGenericTypeDefinition() == typeof(IHandle<>);
     }
     
     public static bool IsRequestHandler(this Type handlerType)

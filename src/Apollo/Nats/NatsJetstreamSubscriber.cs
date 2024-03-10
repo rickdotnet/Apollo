@@ -28,7 +28,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
         this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<NatsMessageReceivedEvent, CancellationToken, Task<bool>> handler)
+    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task<bool>> handler)
     {
         var js = new NatsJSContext((NatsConnection)connection);
 
@@ -79,7 +79,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
     }
 
     private async Task ProcessMessage(NatsJSMsg<byte[]> msg,
-        Func<NatsMessageReceivedEvent, CancellationToken, Task<bool>> handler)
+        Func<NatsMessage, CancellationToken, Task<bool>> handler)
     {
         var json = Encoding.UTF8.GetString(msg.Data);
         logger.LogInformation("JSON: {Json}", json);
@@ -90,7 +90,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
         // this will eventually be a configured serializer
         var deserialized = JsonSerializer.Deserialize(json, type,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        var message = new NatsMessageReceivedEvent
+        var message = new NatsMessage
         {
             Subject = msg.Subject,
             Config = config,

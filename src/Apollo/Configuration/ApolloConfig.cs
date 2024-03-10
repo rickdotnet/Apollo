@@ -12,6 +12,7 @@ public class ApolloConfig
     public string ConsumerName { get; set; } = "DefaultConsumer";
     public string DefaultNamespace { get; set; } = "apollo.default";
 
+    public string? CredsFile { get; set; }
     public string? Jwt { get; set; }
 
     public string? Seed { get; set; }

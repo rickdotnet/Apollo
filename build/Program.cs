@@ -1,7 +1,6 @@
 ﻿using build;
 using static Bullseye.Targets;
 
-//var configuration = new BuildConfiguration("C:\\SourceControl\\RhinoStack\\Apollo");
 var configuration = new BuildConfiguration();
 
 Target(Targets.Build, () => BuildHelper.BuildSolution(configuration.SolutionFile));

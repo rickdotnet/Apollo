@@ -14,10 +14,11 @@ public class BuildConfiguration
     
     public string NuGetSource => "https://api.nuget.org/v3/index.json";
 
-    public string? NuGetApiKey => Environment.GetEnvironmentVariable("NUGET_API_KEY");
+    public string? NuGetApiKey { get; }
     
-    public BuildConfiguration(string? rootDirectory = null)
+    public BuildConfiguration(string? rootDirectory = null, string? nuGetApiKey = null)
     {
         RootDirectory = rootDirectory ?? Directory.GetCurrentDirectory();
+        NuGetApiKey = nuGetApiKey ?? Environment.GetEnvironmentVariable("NUGET_API_KEY");
     }
 }

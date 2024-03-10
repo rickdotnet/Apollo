@@ -1,31 +1,34 @@
-﻿using Apollo.Endpoints;
-using Apollo.Messaging;
+﻿using Apollo.Messaging.Endpoints;
 using Apollo.Nats;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.Hosting;
+namespace Apollo.Messaging;
 
 public class SubscriptionBackgroundService : BackgroundService
 {
     private readonly ILogger<SubscriptionBackgroundService> logger;
-    private readonly IServiceScopeFactory scopeFactory;
+    private readonly IServiceProvider serviceProvider;
+    private readonly RequestProcessor requestProcessor;
 
     public SubscriptionBackgroundService(IServiceProvider serviceProvider)
     {
+        this.serviceProvider = serviceProvider;
         logger = serviceProvider.GetRequiredService<ILogger<SubscriptionBackgroundService>>();
-        scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        requestProcessor = serviceProvider.GetRequiredService<RequestProcessor>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Starting NATS subscription background service");
-        var scope = scopeFactory.CreateScope();
-        var endpointRegistry = scope.ServiceProvider.GetRequiredService<IEndpointRegistry>();
-        var localPublisher = scope.ServiceProvider.GetRequiredService<ILocalPublisher>();
-        var connection = scope.ServiceProvider.GetRequiredService<INatsConnection>();
+
+        // both fine to grab from singleton scope
+        var endpointRegistry = serviceProvider.GetRequiredService<IEndpointRegistry>();
+        var connection = serviceProvider.GetRequiredService<INatsConnection>();
+
+        StartRequestProcessor(stoppingToken);
 
         // remote endpoints only
         var endpoints = endpointRegistry.GetEndpointRegistrations(x => x.Config.IsRemoteEndpoint);
@@ -55,14 +58,22 @@ public class SubscriptionBackgroundService : BackgroundService
                 Serializer = null, // get from service provider
                 NatsSubOpts = null
             };
-
+            
             subscribers.Add(
                 endpoint.Config.DurableConfig.IsDurableConsumer
-                    ? new NatsJetStreamSubscriber(connection, config, scope.GetLogger<NatsJetStreamSubscriber>(),
+                    ? new NatsJetStreamSubscriber(
+                        connection,
+                        config,
+                        serviceProvider.GetLogger<NatsJetStreamSubscriber>(),
                         stoppingToken)
-                    : new NatsCoreSubscriber(connection, config, scope.GetLogger<NatsCoreSubscriber>(), stoppingToken)
+                    : new NatsCoreSubscriber(
+                        connection,
+                        config,
+                        serviceProvider.GetLogger<NatsCoreSubscriber>(),
+                        stoppingToken)
             );
         }
+
 
         // each subscriber will use the same handler that will dispatch the message to the correct endpoint
         var tasks = subscribers.Select(subscriber => subscriber.SubscribeAsync(Handler));
@@ -73,11 +84,29 @@ public class SubscriptionBackgroundService : BackgroundService
         logger.LogInformation("NATS subscription background service task completed");
         return;
 
-        async Task<bool> Handler(NatsMessageReceivedEvent message, CancellationToken cancellationToken)
+        async Task<bool> Handler(NatsMessage message, CancellationToken cancellationToken)
         {
-            // TODO: figure out if we need this extensibility point or if we can simply fire and forget
-            await localPublisher.BroadcastAsync(message, cancellationToken);
+            logger.LogInformation("EnqueueMessageAsync message of type {MessageType}", message.Message?.GetType().Name);
+            await requestProcessor.EnqueueMessageAsync(message, cancellationToken);
             return true;
         }
+    }
+
+    private void StartRequestProcessor(CancellationToken stoppingToken)
+    {
+        _ = requestProcessor.StartProcessingAsync(2,
+                (_, message, cancellationToken) =>
+                {
+                    logger.LogWarning("Processing is complete for message of type {MessageType}",
+                        message.Message?.GetType().Name);
+                    return Task.CompletedTask;
+                }, stoppingToken)
+            .ContinueWith(task =>
+            {
+                if (task.Exception != null)
+                {
+                    logger.LogError(task.Exception, "An error occurred while processing messages");
+                }
+            }, TaskScheduler.Default);
     }
 }

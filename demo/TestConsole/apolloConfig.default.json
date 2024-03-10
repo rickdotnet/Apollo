@@ -1,0 +1,10 @@
+{
+  "Url": "nats://localhost:4222",
+  "ConsumerName": "DefaultConsumer",
+  "DefaultNamespace": "apollo.default",
+  "CredsFile": null,
+  "Jwt": null,
+  "Seed": null,
+  "NKey": null,
+  "Token": null
+}

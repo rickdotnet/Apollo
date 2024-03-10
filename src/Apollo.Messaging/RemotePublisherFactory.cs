@@ -1,14 +1,14 @@
 ﻿using Apollo.Configuration;
-using Apollo.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo;
+namespace Apollo.Messaging;
 
 public interface IRemotePublisherFactory
 {
     IRemotePublisher CreatePublisher(string endpointName);
+    IRemotePublisher CreatePublisherInNamespace(string targetNamespace, string endpointName);
 }
 
 internal class RemotePublisherFactory : IRemotePublisherFactory
@@ -22,15 +22,18 @@ internal class RemotePublisherFactory : IRemotePublisherFactory
         this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         config = serviceProvider.GetRequiredService<ApolloConfig>();
     }
-
+    
     public IRemotePublisher CreatePublisher(string endpointName)
+        => CreatePublisherInNamespace(config.DefaultNamespace, endpointName);
+
+    public IRemotePublisher CreatePublisherInNamespace(string targetNamespace, string endpointName)
     {
-        if (string.IsNullOrEmpty(endpointName))
-            throw new ArgumentException("Endpoint name must not be null or empty.", nameof(endpointName));
+        ArgumentNullException.ThrowIfNull(targetNamespace, nameof(targetNamespace));
+        ArgumentNullException.ThrowIfNull(endpointName, nameof(endpointName));
 
         var connection = serviceProvider.GetRequiredService<INatsConnection>();
         var logger = serviceProvider.GetRequiredService<ILogger<RemotePublisher>>();
 
-        return new RemotePublisher($"{config.DefaultNamespace}.{endpointName}", connection, logger);
+        return new RemotePublisher($"{targetNamespace}.{endpointName}", connection, logger);
     }
 }

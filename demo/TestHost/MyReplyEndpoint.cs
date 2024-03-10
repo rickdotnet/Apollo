@@ -14,7 +14,7 @@ public class MyReplyEndpoint : IReplyTo<MyRequest, bool>
         this.logger = logger;
     }
 
-    public Task<bool> HandleRequestAsync(MyRequest message, CancellationToken cancellationToken = default)
+    public Task<bool> HandleAsync(MyRequest message, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("MyReplyEndpoint Received: {Message}", message.Message);
         logger.LogInformation("Returning true");

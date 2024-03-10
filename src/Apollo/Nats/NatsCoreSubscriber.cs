@@ -33,7 +33,7 @@ public class NatsCoreSubscriber : INatsSubscriber
         this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<NatsMessageReceivedEvent, CancellationToken, Task<bool>> handler)
+    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task<bool>> handler)
     {
         //return;
         logger.LogInformation("Subscribing to {Subject}", subject);
@@ -48,7 +48,7 @@ public class NatsCoreSubscriber : INatsSubscriber
             var type = config.MessageTypes[msg.Subject].GetMessageType();
             logger.LogInformation("Deserializing message to {TypeName}", type.Name);
             var deserialized = JsonSerializer.Deserialize(json, type, new JsonSerializerOptions{ PropertyNameCaseInsensitive = true });
-            var message = new NatsMessageReceivedEvent
+            var message = new NatsMessage
             {
                 Subject = msg.Subject,
                 Config = config,

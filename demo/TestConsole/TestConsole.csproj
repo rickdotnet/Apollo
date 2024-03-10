@@ -16,4 +16,10 @@
       <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="apolloConfig.default.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

@@ -20,6 +20,7 @@ public static class Setup
             RequestTimeout = TimeSpan.FromSeconds(10),
             AuthOpts = NatsAuthOpts.Default with
             {
+                CredsFile = config.CredsFile,
                 Token = config.Token,
                 NKey = config.NKey,
                 Seed = config.Seed,
@@ -33,8 +34,8 @@ public static class Setup
         
         return services;
     }
-        public static ILogger GetLogger<T>(this IServiceScope scope)
-            => scope.ServiceProvider.GetService<ILogger<T>>()
+        public static ILogger GetLogger<T>(this IServiceProvider serviceProvider)
+            => serviceProvider.GetService<ILogger<T>>()
                ?? (ILogger)NullLogger.Instance;
 }
 

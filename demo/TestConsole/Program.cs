@@ -1,14 +1,19 @@
 ﻿using Apollo;
-using Apollo.Configuration;
-using Apollo.Messaging;
 using Apollo.Abstractions.Messaging.Events;
 using Apollo.Abstractions.Messaging.Requests;
+using Apollo.Configuration;
+using Apollo.Messaging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-var config = new ApolloConfig("nats://nats.rhinostack.com:4222");
+using TestConsole;
 
 var builder = Host.CreateApplicationBuilder(args);
+builder.Configuration.AddEnvironmentVariables("APOLLO_");
+builder.Configuration.AddJsonFile("apolloConfig.json", optional: true);
+
+var config = ApolloConfig.Default;
+builder.Configuration.Bind(config);
 
 builder.Services
     .AddApollo(config, x => x.WithRemotePublishing());
@@ -16,8 +21,16 @@ builder.Services
 var host = builder.Build();
 var publisherFactory = host.Services.GetRequiredService<IRemotePublisherFactory>();
 
+//var remoteDispatcher = publisherFactory.CreatePublisher("DockerEndpoint");
+//var response = await remoteDispatcher.SendRequestAsync<ListServicesRequest,ListServicesResponse>(new ListServicesRequest(), default);
+
 var remoteDispatcher = publisherFactory.CreatePublisher("MyEndpoint");
-await remoteDispatcher.BroadcastAsync(new TestEvent("My Event"), default);
+await remoteDispatcher.BroadcastAsync(new TestEvent("My Test Event"), default);
+
+var remoteDispatcher2 = publisherFactory.CreatePublisher("MyReplyEndpoint");
+await remoteDispatcher2.SendRequestAsync<MyRequest, bool>(new MyRequest("My Request"), default);
+
+
 
 //var remoteDispatcher = publisherFactory.CreatePublisher("DashboardEndpoint");
 
@@ -56,42 +69,51 @@ static async Task SimulateHeartbeatAsync(IRemotePublisher remoteDispatcher, Hear
     }
 }
 
-public record TestEvent(string Message) : IEvent;
+namespace TestConsole
+{
+    public record TestEvent(string Message) : IEvent;
 
 //await host.RunAsync();
-public record TestMessage : IEvent
-{
-    public TestMessage(string Message)
+    public record TestMessage : IEvent
     {
-        this.Message = Message;
+        public TestMessage(string Message)
+        {
+            this.Message = Message;
+        }
+
+        public string Message { get; set; }
+
+        public void Deconstruct(out string Message)
+        {
+            Message = this.Message;
+        }
     }
 
-    public string Message { get; set; }
-
-    public void Deconstruct(out string Message)
+    public record MyRequest : IRequest<bool>
     {
-        Message = this.Message;
+        public MyRequest(string Message)
+        {
+            this.Message = Message;
+        }
+
+        public string Message { get; init; }
+
+        public void Deconstruct(out string Message)
+        {
+            Message = this.Message;
+        }
     }
+
+    public record HeartbeatEvent : IEvent
+    {
+        public string Id { get; set; } // Unique identifier for the system
+        public string DisplayName { get; set; } // Human-readable name of the system
+        public DateTime UtcTimestamp { get; set; } // Timestamp of when the heartbeat was received
+    }
+
+    public record ListServicesRequest : IRequest<ListServicesResponse>;
+
+    public record ListServicesResponse(string[] Services);
 }
 
-public record MyRequest : IRequest<bool>
-{
-    public MyRequest(string Message)
-    {
-        this.Message = Message;
-    }
-
-    public string Message { get; init; }
-
-    public void Deconstruct(out string Message)
-    {
-        Message = this.Message;
-    }
-}
-
-public record HeartbeatEvent : IEvent
-{
-    public string Id { get; set; } // Unique identifier for the system
-    public string DisplayName { get; set; } // Human-readable name of the system
-    public DateTime UtcTimestamp { get; set; } // Timestamp of when the heartbeat was received
-}
+public record MyRequest(string Message): IRequest<bool>;

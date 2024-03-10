@@ -13,7 +13,7 @@ public class MyOtherEndpoint : IListenFor<TestEvent>
         logger1 = logger;
     }
 
-    public Task HandleEventAsync(TestEvent message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(TestEvent message, CancellationToken cancellationToken = default)
     {
         logger1.LogInformation("MyOtherEndpoint: {Message}", message.Message);
         return Task.CompletedTask;

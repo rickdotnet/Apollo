@@ -29,13 +29,13 @@ public class MyEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>
         this.logger = logger;
     }
 
-    public Task HandleEventAsync(TestEvent message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(TestEvent message, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("MyEndpoint Received TestEvent: {Message}", message.Message);
         return Task.CompletedTask;
     }
 
-    public Task HandleCommandAsync(TestCommand message, CancellationToken cancellationToken)
+    public Task HandleAsync(TestCommand message, CancellationToken cancellationToken)
     {
         logger.LogInformation("MyEndpoint Received: {Message}", message.Message);
         return Task.CompletedTask;

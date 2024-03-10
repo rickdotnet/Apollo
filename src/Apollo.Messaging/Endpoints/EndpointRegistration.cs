@@ -1,6 +1,4 @@
-﻿using Apollo.Configuration;
-
-namespace Apollo.Messaging.Endpoints;
+﻿namespace Apollo.Messaging.Endpoints;
 
 public class EndpointRegistration<T>(EndpointConfig config)
     : EndpointRegistration(typeof(T), config);

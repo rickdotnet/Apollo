@@ -1,10 +1,9 @@
-﻿using Apollo.Abstractions.Messaging.Events;
-using Microsoft.Extensions.Primitives;
+﻿using Microsoft.Extensions.Primitives;
 using NATS.Client.Core;
 
 namespace Apollo.Nats;
 
-public class NatsMessageReceivedEvent : IEvent
+public class NatsMessage
 {
     // if we expose NatsMessageReceivedEvent to the outside world,
     // we should keep this internal

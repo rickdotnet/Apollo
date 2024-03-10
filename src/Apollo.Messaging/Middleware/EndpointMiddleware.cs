@@ -21,15 +21,15 @@ public class EndpointMiddleware : IMessageMiddleware
         
     }
 
-    public async Task InvokeAsync(NatsMessage message, Func<Task> next, CancellationToken cancellationToken)
+    public async Task InvokeAsync(NatsMessage natsMessage, Func<Task> next, CancellationToken cancellationToken)
     {
-        var messageType = message.Message?.GetType();
+        var messageType = natsMessage.Message?.GetType();
         if (messageType == null) throw new ArgumentNullException(nameof(messageType));
         
         var endpointRegistrations = 
             endpointRegistry.GetEndpointRegistrations(
                 reg => 
-                    reg.Subjects.Contains(message.Subject)
+                    reg.Subjects.Contains(natsMessage.Subject)
                     && reg.HandlerTypes.Any(handlerType => handlerType.GetMessageType() == messageType));
 
         foreach (var registration in endpointRegistrations)
@@ -51,18 +51,18 @@ public class EndpointMiddleware : IMessageMiddleware
 
             if (messageType.IsRequest())
             {
-                var response = await (dynamic)handleMethod.Invoke(endpoint, [message.Message, cancellationToken])!;
+                var response = await (dynamic)handleMethod.Invoke(endpoint, [natsMessage.Message, cancellationToken])!;
                 
                 // TODO: still need to configure the serializer
                 var json = JsonSerializer.Serialize(response);
                 var bytes = Encoding.UTF8.GetBytes(json);
                 
-                var connection = message.Connection ?? throw new Exception("Connection is null");
-                await connection.PublishAsync(message.ReplyTo, bytes, cancellationToken: cancellationToken);
+                var connection = natsMessage.Connection ?? throw new Exception("Connection is null");
+                await connection.PublishAsync(natsMessage.ReplyTo, bytes, cancellationToken: cancellationToken);
             }
             else
             {
-                await (Task)handleMethod.Invoke(endpoint, [message.Message, cancellationToken])!;
+                await (Task)handleMethod.Invoke(endpoint, [natsMessage.Message, cancellationToken])!;
             }
         }
 

@@ -1,32 +1,25 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Apollo.Abstractions.Messaging;
-using Apollo.Abstractions.Messaging.Commands;
-using Apollo.Abstractions.Messaging.Events;
-using Apollo.Abstractions.Messaging.Requests;
+using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
 namespace Apollo.Messaging;
 
-public interface IRemotePublisher : IPublisher
+internal class NatsPublisher : IPublisher
 {
-    string EndpointName { get; }
-}
-
-internal class RemotePublisher : IRemotePublisher
-{
-    public string EndpointName { get; }
+    public string Route { get; }
+    public bool IsLocalOnly => false;
 
     private readonly INatsConnection connection;
-    private readonly ILogger<RemotePublisher> logger;
+    private readonly ILogger<NatsPublisher> logger;
 
 
-    public RemotePublisher(string endpointName,
+    public NatsPublisher(string endpointName,
         INatsConnection connection,
-        ILogger<RemotePublisher> logger)
+        ILogger<NatsPublisher> logger)
     {
-        EndpointName = endpointName;
+        Route = endpointName;
         this.connection = connection;
         this.logger = logger;
     }
@@ -49,7 +42,7 @@ internal class RemotePublisher : IRemotePublisher
 
     private Task PublishInternalAsync<TMessage>(TMessage message, CancellationToken cancellationToken)
     {
-        var subject = $"{EndpointName}.{typeof(TMessage).Name}".ToLower();
+        var subject = $"{Route}.{typeof(TMessage).Name}".ToLower();
 
         logger.LogInformation("Publishing {Name} to {Subject}", typeof(TMessage).Name, subject);
 
@@ -65,7 +58,7 @@ internal class RemotePublisher : IRemotePublisher
     public async Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
         CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
     {
-        var subject = $"{EndpointName}.{typeof(TRequest).Name}".ToLower();
+        var subject = $"{Route}.{typeof(TRequest).Name}".ToLower();
 
         logger.LogInformation("Publishing {Name} to {Subject}", typeof(TRequest).Name, subject);
 

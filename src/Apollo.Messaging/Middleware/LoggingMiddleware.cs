@@ -1,5 +1,4 @@
-﻿using Apollo.Nats;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Apollo.Messaging.Middleware;
 
@@ -12,9 +11,9 @@ public class LoggingMiddleware : IMessageMiddleware
         this.logger = logger;
     }
 
-    public async Task InvokeAsync(NatsMessage message, Func<Task> next, CancellationToken cancellationToken)
+    public async Task InvokeAsync(MessageContext messageContext, Func<Task> next, CancellationToken cancellationToken)
     {
-        var messageTypeName = message.Message?.GetType().Name;
+        var messageTypeName = messageContext.Message?.GetType().Name;
         logger.LogInformation("Processing message of type {MessageType}", messageTypeName);
         
         await next();

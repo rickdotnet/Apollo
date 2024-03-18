@@ -11,13 +11,13 @@ public class SubscriptionBackgroundService : BackgroundService
 {
     private readonly ILogger<SubscriptionBackgroundService> logger;
     private readonly IServiceProvider serviceProvider;
-    private readonly RequestProcessor requestProcessor;
+    private readonly MessageProcessor requestProcessor;
 
     public SubscriptionBackgroundService(IServiceProvider serviceProvider)
     {
         this.serviceProvider = serviceProvider;
         logger = serviceProvider.GetRequiredService<ILogger<SubscriptionBackgroundService>>();
-        requestProcessor = serviceProvider.GetRequiredService<RequestProcessor>();
+        requestProcessor = serviceProvider.GetRequiredService<MessageProcessor>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -58,7 +58,7 @@ public class SubscriptionBackgroundService : BackgroundService
                 Serializer = null, // get from service provider
                 NatsSubOpts = null
             };
-            
+
             subscribers.Add(
                 endpoint.Config.DurableConfig.IsDurableConsumer
                     ? new NatsJetStreamSubscriber(
@@ -87,7 +87,19 @@ public class SubscriptionBackgroundService : BackgroundService
         async Task<bool> Handler(NatsMessage message, CancellationToken cancellationToken)
         {
             logger.LogInformation("EnqueueMessageAsync message of type {MessageType}", message.Message?.GetType().Name);
-            await requestProcessor.EnqueueMessageAsync(message, cancellationToken);
+
+            var headers = message.Headers?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Aggregate((x, y) => $"{x},{y}"));
+            headers ??= new Dictionary<string, string?>();
+            await requestProcessor.EnqueueMessageAsync(
+                new MessageContext
+                {
+                    Headers = headers!,
+                    ReplyTo = message.ReplyTo,
+                    Subject = message.Subject,
+                    Message = message.Message,
+                    Source = "NATS"
+                }, cancellationToken);
+
             return true;
         }
     }

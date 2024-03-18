@@ -1,4 +1,4 @@
-﻿namespace Apollo.Abstractions.Messaging.Events;
+﻿namespace Apollo.Messaging.Abstractions;
 
 public interface IListenFor
 {

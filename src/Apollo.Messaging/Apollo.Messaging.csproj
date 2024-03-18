@@ -15,6 +15,7 @@
     </ItemGroup>
     
     <ItemGroup>
+      <ProjectReference Include="..\Apollo.Messaging.Abstractions\Apollo.Messaging.Abstractions.csproj" />
       <ProjectReference Include="..\Apollo\Apollo.csproj" />
     </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿using Apollo.Abstractions.Messaging.Events;
+﻿using Apollo.Messaging.Abstractions;
 
 namespace Apollo.Messaging.Contracts;
 

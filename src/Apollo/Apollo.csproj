@@ -21,7 +21,4 @@
       <PackageReference Include="NATS.Net" Version="2.1.2" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Apollo.Abstractions\Apollo.Abstractions.csproj" />
-    </ItemGroup>
 </Project>

@@ -18,7 +18,7 @@ To get started with Apollo, you'll need to have a running instance of NATS. You 
 
 ## Current Usage
 
-The API is heavy design right now. This is the current usage.
+The API is in rapid design right now. This is the current usage.
 
 Endpoint Host
 ```cs
@@ -32,7 +32,7 @@ builder.Services
                     endpoints =>
                     {
                         endpoints.AddEndpoint<MyReplyEndpoint>();
-                        endpoints.AddEndpoint<MyEndpoint>(cfg => cfg.SetDurableConsumer(true));
+                        endpoints.AddEndpoint<MyEndpoint>(cfg => cfg.SetDurableConsumer());
                         endpoints.AddEndpoint<MyOtherEndpoint>();
                     });
         });

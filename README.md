@@ -18,58 +18,74 @@ To get started with Apollo, you'll need to have a running instance of NATS. You 
 
 ## Current Usage
 
-The API is very much in design right now. This is the current POC usage.
+The API is heavy design right now. This is the current usage.
 
+Endpoint Host
 ```cs
-var config = new ApolloConfig("nats://localhost:4222");
-
 var builder = Host.CreateApplicationBuilder(args);
-
 builder.Services
-    .AddApollo(config)
-    .WithEndpoints(
-        endpoints =>
+    .AddApollo(
+        apolloBuilder =>
         {
-            endpoints.AddEndpoint<MyEndpoint>(
-              cfg =>
-                {
-                  cfg.IsLocalEndpoint = true;
-                  cfg.ConsumerName = "DifferentConsumerName";
-                });
-            endpoints.AddEndpoint<MyOtherEndpoint>(
-              cfg =>
-                {
-                  cfg.IsLocalEndpoint = true;
-                  cfg.ConsumerName = "MyOtherEndpoint";
-                }
-              );
+            apolloBuilder
+                .WithEndpoints(
+                    endpoints =>
+                    {
+                        endpoints.AddEndpoint<MyReplyEndpoint>();
+                        endpoints.AddEndpoint<MyEndpoint>(cfg => cfg.SetDurableConsumer(true));
+                        endpoints.AddEndpoint<MyOtherEndpoint>();
+                    });
         });
 
 var host = builder.Build();
-
-var localDispatcher = host.Services.GetRequiredService<ILocalPublisher>();
-//var remoteDispatcher = host.Services.GetRequiredService<IRemotePublisher>();
-
-await localDispatcher.BroadcastAsync(new TestMessage("Local Test Event"));
-//await remoteDispatcher.SendCommandAsync(new TestCommand("Remote Test Command"));
-
 await host.RunAsync();
 ```
 
+**Endpoint**
 ```cs
-public class MyEndpoint : IListenFor<TestMessage>, IHandle<TestCommand>
+// EndpointBase is optional, but provides access to the MesssageContext
+public class MyReplyEndpoint : EndpointBase, IReplyTo<MyRequest, bool>
 {
-    public ValueTask HandleEventAsync(TestMessage message, CancellationToken cancellationToken = default)
+    private readonly ILogger<MyReplyEndpoint> logger;
+
+    public MyReplyEndpoint(ILogger<MyReplyEndpoint> logger)
     {
-        Console.WriteLine($"MyEndpoint Received: {message.Message}");
-        return ValueTask.CompletedTask;
+        this.logger = logger;
     }
 
-
-    public ValueTask HandleCommandAsync(TestCommand message, CancellationToken cancellationToken)
+    public Task<bool> HandleAsync(MyRequest message, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine($"MyEndpoint Received: {message.Message}");
-        return ValueTask.CompletedTask;
+        logger.LogInformation("MyReplyEndpoint Received: {Message}", message.Message);
+        logger.LogInformation("Subject: {Subject}", Context.Subject);
+        logger.LogInformation("Source: {Source}", Context.Source);
+        logger.LogInformation("ReplyTo: {ReplyTo}", Context.ReplyTo);
+        Context.Headers.ToList().ForEach(x => logger.LogInformation("Header: {Key}={Value}", x.Key, x.Value));
+        logger.LogInformation("Returning true");
+        return Task.FromResult(true);
     }
 }
+```
+
+**External Publisher**
+```cs
+var config = ApolloConfig.Default;
+
+var builder = Host.CreateApplicationBuilder(args);
+builder.Services
+    .AddApollo(config, x=>x.WithEndpoints());
+
+var host = builder.Build();
+var publisherFactory = host.Services.GetRequiredService<IPublisherFactory>();
+
+var remoteDispatcher = publisherFactory.CreatePublisher("MyReplyEndpoint");
+var response = await remoteDispatcher.SendRequestAsync<MyRequest,bool>(new MyRequest("My Test Request"), default);
+Console.WriteLine("Response: " + response);
+
+public record MyRequest(string Message) : IRequest<bool>;
+```
+
+**Local Publisher**
+```cs
+var localPublisher = publisherFactory.CreatePublisher(nameof(MyOtherEndpoint), PublisherType.Local);
+localPublisher.BroadcastAsync(new TestEvent("Hello"), cancellationToken);
 ```

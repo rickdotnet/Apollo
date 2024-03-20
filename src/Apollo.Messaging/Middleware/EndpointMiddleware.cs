@@ -39,6 +39,9 @@ public class EndpointMiddleware : IMessageMiddleware
             }; // throw an exception?
             
             var endpoint = serviceProvider.GetRequiredService(registration.EndpointType);
+            if(endpoint is EndpointBase baseEndpoint)
+                baseEndpoint.SetContext(messageContext);
+            
             var handleMethod = handlerType.GetMethod("HandleAsync");
             if (handleMethod == null)
             {
@@ -48,12 +51,10 @@ public class EndpointMiddleware : IMessageMiddleware
 
             if (messageType.IsRequest())
             {
-                
                 var response = await (dynamic)handleMethod.Invoke(endpoint, [messageContext.Message, cancellationToken])!;
-                var replier = messageContext.Replier ?? throw new Exception("Replier is null");
                 _ = response ?? throw new InvalidOperationException("Response is null");
                 
-                await replier.ReplyAsync((object)response, cancellationToken);
+                await messageContext.ReplyAsync((object)response, cancellationToken);
             }
             else
             {
@@ -61,7 +62,7 @@ public class EndpointMiddleware : IMessageMiddleware
             }
         }
 
-        // If no handler was found, continue to the next middleware
+        // continue to the next middleware
         await next();
     }
 }

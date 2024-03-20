@@ -14,7 +14,8 @@ builder.Services
 var host = builder.Build();
 var publisherFactory = host.Services.GetRequiredService<IPublisherFactory>();
 
-var remoteDispatcher = publisherFactory.CreatePublisher("MyEndpoint");
-await remoteDispatcher.BroadcastAsync(new TestEvent("My Test Event"), default);
+var remoteDispatcher = publisherFactory.CreatePublisher("MyReplyEndpoint");
+var response = await remoteDispatcher.SendRequestAsync<MyRequest,bool>(new MyRequest("My Test Request"), default);
+Console.WriteLine("Response: " + response);
 
-public record TestEvent(string Message) : IEvent;
+public record MyRequest(string Message) : IRequest<bool>;

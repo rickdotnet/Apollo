@@ -1,5 +1,6 @@
 ﻿using Apollo;
 using Apollo.Messaging;
+using Apollo.Messaging.Endpoints;
 using Microsoft.Extensions.Hosting;
 using TestHost;
 
@@ -13,7 +14,7 @@ builder.Services
                     endpoints =>
                     {
                         endpoints.AddEndpoint<MyReplyEndpoint>();
-                        endpoints.AddEndpoint<MyEndpoint>(cfg => cfg.DurableConfig.IsDurableConsumer = true);
+                        endpoints.AddEndpoint<MyEndpoint>(cfg => cfg.SetDurableConsumer());
                         endpoints.AddEndpoint<MyOtherEndpoint>();
                     });
         });

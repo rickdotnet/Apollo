@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{9E34B6B7
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Abstractions", "Apollo.Abstractions\Apollo.Abstractions.csproj", "{ABDF6AC1-898C-4916-855C-D6895EF3686D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Messaging.Abstractions", "Apollo.Messaging.Abstractions\Apollo.Messaging.Abstractions.csproj", "{ABDF6AC1-898C-4916-855C-D6895EF3686D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Lock", "Apollo.Lock\Apollo.Lock.csproj", "{2BDF67EA-CE85-4A8F-AE94-D0119AFAAF16}"
 EndProject

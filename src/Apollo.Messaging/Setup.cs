@@ -5,17 +5,13 @@ namespace Apollo.Messaging;
 
 public static class Setup
 {
-    public static ApolloBuilder WithEndpoints(this ApolloBuilder apolloBuilder, Action<IEndpointBuilder> builderAction)
+    public static ApolloBuilder WithEndpoints(this ApolloBuilder apolloBuilder, Action<IEndpointBuilder>? builderAction = null)
     {
         var endpointBuilder = new EndpointBuilder(apolloBuilder.Services, apolloBuilder.Config);
-        builderAction(endpointBuilder);
+        builderAction?.Invoke(endpointBuilder);
 
-        return apolloBuilder;
-    }
-
-    public static ApolloBuilder WithRemotePublishing(this ApolloBuilder apolloBuilder)
-    {
-        apolloBuilder.Services.TryAddSingleton<IRemotePublisherFactory, RemotePublisherFactory>();
+        apolloBuilder.Services.TryAddSingleton<IPublisherFactory, PublisherFactory>();
+        apolloBuilder.Services.TryAddTransient<LocalPublisher>();
         return apolloBuilder;
     }
 }

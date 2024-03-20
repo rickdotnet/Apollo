@@ -25,7 +25,7 @@ internal class EndpointBuilder : IEndpointBuilder
         services.AddScoped<MiddlewareExecutor>();
         services.AddScoped<IMessageMiddleware, LoggingMiddleware>();
         services.AddScoped<IMessageMiddleware, EndpointMiddleware>();
-        services.AddSingleton<RequestProcessor>();
+        services.AddSingleton<MessageProcessor>();
         services.AddHostedService<SubscriptionBackgroundService>();
     }
 

@@ -9,7 +9,14 @@ namespace Apollo;
 
 public static class Setup
 {
-    public static IServiceCollection AddApollo(this IServiceCollection services, ApolloConfig config, Action<ApolloBuilder> builderAction)
+    public static IServiceCollection AddApollo(this IServiceCollection services)
+        => AddApollo(services, ApolloConfig.Default);
+    
+    public static IServiceCollection AddApollo(this IServiceCollection services, Action<ApolloBuilder> builderAction)
+        => AddApollo(services, ApolloConfig.Default, builderAction);
+
+    public static IServiceCollection AddApollo(this IServiceCollection services, ApolloConfig config,
+        Action<ApolloBuilder>? builderAction = null)
     {
         services.AddSingleton(config);
         services.AddNats(configureOpts: opts => opts with
@@ -30,13 +37,13 @@ public static class Setup
 
         var builder = new ApolloBuilder(services, config);
         builderAction?.Invoke(builder);
-        
-        
+
         return services;
     }
-        public static ILogger GetLogger<T>(this IServiceProvider serviceProvider)
-            => serviceProvider.GetService<ILogger<T>>()
-               ?? (ILogger)NullLogger.Instance;
+
+    public static ILogger GetLogger<T>(this IServiceProvider serviceProvider)
+        => serviceProvider.GetService<ILogger<T>>()
+           ?? (ILogger)NullLogger.Instance;
 }
 
 public class FakeFactory : ILoggerFactory

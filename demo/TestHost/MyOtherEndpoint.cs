@@ -1,4 +1,4 @@
-﻿using Apollo.Abstractions.Messaging.Events;
+﻿using Apollo.Messaging.Abstractions;
 using Apollo.Messaging.Contracts;
 using Microsoft.Extensions.Logging;
 

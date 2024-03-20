@@ -1,7 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
-using Apollo.Messaging.Endpoints;
-using Apollo.Nats;
+﻿using Apollo.Messaging.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -21,15 +18,15 @@ public class EndpointMiddleware : IMessageMiddleware
         
     }
 
-    public async Task InvokeAsync(NatsMessage natsMessage, Func<Task> next, CancellationToken cancellationToken)
+    public async Task InvokeAsync(MessageContext messageContext, Func<Task> next, CancellationToken cancellationToken)
     {
-        var messageType = natsMessage.Message?.GetType();
+        var messageType = messageContext.Message?.GetType();
         if (messageType == null) throw new ArgumentNullException(nameof(messageType));
         
         var endpointRegistrations = 
             endpointRegistry.GetEndpointRegistrations(
                 reg => 
-                    reg.Subjects.Contains(natsMessage.Subject)
+                    reg.Subjects.Contains(messageContext.Subject)
                     && reg.HandlerTypes.Any(handlerType => handlerType.GetMessageType() == messageType));
 
         foreach (var registration in endpointRegistrations)
@@ -42,6 +39,9 @@ public class EndpointMiddleware : IMessageMiddleware
             }; // throw an exception?
             
             var endpoint = serviceProvider.GetRequiredService(registration.EndpointType);
+            if(endpoint is EndpointBase baseEndpoint)
+                baseEndpoint.SetContext(messageContext);
+            
             var handleMethod = handlerType.GetMethod("HandleAsync");
             if (handleMethod == null)
             {
@@ -51,22 +51,18 @@ public class EndpointMiddleware : IMessageMiddleware
 
             if (messageType.IsRequest())
             {
-                var response = await (dynamic)handleMethod.Invoke(endpoint, [natsMessage.Message, cancellationToken])!;
+                var response = await (dynamic)handleMethod.Invoke(endpoint, [messageContext.Message, cancellationToken])!;
+                _ = response ?? throw new InvalidOperationException("Response is null");
                 
-                // TODO: still need to configure the serializer
-                var json = JsonSerializer.Serialize(response);
-                var bytes = Encoding.UTF8.GetBytes(json);
-                
-                var connection = natsMessage.Connection ?? throw new Exception("Connection is null");
-                await connection.PublishAsync(natsMessage.ReplyTo, bytes, cancellationToken: cancellationToken);
+                await messageContext.ReplyAsync((object)response, cancellationToken);
             }
             else
             {
-                await (Task)handleMethod.Invoke(endpoint, [natsMessage.Message, cancellationToken])!;
+                await (Task)handleMethod.Invoke(endpoint, [messageContext.Message, cancellationToken])!;
             }
         }
 
-        // If no handler was found, continue to the next middleware
+        // continue to the next middleware
         await next();
     }
 }

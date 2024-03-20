@@ -1,4 +1,4 @@
-﻿namespace Apollo.Abstractions.Messaging.Requests;
+﻿namespace Apollo.Messaging.Abstractions;
 
 public interface IReplyTo : IMessage
 {

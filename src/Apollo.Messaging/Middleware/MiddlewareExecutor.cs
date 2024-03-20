@@ -1,10 +1,8 @@
-﻿using Apollo.Nats;
-
-namespace Apollo.Messaging.Middleware;
+﻿namespace Apollo.Messaging.Middleware;
 
 public interface IMessageMiddleware
 {
-    Task InvokeAsync(NatsMessage message, Func<Task> next, CancellationToken cancellationToken);
+    Task InvokeAsync(MessageContext message, Func<Task> next, CancellationToken cancellationToken);
 }
 
 public class MiddlewareExecutor
@@ -18,16 +16,21 @@ public class MiddlewareExecutor
         this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
-    public async Task ExecuteAsync(NatsMessage message, Func<IServiceProvider, NatsMessage, CancellationToken, Task> finalHandler,
-        CancellationToken cancellationToken)
+    public async Task ExecuteAsync(MessageContext messageContext, Func<IServiceProvider, MessageContext, CancellationToken, Task>? finalHandler = null, CancellationToken cancellationToken = default)
     {
-        var next = () => finalHandler(serviceProvider, message, cancellationToken);
-        foreach (var middleMan in middleware.Reverse())
+        // provide a default final handler if none is given
+        finalHandler ??= (_, _, _) => Task.CompletedTask;
+
+        var next = () => finalHandler(serviceProvider, messageContext, cancellationToken);
+
+        // execute the middleware in reverse order, so the first middleware in the list is the outermost one
+        foreach (var middlewareComponent in middleware.Reverse())
         {
             var currentNext = next;
-            next = () => middleMan.InvokeAsync(message, currentNext, cancellationToken);
+            next = () => middlewareComponent.InvokeAsync(messageContext, currentNext, cancellationToken);
         }
 
+        // start the middleware pipeline execution
         await next();
     }
 }

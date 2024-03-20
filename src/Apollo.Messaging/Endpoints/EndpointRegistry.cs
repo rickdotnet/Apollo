@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using Apollo.Abstractions.Messaging.Commands;
-using Apollo.Abstractions.Messaging.Events;
-using Apollo.Abstractions.Messaging.Requests;
+using Apollo.Messaging.Abstractions;
 
 namespace Apollo.Messaging.Endpoints;
 

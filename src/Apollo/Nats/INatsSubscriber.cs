@@ -2,5 +2,5 @@
 
 public interface INatsSubscriber
 {
-    Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task<bool>> handler);
+    Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task> handler);
 }

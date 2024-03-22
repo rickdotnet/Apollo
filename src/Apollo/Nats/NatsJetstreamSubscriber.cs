@@ -28,7 +28,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
         this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task<bool>> handler)
+    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task> handler)
     {
         var js = new NatsJSContext((NatsConnection)connection);
 
@@ -51,7 +51,6 @@ public class NatsJetStreamSubscriber : INatsSubscriber
             streamNameClean);
 
         var consumerConfig = new ConsumerConfig(config.ConsumerName);
-        //consumerConfig.FilterSubject = filterSubject.ToLower();
         var consumer = await js.CreateOrUpdateConsumerAsync(streamNameClean, consumerConfig, cancellationToken);
         logger.LogInformation("Consumer {ConsumerName} for stream {StreamName} created", config.ConsumerName,
             streamNameClean);
@@ -79,7 +78,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
     }
 
     private async Task ProcessMessage(NatsJSMsg<byte[]> msg,
-        Func<NatsMessage, CancellationToken, Task<bool>> handler)
+        Func<NatsMessage, CancellationToken, Task> handler)
     {
         var json = Encoding.UTF8.GetString(msg.Data);
         logger.LogInformation("JSON: {Json}", json);
@@ -96,16 +95,9 @@ public class NatsJetStreamSubscriber : INatsSubscriber
             Config = config,
             Headers = msg.Headers,
             Message = deserialized,
-            //ReplyTo = msg.ReplyTo, // instead of using these two
-            Connection = msg.Connection // we should use a callback instead
+            ReplyTo = msg.ReplyTo
         };
 
-        // leaving this point here in case we decide to handle replies here
-        // I don't think we will, but, it's here if we need it
-        // we might even do some logging based on the result of the handler
-        // other things to consider:
-        // - handle errors here?
-        // - (not)block the thread until the handler is done?
-        var result = await handler(message, cancellationToken);
+        await handler(message, cancellationToken);
     }
 }

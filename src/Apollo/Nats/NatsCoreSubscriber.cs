@@ -33,11 +33,10 @@ public class NatsCoreSubscriber : INatsSubscriber
         this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task<bool>> handler)
+    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task> handler)
     {
-        //return;
         logger.LogInformation("Subscribing to {Subject}", subject);
-        // TODO: figure out serializer
+        
         await foreach (var msg in connection.SubscribeAsync<byte[]>(subject, cancellationToken: cancellationToken))
         {
             logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
@@ -47,6 +46,8 @@ public class NatsCoreSubscriber : INatsSubscriber
 
             var type = config.MessageTypes[msg.Subject].GetMessageType();
             logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+        
+            // TODO: figure out serializer
             var deserialized = JsonSerializer.Deserialize(json, type, new JsonSerializerOptions{ PropertyNameCaseInsensitive = true });
             var message = new NatsMessage
             {
@@ -55,18 +56,9 @@ public class NatsCoreSubscriber : INatsSubscriber
                 Headers = msg.Headers,
                 Message = deserialized,
                 ReplyTo = msg.ReplyTo, // instead of using these two
-                Connection = msg.Connection // we should use a callback instead
             };
 
-            // leaving this point here in case we decide to handle replies here
-            // I don't think we will, but, it's here if we need it
-            // we might even do some logging based on the result of the handler
-            var result = await handler(message, cancellationToken);
+            await handler(message, cancellationToken);
         }
-    }
-
-    public Task SubscribeAsync()
-    {
-        throw new NotImplementedException();
     }
 }

@@ -84,7 +84,7 @@ public class SubscriptionBackgroundService : BackgroundService
         logger.LogInformation("NATS subscription background service task completed");
         return;
 
-        async Task<bool> Handler(NatsMessage message, CancellationToken cancellationToken)
+        async Task Handler(NatsMessage message, CancellationToken cancellationToken)
         {
             logger.LogInformation("EnqueueMessageAsync message of type {MessageType}", message.Message?.GetType().Name);
 
@@ -99,8 +99,6 @@ public class SubscriptionBackgroundService : BackgroundService
                     Message = message.Message,
                     Source = "NATS"
                 }, cancellationToken);
-
-            return true;
         }
     }
 

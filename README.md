@@ -20,47 +20,41 @@ To get started with Apollo, you'll need to have a running instance of NATS. You 
 
 The API is in rapid design right now. This is the current usage.
 
-Endpoint Host
+**Endpoint Host**
 ```cs
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services
-    .AddApollo(
-        apolloBuilder =>
-        {
-            apolloBuilder
-                .WithEndpoints(
-                    endpoints =>
-                    {
-                        endpoints.AddEndpoint<MyReplyEndpoint>();
-                        endpoints.AddEndpoint<MyEndpoint>(cfg => cfg.SetDurableConsumer());
-                        endpoints.AddEndpoint<MyOtherEndpoint>();
-                    });
-        });
 
-var host = builder.Build();
-await host.RunAsync();
+var config = ApolloConfig.Default;
+
+builder.Services.AddApollo(
+    config,
+    apollo => apollo.WithEndpoints(endpoints => endpoints.AddEndpoint<TestEndpoint>()));
+
+return builder.Build();
 ```
 
 **Endpoint**
 ```cs
-// EndpointBase is optional, but provides access to the MesssageContext
-public class MyReplyEndpoint : EndpointBase, IReplyTo<MyRequest, bool>
-{
-    private readonly ILogger<MyReplyEndpoint> logger;
+public record TestEvent(string Message) : IEvent;
 
-    public MyReplyEndpoint(ILogger<MyReplyEndpoint> logger)
+// EndpointBase is optional, but provides access to the MesssageContext
+public class TestEndpoint : EndpointBase, IListenFor<TestEvent>
+{
+    private readonly ILogger<TestEndpoint> logger;
+
+    public TestEndpoint(ILogger<TestEndpoint> logger)
     {
         this.logger = logger;
     }
-
-    public Task<bool> HandleAsync(MyRequest message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(TestEvent message, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("MyReplyEndpoint Received: {Message}", message.Message);
+        logger.LogInformation("TestEndpoint Received: {Message}", message.Message);
         logger.LogInformation("Subject: {Subject}", Context.Subject);
         logger.LogInformation("Source: {Source}", Context.Source);
         logger.LogInformation("ReplyTo: {ReplyTo}", Context.ReplyTo);
-        Context.Headers.ToList().ForEach(x => logger.LogInformation("Header: {Key}={Value}", x.Key, x.Value));
-        logger.LogInformation("Returning true");
+        Context.Headers.ToList()
+            .ForEach(x => logger.LogInformation("Header: {Key}={Value}", x.Key, x.Value));
+
         return Task.FromResult(true);
     }
 }
@@ -77,15 +71,30 @@ builder.Services
 var host = builder.Build();
 var publisherFactory = host.Services.GetRequiredService<IPublisherFactory>();
 
-var remoteDispatcher = publisherFactory.CreatePublisher("MyReplyEndpoint");
-var response = await remoteDispatcher.SendRequestAsync<MyRequest,bool>(new MyRequest("My Test Request"), default);
-Console.WriteLine("Response: " + response);
+var remoteDispatcher = publisherFactory.CreatePublisher("TestEndpoint");
+await remoteDispatcher.BroadcastAsync(new TestEvent("Hello, World!"),default);
 
-public record MyRequest(string Message) : IRequest<bool>;
+public record TestEvent(string Message) : IEvent;
 ```
 
 **Local Publisher**
 ```cs
-var localPublisher = publisherFactory.CreatePublisher(nameof(MyOtherEndpoint), PublisherType.Local);
-localPublisher.BroadcastAsync(new TestEvent("Hello"), cancellationToken);
+var localPublisher = publisherFactory.CreatePublisher(nameof(TestEndpoint), PublisherType.Local);
+localPublisher.BroadcastAsync(new TestEvent("Hello, World!"), cancellationToken);
+```
+
+**NATS Cli**
+```bash
+nats pub apollo.default.testendpoint.testevent "{""message"":""Hello, World!""}"
+```
+
+**HTTP**
+```
+POST https://localhost:7199/endpoints/apollo.default.testendpoint.testevent
+Accept: application/json
+Content-Type: application/json
+
+{
+  "message": "Hello, World!"
+}
 ```

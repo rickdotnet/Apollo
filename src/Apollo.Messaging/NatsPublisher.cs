@@ -24,45 +24,39 @@ internal class NatsPublisher : IPublisher
         this.logger = logger;
     }
 
-
-    public Task SendCommandAsync<TCommand>(TCommand commandMessage, CancellationToken cancellationToken)
+    public Task SendCommandAsync<TCommand>(TCommand message, CancellationToken cancellationToken)
         where TCommand : ICommand
     {
-        return PublishInternalAsync(commandMessage, cancellationToken);
+        var subject = $"{Route}.{typeof(TCommand).Name}".ToLower();
+        return SendObjectAsync(subject, message, cancellationToken);
     }
 
-    // as of now, events and commands are the essentially same
-    // and only differ by intent. We might change this in the future
-    // to include different headers or something
-    public Task BroadcastAsync<TEvent>(TEvent eventMessage, CancellationToken cancellationToken)
+    public Task BroadcastAsync<TEvent>(TEvent message, CancellationToken cancellationToken)
         where TEvent : IEvent
     {
-        return PublishInternalAsync(eventMessage, cancellationToken);
+        var subject = $"{Route}.{typeof(TEvent).Name}".ToLower();
+        return SendObjectAsync(subject, message, cancellationToken);
     }
 
-    private Task PublishInternalAsync<TMessage>(TMessage message, CancellationToken cancellationToken)
+    public async Task<TResponse?> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
+        CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
     {
-        var subject = $"{Route}.{typeof(TMessage).Name}".ToLower();
+        var subject = $"{Route}.{typeof(TRequest).Name}".ToLower();
+        return (TResponse?)await SendRequestAsync(subject, requestMessage, cancellationToken);
+    }
 
-        logger.LogInformation("Publishing {Name} to {Subject}", typeof(TMessage).Name, subject);
-
+    public Task SendObjectAsync(string subject, object commandMessage, CancellationToken cancellationToken)
+    {
         //var bytes = MessagePackSerializer.Serialize(eventMessage);
-        var json = JsonSerializer.Serialize(message);
+        var json = JsonSerializer.Serialize(commandMessage);
         var bytes = Encoding.UTF8.GetBytes(json);
 
-        
         return connection.PublishAsync(subject, bytes, opts: new NatsPubOpts { WaitUntilSent = true },
             cancellationToken: cancellationToken).AsTask();
     }
 
-    public async Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
-        CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
+    public async Task<object?> SendRequestAsync(string subject, object requestMessage, CancellationToken cancellationToken)
     {
-        var subject = $"{Route}.{typeof(TRequest).Name}".ToLower();
-
-        logger.LogInformation("Publishing {Name} to {Subject}", typeof(TRequest).Name, subject);
-
-        //var bytes = MessagePackSerializer.Serialize(eventMessage);
         var json = JsonSerializer.Serialize(requestMessage);
         var bytes = Encoding.UTF8.GetBytes(json);
 
@@ -75,10 +69,15 @@ internal class NatsPublisher : IPublisher
         var result = await connection.RequestAsync<byte[], byte[]>(subject, bytes, replyOpts: replyOpts,
             cancellationToken: cancellationToken);
 
+        if(result.Data == null)
+        {
+            logger.LogWarning("Null Response ({Subject})", subject);
+            return null;
+        }
         var responseJson = Encoding.UTF8.GetString(result.Data);
         logger.LogInformation("Response JSON: {Json}", responseJson);
 
-        var deserialized = JsonSerializer.Deserialize(responseJson, typeof(TResponse));
-        return (TResponse)deserialized!;
+        var deserialized = JsonSerializer.Deserialize(responseJson, typeof(object));
+        return Task.FromResult(deserialized);
     }
 }

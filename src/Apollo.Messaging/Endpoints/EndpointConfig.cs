@@ -7,8 +7,8 @@ public class EndpointConfig
     public static EndpointConfig Default
         => new(ApolloConfig.Default);
 
-    public bool IsLocalEndpoint { get; init; }
-    public bool IsRemoteEndpoint => !IsLocalEndpoint;
+    public bool LocalOnly { get; init; }
+    public bool IsRemoteEndpoint => !LocalOnly;
     public string ConsumerName { get; init; }
     public DurableConfig DurableConfig { get; init; } = DurableConfig.Default;
     public string Namespace { get; init; }

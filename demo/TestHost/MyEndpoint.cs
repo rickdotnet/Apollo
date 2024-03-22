@@ -5,20 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace TestHost;
 
-public record TestCommand : ICommand
-{
-    public TestCommand(string Message)
-    {
-        this.Message = Message;
-    }
-
-    public string Message { get; init; }
-
-    public void Deconstruct(out string Message)
-    {
-        Message = this.Message;
-    }
-}
+public record TestCommand(string Message) : ICommand;
 
 public class MyEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>
 {

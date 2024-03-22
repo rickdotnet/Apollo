@@ -47,7 +47,7 @@ internal class LocalPublisher : IPublisher
         logger.LogDebug("Event {Name} broadcasted", typeof(TEvent).Name);
     }
 
-    public async Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
+    public async Task<TResponse?> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
         CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
     {
         var message = new MessageContext
@@ -60,7 +60,31 @@ internal class LocalPublisher : IPublisher
         var result = await messageProcessor.ProcessLocalMessageAsync(message, cancellationToken);
         logger.LogDebug("Request {Name} processed with result {Result}", typeof(TRequest).Name, result);
 
-        var response = (TResponse)result;
+        var response = (TResponse?)result;
         return response;
+    }
+
+    public Task SendObjectAsync(string subject, object message, CancellationToken cancellationToken)
+    {
+        var messageContext = new MessageContext
+        {
+            Subject = subject,
+            Message = message,
+            Source = "local"
+        };
+        
+        return messageProcessor.ProcessLocalMessageAsync(messageContext, cancellationToken);
+    }
+
+    public Task<object?> SendRequestAsync(string subject, object requestMessage, CancellationToken cancellationToken)
+    {
+        var messageContext = new MessageContext
+        {
+            Subject = subject,
+            Message = requestMessage,
+            Source = "local"
+        };
+        
+        return messageProcessor.ProcessLocalMessageAsync(messageContext, cancellationToken);
     }
 }

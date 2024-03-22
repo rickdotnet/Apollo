@@ -26,8 +26,7 @@ public class EndpointMiddleware : IMessageMiddleware
         var endpointRegistrations = 
             endpointRegistry.GetEndpointRegistrations(
                 reg => 
-                    reg.Subjects.Contains(messageContext.Subject)
-                    && reg.HandlerTypes.Any(handlerType => handlerType.GetMessageType() == messageType));
+                    reg.SubjectMapping.ContainsKey(messageContext.Subject));
 
         foreach (var registration in endpointRegistrations)
         {

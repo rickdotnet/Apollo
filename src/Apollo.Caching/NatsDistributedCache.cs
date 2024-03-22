@@ -17,7 +17,7 @@ public class NatsDistributedCache : IDistributedCache
         this.bucketName = bucketName;
     }
 
-    private async ValueTask<INatsKVStore> CreateStoreAsync(CancellationToken token = default)
+    private async ValueTask<INatsKVStore> GetStoreAsync(CancellationToken token = default)
     {
         if (kvStore != null) return kvStore;
         
@@ -40,7 +40,7 @@ public class NatsDistributedCache : IDistributedCache
 
     public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
     {
-        var store = await CreateStoreAsync(token);
+        var store = await GetStoreAsync(token);
 
         var entry = await store.GetEntryAsync<byte[]>(key, cancellationToken: token);
 
@@ -66,7 +66,7 @@ public class NatsDistributedCache : IDistributedCache
 
     public async Task RemoveAsync(string key, CancellationToken token = default)
     {
-        var store = await CreateStoreAsync(token);
+        var store = await GetStoreAsync(token);
         await store.DeleteAsync(key, cancellationToken: token);
     }
 
@@ -80,7 +80,7 @@ public class NatsDistributedCache : IDistributedCache
         CancellationToken token = default
     )
     {
-        var store = await CreateStoreAsync(token);
+        var store = await GetStoreAsync(token);
 
         var cacheItem = new CacheItem
         {

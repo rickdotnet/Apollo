@@ -7,7 +7,7 @@ public class EndpointRegistration
 {
     public Type EndpointType { get; }
     public IEnumerable<Type> HandlerTypes { get; }
-    public IEnumerable<string> Subjects { get; }
+    public IDictionary<string, Type> SubjectMapping { get; }
     public EndpointConfig Config { get; }
     public string EndpointRoute { get; }
 
@@ -21,11 +21,10 @@ public class EndpointRegistration
         if (config.UseEndpointNameInRoute)
             EndpointRoute += $".{EndpointType.Name}";
 
-        var subjects =
-            HandlerTypes.Select(
-                handlerType => $"{EndpointRoute}.{handlerType.GetMessageType().Name}".ToLower()
-            ).ToList();
-
-        Subjects = subjects.AsReadOnly();
+        SubjectMapping =
+            HandlerTypes
+                .ToDictionary(
+                    x=>$"{EndpointRoute}.{x.GetMessageType().Name}".ToLower(), // subject 
+                    x => x.GetMessageType());// message type
     }
 }

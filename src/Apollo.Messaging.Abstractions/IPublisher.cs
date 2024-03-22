@@ -11,7 +11,11 @@ public interface IPublisher
     Task BroadcastAsync<TEvent>(TEvent eventMessage, CancellationToken cancellationToken)
         where TEvent : IEvent;
 
-    Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
+    Task<TResponse?> SendRequestAsync<TRequest, TResponse>(TRequest requestMessage,
         CancellationToken cancellationToken)
         where TRequest : IRequest<TResponse>;
+    
+    Task SendObjectAsync(string subject, object commandMessage, CancellationToken cancellationToken);
+    
+    Task<object?> SendRequestAsync(string subject, object requestMessage, CancellationToken cancellationToken);
 }

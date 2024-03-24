@@ -1,0 +1,19 @@
+# See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+name: Apollo Publish
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: "./build/default.props"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.x
+    - name: Build and Publish
+      run: dotnet run --project ./build/build.csproj -- publish

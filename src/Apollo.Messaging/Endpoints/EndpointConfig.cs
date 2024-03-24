@@ -14,12 +14,15 @@ public class EndpointConfig
     public string Namespace { get; init; }
     public bool UseEndpointNameInRoute { get; init; } = true;
 
-    public EndpointConfig(ApolloConfig apolloConfig)
+    internal string? MinimalApiRoute { get; set; }
+
+    public EndpointConfig(ApolloConfig apolloConfig, string? minimalApiRoute = null)
     {
         ConsumerName = apolloConfig.ConsumerName;
         Namespace = apolloConfig.DefaultNamespace;
     }
 }
+
 public static class EndpointConfigExtensions
 {
     public static void SetDurableConsumer(this EndpointConfig config, bool durable = true)

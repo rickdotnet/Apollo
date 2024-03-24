@@ -11,17 +11,17 @@ public static class Setup
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-var config = ApolloConfig.Default;
-builder.Configuration.Bind(config);
+        var config = ApolloConfig.Default;
+        builder.Configuration.Bind(config);
 
-builder.Services.AddApollo(
-    config,
-    apollo => apollo.WithEndpoints(endpoints => endpoints.AddEndpoint<TestEndpoint>()));
+        builder.Services.AddApollo(
+            config,
+            apollo => apollo.WithEndpoints(endpoints => endpoints.AddEndpoint<TestEndpoint>()));
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+        builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
 
-return builder.Build();
+        return builder.Build();
     }
 
     public static WebApplication ConfigurePipeline(this WebApplication app)

@@ -17,15 +17,24 @@ public static class BuildHelper
     }
 
     public static Task PackProjects(BuildConfiguration config)
-        => Task.WhenAll(
+    {
+        return Task.WhenAll(
             config.ProjectFiles.Select(
                 project => RunAsync("dotnet",
                     $"pack {project} -c Release -o \"{config.PackOutput}\" --no-build --nologo")
             ));
+    }
 
-    public static Task PublishPackage(BuildConfiguration config, string package) =>
-        string.IsNullOrWhiteSpace(config.NuGetApiKey)
-            ? throw new Exception("No NuGet API key found")
-            : RunAsync("dotnet",
+    public static async Task PublishPackage(BuildConfiguration config)
+    {
+        foreach (var package in config.NugetPackages)
+        {
+            if (string.IsNullOrWhiteSpace(config.NuGetApiKey))
+                throw new Exception("No NuGet API key found");
+
+            await RunAsync(
+                "dotnet",
                 $"nuget push {package} -s {config.NuGetSource} -k {config.NuGetApiKey} --skip-duplicate");
+        }
+    }
 }

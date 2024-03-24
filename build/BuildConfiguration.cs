@@ -11,9 +11,7 @@ public class BuildConfiguration
     public string[] TestDirectories => Directory.GetDirectories(RootDirectory, TestSearchPattern, SearchOption.TopDirectoryOnly);
     public string[] ProjectFiles => Directory.GetFiles(Path.Combine(RootDirectory, "src"), ProjectsSearchPattern, SearchOption.AllDirectories);
     public string[] NugetPackages => Directory.GetFiles(PackOutput, "*.nupkg", SearchOption.AllDirectories);
-    
     public string NuGetSource => "https://api.nuget.org/v3/index.json";
-
     public string? NuGetApiKey { get; }
     
     public BuildConfiguration(string? rootDirectory = null, string? nuGetApiKey = null)

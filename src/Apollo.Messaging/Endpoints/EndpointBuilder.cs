@@ -7,9 +7,8 @@ namespace Apollo.Messaging.Endpoints;
 
 public interface IEndpointBuilder
 {
-    void AddEndpoint<T>();
-    void AddEndpoint<T>(string apiRoute);
-    void AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null);
+    IEndpointRegistration AddEndpoint<T>();
+    IEndpointRegistration AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null);
 }
 
 internal class EndpointBuilder : IEndpointBuilder
@@ -30,19 +29,34 @@ internal class EndpointBuilder : IEndpointBuilder
         services.AddHostedService<SubscriptionBackgroundService>();
     }
 
-    public void AddEndpoint<T>()
+    public IEndpointRegistration AddEndpoint<T>()
         => AddEndpoint<T>(_ => { });
-    
-    public void AddEndpoint<T>(string apiRoute)
+
+    public IEndpointRegistration AddEndpoint<T>(string apiRoute)
         => AddEndpoint<T>(_ => { }, apiRoute);
 
-    public void AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null)
+    public IEndpointRegistration AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null)
     {
         var endpointConfig = new EndpointConfig(config, apiRoute);
         action(endpointConfig);
 
-        var registration = new EndpointRegistration<T>(endpointConfig);
+        var registration = new EndpointRegistration<T>(endpointConfig, this);
         services.AddScoped(typeof(T));
         endpointRegistry.RegisterEndpoint(registration);
+
+        return registration;
+    }
+    
+    internal void AddService(Type type, ServiceLifetime lifetime = ServiceLifetime.Scoped)
+    {
+        services.Add(new ServiceDescriptor(type, type, lifetime));
+    }
+}
+
+ static class EndpointRegistrationExtensions
+{
+    public static void WithWiretap<T>(this EndpointRegistration registration)
+    {
+        registration.AddWiretap<T>();
     }
 }

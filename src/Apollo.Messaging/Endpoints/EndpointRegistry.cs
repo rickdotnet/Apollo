@@ -5,25 +5,26 @@ namespace Apollo.Messaging.Endpoints;
 
 public interface IEndpointRegistry
 {
-    void RegisterEndpoint(EndpointRegistration registration);
+    void RegisterEndpoint(IEndpointRegistration registration);
 
-    IEnumerable<EndpointRegistration> GetEndpointsForCommand<TCommand>(
-        Func<EndpointRegistration, bool>? predicate = default) where TCommand : ICommand;
+    IEnumerable<IEndpointRegistration> GetEndpointsForCommand<TCommand>(
+        Func<IEndpointRegistration, bool>? predicate = default) where TCommand : ICommand;
 
-    IEnumerable<EndpointRegistration> GetEndpointsForEvent<TEvent>(
-        Func<EndpointRegistration, bool>? predicate = default) where TEvent : IEvent;
+    IEnumerable<IEndpointRegistration> GetEndpointsForEvent<TEvent>(
+        Func<IEndpointRegistration, bool>? predicate = default) where TEvent : IEvent;
 
-    IEnumerable<EndpointRegistration> GetEndpointsForRequest<TRequest>(
-        Func<EndpointRegistration, bool>? predicate = default) where TRequest : IRequest;
+    IEnumerable<IEndpointRegistration> GetEndpointsForRequest<TRequest>(
+        Func<IEndpointRegistration, bool>? predicate = default) where TRequest : IRequest;
     
-    IEnumerable<EndpointRegistration> GetEndpointRegistrations(Func<EndpointRegistration, bool>? predicate = default);
+    IEnumerable<IEndpointRegistration> GetEndpointRegistrations(Func<IEndpointRegistration, bool>? predicate = default);
+    IEnumerable<IEndpointRegistration> GetEndpointsWithWiretaps(string subject);
 }
 
 internal class EndpointRegistry : IEndpointRegistry
 {
-    private readonly ConcurrentDictionary<Type, List<EndpointRegistration>> messageEndpoints = new();
+    private readonly ConcurrentDictionary<Type, List<IEndpointRegistration>> messageEndpoints = new();
 
-    public void RegisterEndpoint(EndpointRegistration registration)
+    public void RegisterEndpoint(IEndpointRegistration registration)
     {
         var handlerTypes = registration.EndpointType.MessageHandlerTypes();
         foreach (var handlerType in handlerTypes)
@@ -46,16 +47,22 @@ internal class EndpointRegistry : IEndpointRegistry
         }
     }
 
-    public IEnumerable<EndpointRegistration> GetEndpointsForCommand<TCommand>(
-        Func<EndpointRegistration, bool>? predicate = default) where TCommand : ICommand
-        => GetEndpointRegistrations(typeof(IHandle<TCommand>), predicate);
+    public IEnumerable<IEndpointRegistration> GetEndpointsWithWiretaps(string subject)
+        => messageEndpoints.Values.SelectMany(regs => regs)
+            .Where(reg => reg is EndpointRegistration regImpl 
+                          && regImpl.WiretapTypes.Any()
+                          && reg.SubjectMapping.ContainsKey(subject)).Distinct();
+    
+    public IEnumerable<IEndpointRegistration> GetEndpointsForCommand<TCommand>(
+        Func<IEndpointRegistration, bool>? predicate = default) where TCommand : ICommand
+        => GetIEndpointRegistrations(typeof(IHandle<TCommand>), predicate);
 
-    public IEnumerable<EndpointRegistration> GetEndpointsForEvent<TEvent>(
-        Func<EndpointRegistration, bool>? predicate = default) where TEvent : IEvent
-        => GetEndpointRegistrations(typeof(IListenFor<TEvent>), predicate);
+    public IEnumerable<IEndpointRegistration> GetEndpointsForEvent<TEvent>(
+        Func<IEndpointRegistration, bool>? predicate = default) where TEvent : IEvent
+        => GetIEndpointRegistrations(typeof(IListenFor<TEvent>), predicate);
 
-    public IEnumerable<EndpointRegistration> GetEndpointsForRequest<TRequest>(
-        Func<EndpointRegistration, bool>? predicate = default) where TRequest : IRequest
+    public IEnumerable<IEndpointRegistration> GetEndpointsForRequest<TRequest>(
+        Func<IEndpointRegistration, bool>? predicate = default) where TRequest : IRequest
     {
         var requestType = typeof(TRequest);
         var responseType = requestType.GetInterfaces()
@@ -68,18 +75,18 @@ internal class EndpointRegistry : IEndpointRegistry
         }
 
         var replyToInterface = typeof(IReplyTo<,>).MakeGenericType(requestType, responseType);
-        return GetEndpointRegistrations(replyToInterface, predicate);
+        return GetIEndpointRegistrations(replyToInterface, predicate);
     }
 
-    public IEnumerable<EndpointRegistration> GetEndpointRegistrations(Type handlerType,
-        Func<EndpointRegistration, bool>? predicate = default)
+    public IEnumerable<IEndpointRegistration> GetIEndpointRegistrations(Type handlerType,
+        Func<IEndpointRegistration, bool>? predicate = default)
     {
-        var registrations = messageEndpoints.TryGetValue(handlerType, out var list) ? list : Enumerable.Empty<EndpointRegistration>();
+        var registrations = messageEndpoints.TryGetValue(handlerType, out var list) ? list : Enumerable.Empty<IEndpointRegistration>();
         predicate ??= _ => true;
         return registrations.Where(predicate);
     }
 
-    public IEnumerable<EndpointRegistration> GetEndpointRegistrations(Func<EndpointRegistration, bool>? predicate = default)
+    public IEnumerable<IEndpointRegistration> GetEndpointRegistrations(Func<IEndpointRegistration, bool>? predicate = default)
     {
         predicate ??= _ => true;
         return messageEndpoints.Values.SelectMany(regs => regs).Where(predicate).Distinct();

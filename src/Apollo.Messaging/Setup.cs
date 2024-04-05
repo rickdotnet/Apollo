@@ -11,7 +11,6 @@ public static class Setup
         builderAction?.Invoke(endpointBuilder);
 
         apolloBuilder.Services.TryAddSingleton<IPublisherFactory, PublisherFactory>();
-        //apolloBuilder.Services.TryAddTransient<LocalPublisher>();
         return apolloBuilder;
     }
 }

@@ -10,12 +10,6 @@ public record MessageContext
     public string? ReplyTo { get; init; }
     internal object? Message { get; init; }
     internal IReplier Replier { get; init; } = NoOpReplier.Instance;
-
-    internal MessageContext WithSubject(string subject) => this with { Subject = subject };
-    internal MessageContext WithMessage(object message) => this with { Message = message };
-    internal MessageContext WithSource(string source) => this with { Source = source };
-    internal MessageContext WithReplyTo(string replyTo) => this with { ReplyTo = replyTo };
-    internal MessageContext WithReplier(IReplier replier) => this with { Replier = replier };
 }
 
 public static class MessageContextExtensions

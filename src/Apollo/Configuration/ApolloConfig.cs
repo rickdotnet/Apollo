@@ -1,4 +1,6 @@
-﻿namespace Apollo.Configuration;
+﻿using Apollo.Time;
+
+namespace Apollo.Configuration;
 
 /// <summary>
 /// Configure Apollo
@@ -11,15 +13,13 @@ public class ApolloConfig
     public string Url { get; set; } = "nats://localhost:4222";
     public string ConsumerName { get; set; } = "DefaultConsumer";
     public string DefaultNamespace { get; set; } = "apollo.default";
-
+    public string TimeSubject => $"{DefaultNamespace}.time";
     public string? CredsFile { get; set; }
     public string? Jwt { get; set; }
-
     public string? Seed { get; set; }
-
     public string? NKey { get; }
-
     public string? Token { get; }
-    
     public static ApolloConfig Default => new();
+    
+    internal TimeSyncMode TimeSyncMode { get; set; } = TimeSyncMode.Receive;
 }

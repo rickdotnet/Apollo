@@ -1,4 +1,5 @@
 ﻿using Apollo.Configuration;
+using Apollo.Time;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Apollo;
@@ -19,6 +20,12 @@ public class ApolloBuilder
     public void WithService(Action<IServiceCollection> action)
     {
         action(Services);
+    }
+    
+    public void WithTimeSynchronizer()
+    {
+        Services.AddSingleton<TimeSynchronizer>();
+        // add hosted service
     }
 }
 

@@ -41,24 +41,32 @@ public class NatsCoreSubscriber : INatsSubscriber
         {
             logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
 
-            var json = Encoding.UTF8.GetString(msg.Data);
-            logger.LogInformation("JSON: {Json}", json);
-
-            var type = config.MessageTypes[msg.Subject].GetMessageType();
-            logger.LogInformation("Deserializing message to {TypeName}", type.Name);
-        
-            // TODO: figure out serializer
-            var deserialized = JsonSerializer.Deserialize(json, type, new JsonSerializerOptions{ PropertyNameCaseInsensitive = true });
-            var message = new NatsMessage
+            try
             {
-                Subject = msg.Subject,
-                Config = config,
-                Headers = msg.Headers,
-                Message = deserialized,
-                ReplyTo = msg.ReplyTo, // instead of using these two
-            };
+                var json = Encoding.UTF8.GetString(msg.Data);
+                logger.LogInformation("JSON: {Json}", json);
 
-            await handler(message, cancellationToken);
+                var type = config.MessageTypes[msg.Subject].GetMessageType();
+                logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+
+                // TODO: figure out serializer
+                var deserialized = JsonSerializer.Deserialize(json, type,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var message = new NatsMessage
+                {
+                    Subject = msg.Subject,
+                    Config = config,
+                    Headers = msg.Headers,
+                    Message = deserialized,
+                    ReplyTo = msg.ReplyTo, // instead of using these two
+                };
+
+                await handler(message, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error processing message from {Subject}", msg.Subject);
+            }
         }
     }
 }

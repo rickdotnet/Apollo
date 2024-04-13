@@ -57,21 +57,30 @@ public class NatsJetStreamSubscriber : INatsSubscriber
 
         await foreach (var msg in consumer.ConsumeAsync<byte[]>().WithCancellation(cancellationToken))
         {
-            logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
-            // Process message
+            try
+            {
+                logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
+                // Process message
 
-            if (config.MessageTypes.ContainsKey(msg.Subject))
-            {
-                await ProcessMessage(msg, handler);
-                await msg.AckAsync(cancellationToken: cancellationToken);
+                if (config.MessageTypes.ContainsKey(msg.Subject))
+                {
+                    await ProcessMessage(msg, handler);
+                    await msg.AckAsync(cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    logger.LogWarning("No handler found for {Subject} in endpoint ({Endpoint})", msg.Subject,
+                        config.EndpointName);
+
+                    // TODO: need to makes sure this doesn't stop the server from
+                    //       redelivering the message to other processors outside
+                    //       of this application
+                    await msg.AckTerminateAsync(cancellationToken: cancellationToken);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                logger.LogWarning("No handler found for {Subject} in endpoint ({Endpoint})", msg.Subject, config.EndpointName);
-                
-                // TODO: need to makes sure this doesn't stop the server from
-                //       redelivering the message to other processors outside
-                //       of this application
+                logger.LogError(ex, "Error processing message from {Subject}", msg.Subject);
                 await msg.AckTerminateAsync(cancellationToken: cancellationToken);
             }
         }
@@ -89,6 +98,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
         // this will eventually be a configured serializer
         var deserialized = JsonSerializer.Deserialize(json, type,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        
         var message = new NatsMessage
         {
             Subject = msg.Subject,

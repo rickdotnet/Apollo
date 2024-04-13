@@ -1,5 +1,6 @@
 ﻿using Apollo.Configuration;
 using Apollo.Messaging.Abstractions;
+using IdGen;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
@@ -45,8 +46,8 @@ public class PublisherFactory: IPublisherFactory
 
         var messageProcessor = serviceProvider.GetRequiredService<MessageProcessor>();
         var logger = serviceProvider.GetRequiredService<ILogger<LocalPublisher>>();
-
-        return new LocalPublisher(route, messageProcessor, logger);
+        var idGenerator = serviceProvider.GetRequiredService<IdGenerator>();
+        return new LocalPublisher(route, messageProcessor, idGenerator, logger);
     }
     private NatsPublisher CreateNatsPublisher(string route)
     {
@@ -54,7 +55,7 @@ public class PublisherFactory: IPublisherFactory
 
         var connection = serviceProvider.GetRequiredService<INatsConnection>();
         var logger = serviceProvider.GetRequiredService<ILogger<NatsPublisher>>();
-
-        return new NatsPublisher(route, connection, logger);
+        var idGenerator = serviceProvider.GetRequiredService<IdGenerator>();
+        return new NatsPublisher(route, connection, idGenerator, logger);
     }
 }

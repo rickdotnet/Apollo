@@ -7,9 +7,9 @@ namespace Apollo.Messaging.Endpoints;
 
 public interface IEndpointBuilder
 {
-    void AddEndpoint<T>();
-    void AddEndpoint<T>(string apiRoute);
-    void AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null);
+    IEndpointBuilder AddEndpoint<T>();
+    IEndpointBuilder AddEndpoint<T>(string apiRoute);
+    IEndpointBuilder AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null);
 }
 
 internal class EndpointBuilder : IEndpointBuilder
@@ -22,21 +22,17 @@ internal class EndpointBuilder : IEndpointBuilder
     {
         this.services = services;
         this.config = config;
+        
         services.TryAddSingleton<IEndpointRegistry>(endpointRegistry);
-        services.AddScoped<MiddlewareExecutor>();
-        services.AddScoped<IMessageMiddleware, LoggingMiddleware>();
-        services.AddScoped<IMessageMiddleware, EndpointMiddleware>();
-        services.AddSingleton<MessageProcessor>();
-        services.AddHostedService<SubscriptionBackgroundService>();
     }
 
-    public void AddEndpoint<T>()
+    public IEndpointBuilder AddEndpoint<T>()
         => AddEndpoint<T>(_ => { });
     
-    public void AddEndpoint<T>(string apiRoute)
+    public IEndpointBuilder AddEndpoint<T>(string apiRoute)
         => AddEndpoint<T>(_ => { }, apiRoute);
 
-    public void AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null)
+    public IEndpointBuilder AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null)
     {
         var endpointConfig = new EndpointConfig(config, apiRoute);
         action(endpointConfig);
@@ -44,5 +40,7 @@ internal class EndpointBuilder : IEndpointBuilder
         var registration = new EndpointRegistration<T>(endpointConfig);
         services.AddScoped(typeof(T));
         endpointRegistry.RegisterEndpoint(registration);
+
+        return this;
     }
 }

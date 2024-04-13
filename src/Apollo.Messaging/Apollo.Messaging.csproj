@@ -20,6 +20,7 @@
     </ItemGroup>
     
     <ItemGroup>
+      <PackageReference Include="IdGen.DependencyInjection" Version="3.0.5" />
       <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     </ItemGroup>
 

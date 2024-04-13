@@ -1,33 +1,43 @@
 using Apollo.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NATS.Client.Core;
 
-namespace Apollo.Time;
+namespace Apollo.Messaging.Time;
 
+// The idea here is that this would be added with something like apolloBuilder.WithTimeSynchronizer()
+// then, you'd listen for time messages and update the time offset
+// 
+// whichever server(s) is/are the time keeper could occasionally broadcast the time to all other servers
+// update the offset based on the latency, and then use that offset to calculate the current time
+//
+// once a time offset is set, it should be updated periodically to account for drift
+// need to determine the frequency of updates and run some tests to see how much drift we get
 internal class TimeSynchronizer
 {
     private readonly INatsConnection natsConnection;
-    private readonly ApolloConfig config;
+    private readonly ApolloIdGenTimeSource? timeSource;
     private readonly ILogger<TimeSynchronizer> logger;
+    private readonly string timeSubject;
     private long timeOffset;
     private Task internalTask;
     private Timer? broadcastTimer;
-
-    // The idea here is that this would be added with something like apolloBuilder.WithTimeSynchronizer()
-    // then, you'd add a hosted service that would listen for time messages and update the time offset
-    // t
-    // whichever server is the time keeper would then instead broadcast the time to all other servers
-    // not sure if that belongs here or in a timepublisher class
-    public TimeSynchronizer(INatsConnection natsConnection, ApolloConfig config, ILogger<TimeSynchronizer> logger)
+    
+    public TimeSynchronizer(
+        ApolloConfig config,
+        INatsConnection natsConnection,
+        ApolloIdGenTimeSource? timeSource = null,
+        ILogger<TimeSynchronizer>? logger = null)
     {
+        timeSubject = $"{config.DefaultNamespace}.time";
         this.natsConnection = natsConnection;
-        this.config = config;
-        this.logger = logger;
-
-        switch (config.TimeSyncMode)
+        this.timeSource = timeSource;
+        this.logger = logger ?? NullLogger<TimeSynchronizer>.Instance;
+        
+        switch (timeSource?.TimeSyncMode)
         {
             case TimeSyncMode.Receive:
-                internalTask = SubscribeToTimeMessages(config.TimeSubject);
+                internalTask = SubscribeToTimeMessages();
                 break;
             case TimeSyncMode.Broadcast:
                 internalTask = Task.CompletedTask;
@@ -39,8 +49,14 @@ internal class TimeSynchronizer
                 break;
         }
     }
+    
+    public DateTime CurrentUtc()
+    {
+        var offset = Interlocked.Read(ref timeOffset);
+        return DateTime.UtcNow.AddMilliseconds(offset);
+    }
 
-    private async Task SubscribeToTimeMessages(string timeSubject)
+    private async Task SubscribeToTimeMessages()
     {
         // cancellationToken needs implemented
         await foreach (var msg in natsConnection.SubscribeAsync<byte[]>(timeSubject))
@@ -61,7 +77,10 @@ internal class TimeSynchronizer
             var sentTime = new DateTime(BitConverter.ToInt64(tickData, 0), DateTimeKind.Utc);
             var latency = (receivedTime - sentTime).TotalMilliseconds;
 
-            // update the time offset, but... safety first.
+            // get our time source updated first
+            timeSource?.SetApolloOffset((long)latency);
+            
+            // update the local time offset, but... safety first.
             Interlocked.Exchange(ref timeOffset, (long)latency);
         }
     }
@@ -75,7 +94,7 @@ internal class TimeSynchronizer
             var utcTicks = currentTime.ToUniversalTime().Ticks;
             var tickData = BitConverter.GetBytes(utcTicks);
 
-            await natsConnection.PublishAsync(config.TimeSubject, tickData).ConfigureAwait(false);
+            await natsConnection.PublishAsync(timeSubject, tickData).ConfigureAwait(false);
         }
         catch (Exception e)
         {

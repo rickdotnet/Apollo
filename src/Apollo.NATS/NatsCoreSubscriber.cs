@@ -3,23 +3,23 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.Nats;
+namespace Apollo.NATS;
 
-public class NatsCoreSubscriber : INatsSubscriber
+public class NatsCoreSubscriber : ISubscriber
 {
     private readonly INatsConnection connection;
-    private readonly NatsSubscriptionConfig config;
+    private readonly SubscriptionConfig config;
     private readonly ILogger logger;
     private readonly string subject;
     private readonly string? queueGroup;
-    private readonly INatsDeserialize<byte[]>? serializer;
+    private readonly ISerializeThings? serializer;
     private readonly NatsSubOpts? opts;
     private readonly CancellationToken cancellationToken;
 
 
     public NatsCoreSubscriber(
         INatsConnection connection,
-        NatsSubscriptionConfig config,
+        SubscriptionConfig config,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
@@ -33,7 +33,7 @@ public class NatsCoreSubscriber : INatsSubscriber
         this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task> handler)
+    public async Task SubscribeAsync(Func<ApolloMessage, CancellationToken, Task> handler)
     {
         logger.LogInformation("Subscribing to {Subject}", subject);
         
@@ -52,10 +52,9 @@ public class NatsCoreSubscriber : INatsSubscriber
                 // TODO: figure out serializer
                 var deserialized = JsonSerializer.Deserialize(json, type,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                var message = new NatsMessage
+                var message = new ApolloMessage
                 {
                     Subject = msg.Subject,
-                    Config = config,
                     Headers = msg.Headers,
                     Message = deserialized,
                     ReplyTo = msg.ReplyTo, // instead of using these two

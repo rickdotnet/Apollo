@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Primitives;
 
-namespace Apollo.Nats;
+namespace Apollo;
 
-public class NatsMessage
+public class ApolloMessage
 {
-    internal NatsSubscriptionConfig Config { get; init; }
+    internal SubscriptionConfig? Config { get; init; }
     public string Subject { get; init; } = string.Empty;
     public IDictionary<string, StringValues>? Headers { get; init; }
     public object? Message { get; init; }

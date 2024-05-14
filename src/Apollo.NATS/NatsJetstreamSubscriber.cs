@@ -5,19 +5,19 @@ using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
 
-namespace Apollo.Nats;
+namespace Apollo.NATS;
 
-public class NatsJetStreamSubscriber : INatsSubscriber
+public class NatsJetStreamSubscriber : ISubscriber
 {
     private readonly INatsConnection connection;
-    private readonly NatsSubscriptionConfig config;
+    private readonly SubscriptionConfig config;
     private readonly ILogger logger;
     private readonly NatsSubOpts? opts;
     private readonly CancellationToken cancellationToken;
 
     public NatsJetStreamSubscriber(
         INatsConnection connection,
-        NatsSubscriptionConfig config,
+        SubscriptionConfig config,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
@@ -28,7 +28,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
         this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<NatsMessage, CancellationToken, Task> handler)
+    public async Task SubscribeAsync(Func<ApolloMessage, CancellationToken, Task> handler)
     {
         var js = new NatsJSContext((NatsConnection)connection);
 
@@ -87,7 +87,7 @@ public class NatsJetStreamSubscriber : INatsSubscriber
     }
 
     private async Task ProcessMessage(NatsJSMsg<byte[]> msg,
-        Func<NatsMessage, CancellationToken, Task> handler)
+        Func<ApolloMessage, CancellationToken, Task> handler)
     {
         var json = Encoding.UTF8.GetString(msg.Data);
         logger.LogInformation("JSON: {Json}", json);
@@ -99,10 +99,9 @@ public class NatsJetStreamSubscriber : INatsSubscriber
         var deserialized = JsonSerializer.Deserialize(json, type,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         
-        var message = new NatsMessage
+        var message = new ApolloMessage
         {
             Subject = msg.Subject,
-            Config = config,
             Headers = msg.Headers,
             Message = deserialized,
             ReplyTo = msg.ReplyTo

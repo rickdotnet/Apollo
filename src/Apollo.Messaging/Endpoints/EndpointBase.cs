@@ -2,11 +2,11 @@ namespace Apollo.Messaging.Endpoints;
 
 public class EndpointBase
 {
-    private MessageContext context;
+    private MessageContext context = null!;
     protected MessageContext Context => context;
 
-    internal void SetContext(MessageContext context)
+    internal void SetContext(MessageContext messageContext)
     {
-        this.context = context;
+        context = messageContext;
     }
 }

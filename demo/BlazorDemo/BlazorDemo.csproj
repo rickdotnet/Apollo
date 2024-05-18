@@ -7,7 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Apollo.Messaging.Api\Apollo.Messaging.Api.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging.WebApi\Apollo.Messaging.WebApi.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging.NATS\Apollo.Messaging.NATS.csproj" />
       <ProjectReference Include="..\..\src\Apollo.Messaging\Apollo.Messaging.csproj" />
       <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
     </ItemGroup>

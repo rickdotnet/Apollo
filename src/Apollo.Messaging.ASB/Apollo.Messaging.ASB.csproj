@@ -7,21 +7,20 @@
     </PropertyGroup>
 
     <PropertyGroup Label="Package">
-        <PackageId>RickDotNet.Apollo.Caching</PackageId>
+        <PackageId>RickDotNet.Apollo.Messaging.ASB</PackageId>
     </PropertyGroup>
-    
+
     <ItemGroup>
-      <PackageReference Include="MessagePack" Version="2.5.140" />
-      <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-      <PackageReference Include="NATS.Client.KeyValueStore" Version="2.2.1" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Apollo.Messaging\Apollo.Messaging.csproj" />
       <ProjectReference Include="..\Apollo\Apollo.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include=".\README.md" Pack="true" PackagePath="\"/>
+      <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.5" />
     </ItemGroup>
 
 </Project>

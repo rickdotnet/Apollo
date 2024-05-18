@@ -1,4 +1,4 @@
-﻿namespace Apollo.Messaging.Replier;
+﻿namespace Apollo.Messaging.Abstractions;
 
 public interface IReplier
 {

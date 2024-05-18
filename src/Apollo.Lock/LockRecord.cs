@@ -6,6 +6,6 @@ namespace Apollo.Lock;
 public record LockRecord
 {
     internal static LockRecord Empty = new() { Owner = string.Empty, Expiration = DateTimeOffset.MinValue };
-    [Key(0)] public string Owner { get; set; }
+    [Key(0)] public required string Owner { get; set; }
     [Key(1)] public DateTimeOffset Expiration { get; set; }
 }

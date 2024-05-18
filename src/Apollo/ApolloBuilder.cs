@@ -16,7 +16,5 @@ public class ApolloBuilder
    
     public void WithService(Action<IServiceCollection> action) 
         => action(Services);
-
-    
 }
 

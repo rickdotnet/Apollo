@@ -11,7 +11,7 @@ public class EndpointRegistration
     public EndpointConfig Config { get; }
     public string EndpointRoute { get; }
 
-    public EndpointRegistration(Type endpointType, EndpointConfig config)
+    protected EndpointRegistration(Type endpointType, EndpointConfig config)
     {
         EndpointType = endpointType ?? throw new ArgumentNullException(nameof(endpointType));
         HandlerTypes = EndpointType.MessageHandlerTypes();

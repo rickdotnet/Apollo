@@ -1,5 +1,8 @@
 ﻿namespace Apollo.Messaging.Abstractions;
 
+public interface ILocalPublisher : IPublisher;
+public interface IRemotePublisher : IPublisher;
+
 public interface IPublisher
 {
     string Route { get; }
@@ -18,4 +21,5 @@ public interface IPublisher
     Task SendObjectAsync(string subject, object commandMessage, CancellationToken cancellationToken);
     
     Task<object?> SendRequestAsync(string subject, object requestMessage, CancellationToken cancellationToken);
+    Task<TResponse?> SendRequestAsync<TResponse>(string subject, object requestMessage, CancellationToken cancellationToken);
 }

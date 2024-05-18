@@ -1,55 +1,49 @@
-﻿using Apollo.Configuration;
-using Apollo.Messaging.Endpoints;
+﻿using Apollo.Messaging.Endpoints;
 using Apollo.Messaging.Middleware;
-using Apollo.Messaging.Time;
-using IdGen;
-using IdGen.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace Apollo.Messaging;
 
 public static class Setup
 {
+    private static bool skip = false;
     public static ApolloBuilder WithEndpoints(this ApolloBuilder apolloBuilder,
         Action<IEndpointBuilder>? builderAction = null)
     {
         var services = apolloBuilder.Services;
         var endpointBuilder = new EndpointBuilder(services, apolloBuilder.Config);
+        // this is a lie, but we want to make sure the publisher factory is registered
+        apolloBuilder.PublishOnly();
+        services.TryAddScoped<MiddlewareExecutor>();
+        
+        // look, we know what this is
+        // it's a hack, but it's a worthy one
+        // I don't want to move the middleware registration
+        // just yet. This helps avoid multiple registry combinations
+        // registering middleware multiple times
+        if (!skip)
+        {
+            services.AddScoped<IMessageMiddleware, LoggingMiddleware>();
+            services.AddScoped<IMessageMiddleware, EndpointMiddleware>();
 
-        services.AddScoped<MiddlewareExecutor>();
-        services.AddScoped<IMessageMiddleware, LoggingMiddleware>();
-        services.AddScoped<IMessageMiddleware, EndpointMiddleware>();
-        services.AddSingleton<MessageProcessor>();
-        services.AddHostedService<SubscriptionBackgroundService>();
-        services.TryAddSingleton<IPublisherFactory, PublisherFactory>();
-        
+            skip = true;
+        }
+
+        services.TryAddSingleton<MessageProcessor>();
+        //services.AddHostedService<SubscriptionBackgroundService>();
+        services.TryAddTransient<IHostedService, SubscriptionBackgroundService>();
         builderAction?.Invoke(endpointBuilder);
-        
-        // if time sync is enabled, this will track an offset
-        // based on delay between our source and us
-        // otherwise, it's the default timer source
-        var timeSource = new ApolloIdGenTimeSource();
-        services.AddSingleton<ApolloIdGenTimeSource>();
-        
-        // used to generate message ids
-        // TODO: generator id should be unique per client/generator, should design and configure this
-        var randomInt = new Random().Next(1, 1000); // lazy duplicate Id prevention
-        services.AddIdGen(randomInt, () => new IdGeneratorOptions(timeSource: timeSource));
-        
+
+        // add the registries by subscriber type
+        endpointBuilder.Build();
         return apolloBuilder;
     }
-
-    public static void WithTimeSynchronizer(this ApolloBuilder apolloBuilder, TimeSyncMode timeSyncMode = TimeSyncMode.Receive)
+    
+    public static ApolloBuilder PublishOnly(this ApolloBuilder apolloBuilder)
     {
-        if (timeSyncMode == TimeSyncMode.Receive)
-        {
-            // hopefully syncs an offset for us
-            apolloBuilder.Services.TryAddSingleton<TimeSynchronizer>();
-        }
-        else
-        {
-            // we don't support time-publishing, yet
-        }
+        apolloBuilder.Services.TryAddSingleton<IPublisherFactory, PublisherFactory>();
+        return apolloBuilder;
     }
 }

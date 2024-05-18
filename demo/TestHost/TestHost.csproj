@@ -15,6 +15,7 @@
       <ProjectReference Include="..\..\src\Apollo.Messaging.Abstractions\Apollo.Messaging.Abstractions.csproj" />
       <ProjectReference Include="..\..\src\Apollo.Caching\Apollo.Caching.csproj" />
       <ProjectReference Include="..\..\src\Apollo.Messaging.Contracts\Apollo.Messaging.Contracts.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging.NATS\Apollo.Messaging.NATS.csproj" />
       <ProjectReference Include="..\..\src\Apollo.Messaging\Apollo.Messaging.csproj" />
       <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
     </ItemGroup>

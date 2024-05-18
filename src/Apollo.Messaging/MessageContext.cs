@@ -1,4 +1,5 @@
-﻿using Apollo.Messaging.Replier;
+﻿using Apollo.Messaging.Abstractions;
+using Apollo.Messaging.Replier;
 
 namespace Apollo.Messaging;
 
@@ -10,6 +11,7 @@ public record MessageContext
     public string? ReplyTo { get; init; }
     internal object? Message { get; init; }
     internal IReplier Replier { get; init; } = NoOpReplier.Instance;
+    internal Type? ReplierType { get; set; }
 
     internal MessageContext WithSubject(string subject) => this with { Subject = subject };
     internal MessageContext WithMessage(object message) => this with { Message = message };

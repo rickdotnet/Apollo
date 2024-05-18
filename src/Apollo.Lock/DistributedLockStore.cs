@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using NATS.Client.KeyValueStore;
 using MessagePack;
+using NATS.Client.KeyValueStore;
 
 namespace Apollo.Lock;
 

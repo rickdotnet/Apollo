@@ -1,5 +1,5 @@
 using Apollo.Configuration;
-using Apollo.Messaging.Middleware;
+using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -10,6 +10,7 @@ public interface IEndpointBuilder
     IEndpointBuilder AddEndpoint<T>();
     IEndpointBuilder AddEndpoint<T>(string apiRoute);
     IEndpointBuilder AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null);
+    IEndpointBuilder AddSubscriber<T>() where T : ISubscriber;
 }
 
 internal class EndpointBuilder : IEndpointBuilder
@@ -22,13 +23,14 @@ internal class EndpointBuilder : IEndpointBuilder
     {
         this.services = services;
         this.config = config;
-        
-        services.TryAddSingleton<IEndpointRegistry>(endpointRegistry);
     }
+
+    // allows AddSubscriber() to register multiple subscribers for the same registry
+    public void Build() => services.AddSingleton<IEndpointRegistry>(endpointRegistry);
 
     public IEndpointBuilder AddEndpoint<T>()
         => AddEndpoint<T>(_ => { });
-    
+
     public IEndpointBuilder AddEndpoint<T>(string apiRoute)
         => AddEndpoint<T>(_ => { }, apiRoute);
 
@@ -38,9 +40,15 @@ internal class EndpointBuilder : IEndpointBuilder
         action(endpointConfig);
 
         var registration = new EndpointRegistration<T>(endpointConfig);
-        services.AddScoped(typeof(T));
+        services.TryAddScoped(typeof(T));
         endpointRegistry.RegisterEndpoint(registration);
 
+        return this;
+    }
+
+    public IEndpointBuilder AddSubscriber<T>() where T : ISubscriber
+    {
+        endpointRegistry.AddSubscriberType<T>();
         return this;
     }
 }

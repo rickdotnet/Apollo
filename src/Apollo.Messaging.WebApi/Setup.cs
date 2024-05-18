@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Apollo.Messaging.Api;
+namespace Apollo.Messaging.WebApi;
 
 public static class Setup
 {

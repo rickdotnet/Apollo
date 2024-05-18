@@ -1,24 +1,21 @@
 ﻿using Apollo.Messaging.Abstractions;
-using IdGen;
 using Microsoft.Extensions.Logging;
 
 namespace Apollo.Messaging;
 
-internal class LocalPublisher : IPublisher
+internal class LocalPublisher : ILocalPublisher
 {
     public string Route { get; }
 
     public bool IsLocalOnly => true;
 
     private readonly MessageProcessor messageProcessor;
-    private readonly IdGenerator idGenerator;
-    private readonly ILogger<LocalPublisher> logger;
+    private readonly ILogger logger;
 
-    public LocalPublisher(string route, MessageProcessor messageProcessor, IdGenerator idGenerator, ILogger<LocalPublisher> logger)
+    public LocalPublisher(string route, MessageProcessor messageProcessor, ILogger<LocalPublisher> logger)
     {
         Route = route;
         this.messageProcessor = messageProcessor;
-        this.idGenerator = idGenerator;
         this.logger = logger;
     }
 
@@ -31,10 +28,6 @@ internal class LocalPublisher : IPublisher
             Subject = $"{Route}.{typeof(TCommand).Name}".ToLower(),
             Message = commandMessage,
             Source = "local",
-            Headers = new Dictionary<string, string>
-            {
-                { "Message-Id", idGenerator.CreateId().ToString() }
-            }
         };
         var result = await messageProcessor.ProcessLocalMessageAsync(message, cancellationToken);
         logger.LogDebug("Command {Name} processed with result {Result}", typeof(TCommand).Name, result);
@@ -48,10 +41,6 @@ internal class LocalPublisher : IPublisher
             Subject = $"{Route}.{typeof(TEvent).Name}".ToLower(),
             Message = eventMessage,
             Source = "local",
-            Headers = new Dictionary<string, string>
-            {
-                { "Message-Id", idGenerator.CreateId().ToString() }
-            }
         };
 
         var result = await messageProcessor.ProcessLocalMessageAsync(message, cancellationToken);
@@ -66,10 +55,6 @@ internal class LocalPublisher : IPublisher
             Subject = $"{Route}.{typeof(TRequest).Name}".ToLower(),
             Message = requestMessage,
             Source = "local",
-            Headers = new Dictionary<string, string>
-            {
-                { "Message-Id", idGenerator.CreateId().ToString() }
-            }
         };
 
         var result = await messageProcessor.ProcessLocalMessageAsync(message, cancellationToken);
@@ -81,17 +66,11 @@ internal class LocalPublisher : IPublisher
 
     public Task SendObjectAsync(string subject, object message, CancellationToken cancellationToken)
     {
-        var msgId = idGenerator.CreateId().ToString();
         var messageContext = new MessageContext
         {
             Subject = subject,
             Message = message,
-            Source = "local",
-            Headers = new Dictionary<string, string>
-            {
-                { "Message-Id", msgId },
-                { "Nats-Msg-Id", msgId } // do we want to set this?
-            }
+            Source = "local"
         };
         
         return messageProcessor.ProcessLocalMessageAsync(messageContext, cancellationToken);
@@ -103,13 +82,14 @@ internal class LocalPublisher : IPublisher
         {
             Subject = subject,
             Message = requestMessage,
-            Source = "local",
-            Headers = new Dictionary<string, string>
-            {
-                { "Message-Id", idGenerator.CreateId().ToString() }
-            }
+            Source = "local"
         };
         
         return messageProcessor.ProcessLocalMessageAsync(messageContext, cancellationToken);
+    }
+
+    public Task<TResponse?> SendRequestAsync<TResponse>(string subject, object requestMessage, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

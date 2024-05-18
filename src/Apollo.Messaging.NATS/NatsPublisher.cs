@@ -1,31 +1,26 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Apollo.Messaging.Abstractions;
-using IdGen;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.Messaging;
+namespace Apollo.Messaging.NATS;
 
-internal class NatsPublisher : IPublisher
+internal class NatsPublisher : IRemotePublisher
 {
     public string Route { get; }
     public bool IsLocalOnly => false;
 
     private readonly INatsConnection connection;
-    private readonly IdGenerator idGenerator;
-    private readonly ILogger<NatsPublisher> logger;
-
+    private readonly ILogger logger;
 
     public NatsPublisher(
         string endpointName,
         INatsConnection connection,
-        IdGenerator idGenerator,
-        ILogger<NatsPublisher> logger)
+        ILogger logger)
     {
         Route = endpointName;
         this.connection = connection;
-        this.idGenerator = idGenerator;
         this.logger = logger;
     }
 
@@ -53,13 +48,13 @@ internal class NatsPublisher : IPublisher
         //       ideally the same path for local and remote
         //       with different config
         // ex: Ids should be added consistently
-        var msgId = idGenerator.CreateId().ToString();
-        var headers = new NatsHeaders
-        {
-            { "Message-Id", msgId },
-            { "Nats-Msg-Id", msgId } // do we want to set this?
-        };
-        return connection.PublishAsync(subject, bytes, headers: headers, opts: new NatsPubOpts {   },
+        // var msgId = idGenerator.CreateId().ToString();
+        // var headers = new NatsHeaders
+        // {
+        //     { "Message-Id", msgId },
+        //     { "Nats-Msg-Id", msgId } // do we want to set this?
+        // };
+        return connection.PublishAsync(subject, bytes, headers: null, opts: new NatsPubOpts {   },
             cancellationToken: cancellationToken).AsTask();
     }
 
@@ -67,9 +62,12 @@ internal class NatsPublisher : IPublisher
         CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
     {
         var subject = $"{Route}.{typeof(TRequest).Name}".ToLower();
-        return (TResponse?)await SendRequestAsync(subject, requestMessage, cancellationToken);
+        return await SendRequestAsync<TResponse>(subject, requestMessage, cancellationToken);
     }
-    public async Task<object?> SendRequestAsync(string subject, object requestMessage, CancellationToken cancellationToken)
+    public Task<object?> SendRequestAsync(string subject, object requestMessage, CancellationToken cancellationToken) 
+        => SendRequestAsync<object>(subject, requestMessage, cancellationToken);
+
+    public async Task<TResponse?> SendRequestAsync<TResponse>(string subject, object requestMessage, CancellationToken cancellationToken)
     {
         var json = JsonSerializer.Serialize(requestMessage);
         var bytes = Encoding.UTF8.GetBytes(json);
@@ -86,12 +84,12 @@ internal class NatsPublisher : IPublisher
         if(result.Data == null)
         {
             logger.LogWarning("Null Response ({Subject})", subject);
-            return null;
+            return default;
         }
         var responseJson = Encoding.UTF8.GetString(result.Data);
-        logger.LogInformation("Response JSON: {Json}", responseJson);
+        logger.LogInformation("Response JSON2: {Json}", responseJson);
 
-        var deserialized = JsonSerializer.Deserialize(responseJson, typeof(object));
-        return Task.FromResult(deserialized);
+        var deserialized = JsonSerializer.Deserialize<TResponse>(responseJson);
+        return deserialized;
     }
 }

@@ -1,7 +1,8 @@
 using Apollo;
 using Apollo.Configuration;
 using Apollo.Messaging;
-using Apollo.Messaging.Api;
+using Apollo.Messaging.WebApi;
+using Apollo.Messaging.NATS;
 using BlazorDemo.Components;
 using BlazorDemo.Endpoints;
 
@@ -16,7 +17,11 @@ public static class Setup
 
         builder.Services.AddApollo(
             config,
-            apollo => apollo.WithEndpoints(endpoints => endpoints.AddEndpoint<TestEndpoint>()));
+            apollo =>
+            {
+                apollo.UseNats();
+                apollo.WithEndpoints(endpoints => endpoints.AddEndpoint<TestEndpoint>());
+            });
 
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();

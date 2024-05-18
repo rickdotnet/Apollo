@@ -15,13 +15,17 @@ public interface IEndpointRegistry
 
     IEnumerable<EndpointRegistration> GetEndpointsForRequest<TRequest>(
         Func<EndpointRegistration, bool>? predicate = default) where TRequest : IRequest;
-    
+
     IEnumerable<EndpointRegistration> GetEndpointRegistrations(Func<EndpointRegistration, bool>? predicate = default);
+    
+    public IReadOnlyList<Type> SubscriberTypes { get; }
 }
 
 internal class EndpointRegistry : IEndpointRegistry
 {
+    public IReadOnlyList<Type> SubscriberTypes => subscriberTypes;
     private readonly ConcurrentDictionary<Type, List<EndpointRegistration>> messageEndpoints = new();
+    private readonly List<Type> subscriberTypes = new();
 
     public void RegisterEndpoint(EndpointRegistration registration)
     {
@@ -33,16 +37,32 @@ internal class EndpointRegistry : IEndpointRegistry
             {
                 // Until we can figure out how to handle durable request handlers
                 // or split request handlers from durable endpoints we'll throw an exception
-                throw new Exception($"Request handlers cannot be durable consumers. Endpoint: {registration.EndpointType.Name}");
+                throw new Exception(
+                    $"Request handlers cannot be durable consumers. Endpoint: {registration.EndpointType.Name}");
             }
-            
+
             messageEndpoints.AddOrUpdate(handlerType,
                 _ => [registration],
                 (_, list) =>
                 {
+                    // multiple subscribers could register and subscribe to the same message type
+                    // subscribers will be derived based on the types they handle
+                    var skip = list.Any(x => x.EndpointType == registration.EndpointType);
+                    if (skip)
+                        throw new Exception("Did we hit this? Hope not. ;)"); //return list;
+
                     list.Add(registration);
                     return list;
                 });
+        }
+    }
+    
+    public void AddSubscriberType<T>() where T : ISubscriber
+    {
+        var subscriberType = typeof(T);
+        if (!subscriberTypes.Contains(subscriberType))
+        {
+            subscriberTypes.Add(subscriberType);
         }
     }
 
@@ -74,14 +94,23 @@ internal class EndpointRegistry : IEndpointRegistry
     public IEnumerable<EndpointRegistration> GetEndpointRegistrations(Type handlerType,
         Func<EndpointRegistration, bool>? predicate = default)
     {
-        var registrations = messageEndpoints.TryGetValue(handlerType, out var list) ? list : Enumerable.Empty<EndpointRegistration>();
+        var registrations = messageEndpoints.TryGetValue(handlerType, out var list)
+            ? list
+            : Enumerable.Empty<EndpointRegistration>();
         predicate ??= _ => true;
         return registrations.Where(predicate);
     }
 
-    public IEnumerable<EndpointRegistration> GetEndpointRegistrations(Func<EndpointRegistration, bool>? predicate = default)
+    public IEnumerable<EndpointRegistration> GetEndpointRegistrations(
+        Func<EndpointRegistration, bool>? predicate = default)
     {
         predicate ??= _ => true;
         return messageEndpoints.Values.SelectMany(regs => regs).Where(predicate).Distinct();
+    }
+
+    public bool SupportsSubscriberType<T>() where T : ISubscriber
+    {
+        var subscriberType = typeof(T);
+        return subscriberTypes.Contains(subscriberType);
     }
 }

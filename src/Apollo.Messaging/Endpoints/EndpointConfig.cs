@@ -4,8 +4,7 @@ namespace Apollo.Messaging.Endpoints;
 
 public class EndpointConfig
 {
-    public static EndpointConfig Default
-        => new(ApolloConfig.Default);
+    public static EndpointConfig Default => new(ApolloConfig.Default);
 
     public bool LocalOnly { get; init; }
     public bool IsRemoteEndpoint => !LocalOnly;
@@ -13,6 +12,8 @@ public class EndpointConfig
     public DurableConfig DurableConfig { get; init; } = DurableConfig.Default;
     public string Namespace { get; init; }
     public bool UseEndpointNameInRoute { get; init; } = true;
+    
+    internal List<Type> LimitedSubscriberTypes { get; } = [];
 
     internal string? MinimalApiRoute { get; set; }
 

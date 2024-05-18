@@ -15,13 +15,12 @@ public class EndpointMiddleware : IMessageMiddleware
         this.serviceProvider = serviceProvider;
         endpointRegistry = serviceProvider.GetRequiredService<IEndpointRegistry>();
         logger = serviceProvider.GetRequiredService<ILogger<EndpointMiddleware>>();
-        
     }
 
     public async Task InvokeAsync(MessageContext messageContext, Func<Task> next, CancellationToken cancellationToken)
     {
         var messageType = messageContext.Message?.GetType();
-        if (messageType == null) throw new ArgumentNullException(nameof(messageType));
+        ArgumentNullException.ThrowIfNull(messageType, nameof(messageType));
         
         var endpointRegistrations = 
             endpointRegistry.GetEndpointRegistrations(

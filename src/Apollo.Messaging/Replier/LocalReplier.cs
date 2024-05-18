@@ -1,4 +1,6 @@
-﻿namespace Apollo.Messaging.Replier;
+﻿using Apollo.Messaging.Abstractions;
+
+namespace Apollo.Messaging.Replier;
 
 public class LocalReplier : IReplier
 {

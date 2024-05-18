@@ -1,8 +1,8 @@
 ﻿using System.Threading.Channels;
+using Apollo.Messaging.Abstractions;
 using Apollo.Messaging.Middleware;
 using Apollo.Messaging.Replier;
 using Microsoft.Extensions.DependencyInjection;
-using NATS.Client.Core;
 
 namespace Apollo.Messaging;
 
@@ -40,13 +40,18 @@ public class MessageProcessor
         {
             // each message gets it's own pipeline/execution scope
             using var scope = serviceProvider.CreateScope();
+            var pipelineMessage = message;
             
-            var connection = scope.ServiceProvider.GetRequiredService<INatsConnection>();
-            IReplier replier = NoOpReplier.Instance;
-            if(!string.IsNullOrEmpty(message.ReplyTo))
-                replier = new NatsReplier(connection, message.ReplyTo);
+            if (!string.IsNullOrEmpty(message.ReplyTo)
+                && message.Replier is NoOpReplier
+                && message.ReplierType != null)
+            {
+                pipelineMessage = message with
+                {
+                    Replier = (IReplier)scope.ServiceProvider.GetRequiredService(message.ReplierType)
+                };
+            }
             
-            var pipelineMessage = message with { Replier = replier};
             var scopedMiddlewareExecutor = scope.ServiceProvider.GetRequiredService<MiddlewareExecutor>();
             await scopedMiddlewareExecutor.ExecuteAsync(pipelineMessage, finalHandler, cancellationToken);
         }

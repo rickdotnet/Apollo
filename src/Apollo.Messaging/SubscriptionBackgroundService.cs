@@ -1,10 +1,9 @@
-﻿using Apollo.Messaging.Endpoints;
-using Apollo.NATS;
-using IdGen;
+﻿using Apollo.Configuration;
+using Apollo.Messaging.Abstractions;
+using Apollo.Messaging.Endpoints;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NATS.Client.Core;
 
 namespace Apollo.Messaging;
 
@@ -13,7 +12,6 @@ public class SubscriptionBackgroundService : BackgroundService
     private readonly ILogger<SubscriptionBackgroundService> logger;
     private readonly IServiceProvider serviceProvider;
     private readonly MessageProcessor requestProcessor;
-    private readonly IdGenerator idGenerator;
     private Task processorTask = Task.CompletedTask; // hang out
 
     public SubscriptionBackgroundService(IServiceProvider serviceProvider)
@@ -21,69 +19,83 @@ public class SubscriptionBackgroundService : BackgroundService
         this.serviceProvider = serviceProvider;
         logger = serviceProvider.GetRequiredService<ILogger<SubscriptionBackgroundService>>();
         requestProcessor = serviceProvider.GetRequiredService<MessageProcessor>();
-        idGenerator = serviceProvider.GetRequiredService<IdGenerator>();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Starting NATS subscription background service");
 
-        // both fine to grab from singleton scope
-        var endpointRegistry = serviceProvider.GetRequiredService<IEndpointRegistry>();
-        var connection = serviceProvider.GetRequiredService<INatsConnection>();
+        var endpointRegistries = serviceProvider.GetRequiredService<IEnumerable<IEndpointRegistry>>();
 
         processorTask = CreateRequestProcessor(stoppingToken);
 
-        // remote endpoints only
-        var endpoints = endpointRegistry.GetEndpointRegistrations(x => x.Config.IsRemoteEndpoint);
-        var subscribers = new List<ISubscriber>();
+        var subscribers = new List<ApolloSubscriber>();
 
-        foreach (var endpoint in endpoints)
+        foreach (var endpointRegistry in endpointRegistries)
         {
-            var endpointName = endpoint.Config.UseEndpointNameInRoute ? endpoint.EndpointType.Name : string.Empty;
-            var filterSubject = $"{endpoint.Config.Namespace}.{endpointName}.>".ToLower();
-            var subjectTypeMapping = new Dictionary<string, Type>();
-            foreach (var handlerType in endpoint.HandlerTypes)
-            {
-                var subject =
-                    $"{endpoint.Config.Namespace}.{endpointName}.{handlerType.GetMessageType().Name}".ToLower();
+            // remote endpoints only
+            var endpoints = endpointRegistry.GetEndpointRegistrations(x => x.Config.IsRemoteEndpoint);
 
-                subjectTypeMapping.Add(subject, handlerType);
+            foreach (var endpoint in endpoints)
+            {
+                var endpointName = endpoint.Config.UseEndpointNameInRoute ? endpoint.EndpointType.Name : string.Empty;
+                var filterSubject = $"{endpoint.Config.Namespace}.{endpointName}.>".ToLower();
+                var subjectTypeMapping = new Dictionary<string, Type>();
+                foreach (var handlerType in endpoint.HandlerTypes)
+                {
+                    var subject =
+                        $"{endpoint.Config.Namespace}.{endpointName}.{handlerType.GetMessageType().Name}".ToLower();
+
+                    subjectTypeMapping.Add(subject, handlerType);
+                }
+
+                var config = new SubscriptionConfig
+                {
+                    Namespace = endpoint.Config.Namespace,
+                    EndpointType = endpoint.EndpointType,
+                    EndpointName = endpointName,
+                    MessageTypes = subjectTypeMapping,
+                    EndpointSubject = filterSubject,
+                    ConsumerName = endpoint.Config.ConsumerName,
+                    IsDurableConsumer = endpoint.Config.DurableConfig?.IsDurableConsumer ?? false,
+                    Serializer = null // get from service provider
+                };
+
+                var newSubscribers = endpointRegistry.SubscriberTypes.Select(
+                    subscriberType => new ApolloSubscriber
+                    {
+                        Identifier = endpoint.EndpointRoute,
+                        Config = config,
+                        Subscriber = (ISubscriber)serviceProvider.GetRequiredService(subscriberType),
+                        
+                    }).ToArray();
+
+                if (newSubscribers.Any())
+                    subscribers.AddRange(newSubscribers);
+                else
+                {
+                    // protect against no explicit subscriber registration
+                    // and get the one registered in the service provider
+                    var subs = serviceProvider.GetService<IEnumerable<ISubscriber>>()?.ToArray() ?? [];
+                    if (!subs.Any())
+                        throw new Exception(
+                            "No SubscriberTypes registered and no subscriber found in service provider");
+
+                    subscribers.AddRange(subs.Select(x => new ApolloSubscriber
+                        {
+                            Identifier = endpoint.EndpointRoute,
+                            Config = config,
+                            Subscriber = x
+                        })
+                    );
+                }
             }
-
-            var config = new SubscriptionConfig
-            {
-                Namespace = endpoint.Config.Namespace,
-                EndpointType = endpoint.EndpointType,
-                EndpointName = endpointName,
-                MessageTypes = subjectTypeMapping,
-                EndpointSubject = filterSubject,
-                ConsumerName = endpoint.Config.ConsumerName,
-                Serializer = null , // get from service provider
-                NatsSubOpts = null
-            };
-            
-            // subscriber factory?
-            // pull subs
-
-            // subscribers.Add(
-            //     endpoint.Config.DurableConfig.IsDurableConsumer
-            //         ? new NatsJetStreamSubscriber(
-            //             connection,
-            //             config,
-            //             serviceProvider.GetLogger<NatsJetStreamSubscriber>(),
-            //             stoppingToken)
-            //         : new NatsCoreSubscriber(
-            //             connection,
-            //             config,
-            //             serviceProvider.GetLogger<NatsCoreSubscriber>(),
-            //             stoppingToken)
-            // );
         }
 
 
         // each subscriber will use the same handler that will dispatch the message to the correct endpoint
-        var tasks = subscribers.Select(subscriber => subscriber.SubscribeAsync(Handler));
+        var tasks = subscribers.Select(
+            apolloSub => apolloSub.Subscriber.SubscribeAsync(apolloSub.Config, Handler, stoppingToken));
 
         // start all subscribers
         await Task.WhenAll(tasks);
@@ -103,19 +115,20 @@ public class SubscriptionBackgroundService : BackgroundService
                     );
 
             headers ??= new Dictionary<string, string?>();
-            
+
             // messages that come from outside of Apollo get an Id
-            if (!headers.ContainsKey("Message-Id"))
-                headers.Add("Message-Id", idGenerator.CreateId().ToString());
+            // if (!headers.ContainsKey("Message-Id"))
+            //     headers.Add("Message-Id", idGenerator.CreateId().ToString());
 
             await requestProcessor.EnqueueMessageAsync(
                 new MessageContext
                 {
                     Headers = headers!,
                     ReplyTo = message.ReplyTo,
+                    Replier = message.Replier,
                     Subject = message.Subject,
                     Message = message.Message,
-                    Source = "NATS"
+                    Source = "NATS",
                 }, cancellationToken);
         }
     }
@@ -137,4 +150,11 @@ public class SubscriptionBackgroundService : BackgroundService
                 }
             }, TaskScheduler.Default);
     }
+}
+
+internal class ApolloSubscriber
+{
+    public required string Identifier { get; init; }
+    public required SubscriptionConfig Config { get; init; }
+    public required ISubscriber Subscriber { get; init; }
 }

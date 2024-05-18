@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Apollo.Messaging.Abstractions;
 using NATS.Client.Core;
 
-namespace Apollo.Messaging.Replier;
+namespace Apollo.Messaging.NATS;
 
 public class NatsReplier : IReplier
 {

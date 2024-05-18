@@ -1,34 +1,33 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Apollo.Configuration;
+using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
 using NATS.Client.JetStream.Models;
 
-namespace Apollo.NATS;
+namespace Apollo.Messaging.NATS;
 
-public class NatsJetStreamSubscriber : ISubscriber
+internal class NatsJetStreamSubscriber : ISubscriber
 {
     private readonly INatsConnection connection;
-    private readonly SubscriptionConfig config;
     private readonly ILogger logger;
     private readonly NatsSubOpts? opts;
-    private readonly CancellationToken cancellationToken;
+    //private readonly CancellationToken cancellationToken;
 
     public NatsJetStreamSubscriber(
         INatsConnection connection,
-        SubscriptionConfig config,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
         this.connection = connection;
-        this.config = config ?? throw new ArgumentNullException(nameof(config));
         //this.filterSubject = config.EndpointSubject;
         this.logger = logger;
-        this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<ApolloMessage, CancellationToken, Task> handler)
+    public async Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler,
+        CancellationToken cancellationToken)
     {
         var js = new NatsJSContext((NatsConnection)connection);
 
@@ -45,7 +44,7 @@ public class NatsJetStreamSubscriber : ISubscriber
         await js.CreateStreamAsync(
             new StreamConfig(streamNameClean, new[] { config.EndpointSubject }),
             cancellationToken);
-        
+
         logger.LogInformation("Stream {StreamName} created for {Subjects}", streamNameClean, config.EndpointSubject);
         logger.LogInformation("Creating consumer {ConsumerName} for stream {StreamName}", config.ConsumerName,
             streamNameClean);
@@ -84,29 +83,31 @@ public class NatsJetStreamSubscriber : ISubscriber
                 await msg.AckTerminateAsync(cancellationToken: cancellationToken);
             }
         }
-    }
 
-    private async Task ProcessMessage(NatsJSMsg<byte[]> msg,
-        Func<ApolloMessage, CancellationToken, Task> handler)
-    {
-        var json = Encoding.UTF8.GetString(msg.Data);
-        logger.LogInformation("JSON: {Json}", json);
+        return;
 
-        var type = config.MessageTypes[msg.Subject].GetMessageType();
-
-        logger.LogInformation("Deserializing message to {TypeName}", type.Name);
-        // this will eventually be a configured serializer
-        var deserialized = JsonSerializer.Deserialize(json, type,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        
-        var message = new ApolloMessage
+        async Task ProcessMessage(NatsJSMsg<byte[]> msg,
+            Func<ApolloMessage, CancellationToken, Task> handler)
         {
-            Subject = msg.Subject,
-            Headers = msg.Headers,
-            Message = deserialized,
-            ReplyTo = msg.ReplyTo
-        };
+            var json = Encoding.UTF8.GetString(msg.Data);
+            logger.LogInformation("JSON: {Json}", json);
 
-        await handler(message, cancellationToken);
+            var type = config.MessageTypes[msg.Subject].GetMessageType();
+
+            logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+            // this will eventually be a configured serializer
+            var deserialized = JsonSerializer.Deserialize(json, type,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            var message = new ApolloMessage
+            {
+                Subject = msg.Subject,
+                Headers = msg.Headers,
+                Message = deserialized,
+                ReplyTo = msg.ReplyTo
+            };
+
+            await handler(message, cancellationToken);
+        }
     }
 }

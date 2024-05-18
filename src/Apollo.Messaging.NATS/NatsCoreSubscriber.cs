@@ -1,43 +1,34 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Apollo.Configuration;
+using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
-namespace Apollo.NATS;
+namespace Apollo.Messaging.NATS;
 
-public class NatsCoreSubscriber : ISubscriber
+internal class NatsCoreSubscriber : ISubscriber
 {
     private readonly INatsConnection connection;
-    private readonly SubscriptionConfig config;
     private readonly ILogger logger;
-    private readonly string subject;
-    private readonly string? queueGroup;
-    private readonly ISerializeThings? serializer;
-    private readonly NatsSubOpts? opts;
-    private readonly CancellationToken cancellationToken;
 
 
     public NatsCoreSubscriber(
         INatsConnection connection,
-        SubscriptionConfig config,
-        ILogger logger,
-        CancellationToken cancellationToken = default)
+        ILogger logger
+    )
     {
         this.connection = connection;
-        this.config = config;
         this.logger = logger;
-        this.subject = config.EndpointSubject;
-        this.queueGroup = config.ConsumerName;
-        this.serializer = config.Serializer;
-        this.opts = config.NatsSubOpts;
-        this.cancellationToken = cancellationToken;
     }
 
-    public async Task SubscribeAsync(Func<ApolloMessage, CancellationToken, Task> handler)
+    public async Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler,
+        CancellationToken cancellationToken)
     {
-        logger.LogInformation("Subscribing to {Subject}", subject);
-        
-        await foreach (var msg in connection.SubscribeAsync<byte[]>(subject, cancellationToken: cancellationToken))
+        logger.LogInformation("Subscribing to {Subject}", config.EndpointSubject);
+
+        await foreach (var msg in connection.SubscribeAsync<byte[]>(config.EndpointSubject,
+                           cancellationToken: cancellationToken))
         {
             logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
 
@@ -59,6 +50,9 @@ public class NatsCoreSubscriber : ISubscriber
                     Message = deserialized,
                     ReplyTo = msg.ReplyTo, // instead of using these two
                 };
+
+                if (message.ReplyTo != null)
+                    message.Replier = new NatsReplier(connection, message.ReplyTo);
 
                 await handler(message, cancellationToken);
             }

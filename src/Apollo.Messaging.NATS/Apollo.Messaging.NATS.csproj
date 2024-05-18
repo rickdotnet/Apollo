@@ -7,20 +7,22 @@
     </PropertyGroup>
 
     <PropertyGroup Label="Package">
-        <PackageId>RickDotNet.Apollo.Messaging</PackageId>
+        <PackageId>RickDotNet.Apollo.Messaging.NATS</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
         <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
-    
+
     <ItemGroup>
-      <ProjectReference Include="..\Apollo.Messaging.Abstractions\Apollo.Messaging.Abstractions.csproj" />
+      <ProjectReference Include="..\Apollo.Messaging\Apollo.Messaging.csproj" />
       <ProjectReference Include="..\Apollo\Apollo.csproj" />
     </ItemGroup>
-    
+
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+      <PackageReference Include="NATS.Client.Serializers.Json" Version="2.2.1" />
+      <PackageReference Include="NATS.Extensions.Microsoft.DependencyInjection" Version="2.2.1" />
+      <PackageReference Include="NATS.Net" Version="2.2.1" />
     </ItemGroup>
 
 </Project>

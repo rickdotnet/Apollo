@@ -6,6 +6,15 @@ public class AzureServiceBusSubscriber : ISubscriber
 {
     public Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (config.IsDurableConsumer)
+        {
+            // queue subscription
+        }
+        else
+        {
+            // topic
+        }
+        
+        return Task.CompletedTask;
     }
 }

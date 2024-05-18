@@ -1,3 +1,7 @@
 <Project>
 	<Import Project="..\build\default.props" />
+	<ItemGroup>
+ 	   <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+	</ItemGroup>
 </Project>
+

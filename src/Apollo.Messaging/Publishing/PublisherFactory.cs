@@ -2,7 +2,7 @@
 using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Apollo.Messaging;
+namespace Apollo.Messaging.Publishing;
 
 public interface IPublisherFactory
 {

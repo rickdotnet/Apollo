@@ -1,7 +1,7 @@
 ﻿using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.Logging;
 
-namespace Apollo.Messaging;
+namespace Apollo.Messaging.Publishing;
 
 internal class LocalPublisher : ILocalPublisher
 {

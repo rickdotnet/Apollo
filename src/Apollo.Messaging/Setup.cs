@@ -1,5 +1,7 @@
-﻿using Apollo.Messaging.Endpoints;
+﻿using Apollo.Messaging.Abstractions;
+using Apollo.Messaging.Endpoints;
 using Apollo.Messaging.Middleware;
+using Apollo.Messaging.Publishing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -14,9 +16,7 @@ public static class Setup
     {
         var services = apolloBuilder.Services;
         var endpointBuilder = new EndpointBuilder(services, apolloBuilder.Config);
-        // this is a lie, but we want to make sure the publisher factory is registered
-        apolloBuilder.PublishOnly();
-        services.TryAddScoped<MiddlewareExecutor>();
+        builderAction?.Invoke(endpointBuilder);
         
         // look, we know what this is
         // it's a hack, but it's a worthy one
@@ -27,14 +27,14 @@ public static class Setup
         {
             services.AddScoped<IMessageMiddleware, LoggingMiddleware>();
             services.AddScoped<IMessageMiddleware, EndpointMiddleware>();
-
+            services.AddHostedService<SubscriptionBackgroundService>();
             skip = true;
         }
-
+        services.TryAddScoped<MiddlewareExecutor>();
         services.TryAddSingleton<MessageProcessor>();
-        //services.AddHostedService<SubscriptionBackgroundService>();
-        services.TryAddTransient<IHostedService, SubscriptionBackgroundService>();
-        builderAction?.Invoke(endpointBuilder);
+        
+        apolloBuilder.Services.TryAddSingleton<IPublisherFactory, PublisherFactory>();
+        apolloBuilder.Services.TryAddSingleton<ILocalPublisherFactory, LocalPublisherFactory>();
 
         // add the registries by subscriber type
         endpointBuilder.Build();
@@ -44,6 +44,7 @@ public static class Setup
     public static ApolloBuilder PublishOnly(this ApolloBuilder apolloBuilder)
     {
         apolloBuilder.Services.TryAddSingleton<IPublisherFactory, PublisherFactory>();
+        apolloBuilder.Services.TryAddSingleton<ILocalPublisherFactory, LocalPublisherFactory>();
         return apolloBuilder;
     }
 }

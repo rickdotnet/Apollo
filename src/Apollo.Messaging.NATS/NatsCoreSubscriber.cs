@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Apollo.Configuration;
-using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 
@@ -34,22 +33,28 @@ internal class NatsCoreSubscriber : ISubscriber
 
             try
             {
-                var json = Encoding.UTF8.GetString(msg.Data);
-                logger.LogInformation("JSON: {Json}", json);
-
-                var type = config.MessageTypes[msg.Subject].GetMessageType();
-                logger.LogInformation("Deserializing message to {TypeName}", type.Name);
-
-                // TODO: figure out serializer
-                var deserialized = JsonSerializer.Deserialize(json, type,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 var message = new ApolloMessage
                 {
                     Subject = msg.Subject,
                     Headers = msg.Headers,
-                    Message = deserialized,
-                    ReplyTo = msg.ReplyTo, // instead of using these two
+                    ReplyTo = msg.ReplyTo
                 };
+
+                if (msg.Data != null)
+                {
+
+                    var json = Encoding.UTF8.GetString(msg.Data);
+                    logger.LogInformation("JSON: {Json}", json);
+
+                    var type = config.MessageTypes[msg.Subject].GetMessageType();
+                    logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+
+                    // TODO: figure out serializer
+                    var deserialized = JsonSerializer.Deserialize(json, type,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    message.Message = deserialized;
+                }
 
                 if (message.ReplyTo != null)
                     message.Replier = new NatsReplier(connection, message.ReplyTo);

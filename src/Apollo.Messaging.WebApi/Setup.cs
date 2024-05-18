@@ -1,4 +1,5 @@
 ﻿using Apollo.Messaging.Endpoints;
+using Apollo.Messaging.Publishing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;

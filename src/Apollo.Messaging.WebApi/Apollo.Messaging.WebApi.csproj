@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <PropertyGroup Label="Package">
-        <PackageId>RickDotNet.Apollo.Messaging.Api</PackageId>
+        <PackageId>RickDotNet.Apollo.Messaging.WebApi</PackageId>
     </PropertyGroup>
     
     <ItemGroup>

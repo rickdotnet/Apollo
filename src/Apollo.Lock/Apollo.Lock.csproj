@@ -9,6 +9,10 @@
     <PropertyGroup Label="Package">
         <PackageId>RickDotNet.Apollo.Lock</PackageId>
     </PropertyGroup>
+
+    <PropertyGroup>
+        <VersionQuality>-preview</VersionQuality>
+    </PropertyGroup>
     
     <ItemGroup>
         <ProjectReference Include="..\Apollo\Apollo.csproj"/>

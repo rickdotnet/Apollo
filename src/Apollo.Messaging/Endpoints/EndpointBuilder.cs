@@ -1,5 +1,4 @@
 using Apollo.Configuration;
-using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

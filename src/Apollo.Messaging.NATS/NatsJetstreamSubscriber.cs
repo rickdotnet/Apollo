@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Apollo.Configuration;
-using Apollo.Messaging.Abstractions;
 using Microsoft.Extensions.Logging;
 using NATS.Client.Core;
 using NATS.Client.JetStream;
@@ -13,16 +12,12 @@ internal class NatsJetStreamSubscriber : ISubscriber
 {
     private readonly INatsConnection connection;
     private readonly ILogger logger;
-    private readonly NatsSubOpts? opts;
-    //private readonly CancellationToken cancellationToken;
 
     public NatsJetStreamSubscriber(
         INatsConnection connection,
-        ILogger logger,
-        CancellationToken cancellationToken = default)
+        ILogger logger)
     {
         this.connection = connection;
-        //this.filterSubject = config.EndpointSubject;
         this.logger = logger;
     }
 
@@ -87,27 +82,35 @@ internal class NatsJetStreamSubscriber : ISubscriber
         return;
 
         async Task ProcessMessage(NatsJSMsg<byte[]> msg,
-            Func<ApolloMessage, CancellationToken, Task> handler)
+            Func<ApolloMessage, CancellationToken, Task> messageHandler)
         {
-            var json = Encoding.UTF8.GetString(msg.Data);
-            logger.LogInformation("JSON: {Json}", json);
-
-            var type = config.MessageTypes[msg.Subject].GetMessageType();
-
-            logger.LogInformation("Deserializing message to {TypeName}", type.Name);
-            // this will eventually be a configured serializer
-            var deserialized = JsonSerializer.Deserialize(json, type,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
             var message = new ApolloMessage
             {
                 Subject = msg.Subject,
                 Headers = msg.Headers,
-                Message = deserialized,
                 ReplyTo = msg.ReplyTo
             };
 
-            await handler(message, cancellationToken);
+            if (msg.Data != null)
+            {
+                var json = Encoding.UTF8.GetString(msg.Data);
+                logger.LogInformation("JSON: {Json}", json);
+
+                var type = config.MessageTypes[msg.Subject].GetMessageType();
+
+                logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+                
+                // this will eventually be a configured serializer
+                var deserialized = JsonSerializer.Deserialize(json, type,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                message.Message = deserialized;
+            }
+            
+            if (message.ReplyTo != null)
+                message.Replier = new NatsReplier(connection, message.ReplyTo);
+
+            await messageHandler(message, cancellationToken);
         }
     }
 }

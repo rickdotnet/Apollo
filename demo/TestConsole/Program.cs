@@ -3,6 +3,7 @@ using Apollo.Configuration;
 using Apollo.Messaging;
 using Apollo.Messaging.Abstractions;
 using Apollo.Messaging.NATS;
+using Apollo.Messaging.Publishing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

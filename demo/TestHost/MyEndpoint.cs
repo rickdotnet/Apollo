@@ -1,6 +1,6 @@
-﻿using Apollo.Messaging;
-using Apollo.Messaging.Abstractions;
+﻿using Apollo.Messaging.Abstractions;
 using Apollo.Messaging.Contracts;
+using Apollo.Messaging.Publishing;
 using Microsoft.Extensions.Logging;
 
 namespace TestHost;

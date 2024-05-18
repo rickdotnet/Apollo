@@ -1,5 +1,4 @@
 ﻿using Apollo.Configuration;
-using Apollo.Messaging.Abstractions;
 
 namespace Apollo.Messaging.ASB;
 

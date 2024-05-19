@@ -24,69 +24,76 @@ internal class NatsJetStreamSubscriber : ISubscriber
     public async Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler,
         CancellationToken cancellationToken)
     {
-        var js = new NatsJSContext((NatsConnection)connection);
-
-        // namespace without the message type
-        var streamNameClean =
-            config
-                .EndpointSubject
-                .Replace(".", "_")
-                .Replace("*", "")
-                .Replace(">", "")
-                .TrimEnd('_');
-
-
-        logger.LogWarning("Create Missing Resources? {CreateMissingResources}", config.CreateMissingResources);
-        // TODO: ^ now we need to honor it
-        
-        logger.LogInformation("Creating stream {StreamName} for {Subjects}", streamNameClean, config.EndpointSubject);
-        await js.CreateStreamAsync(
-            new StreamConfig(streamNameClean, new[] { config.EndpointSubject }),
-            cancellationToken);
-
-        logger.LogInformation("Stream {StreamName} created for {Subjects}", streamNameClean, config.EndpointSubject);
-        logger.LogInformation("Creating consumer {ConsumerName} for stream {StreamName}", config.ConsumerName,
-            streamNameClean);
-
-        var consumerConfig = new ConsumerConfig(config.ConsumerName);
-        var consumer = await js.CreateOrUpdateConsumerAsync(streamNameClean, consumerConfig, cancellationToken);
-        logger.LogInformation("Consumer {ConsumerName} for stream {StreamName} created", config.ConsumerName,
-            streamNameClean);
-
-        await foreach (var msg in consumer.ConsumeAsync<byte[]>().WithCancellation(cancellationToken))
+        try
         {
-            try
+            var js = new NatsJSContext((NatsConnection)connection);
+
+            // namespace without the message type
+            var streamNameClean =
+                config
+                    .EndpointSubject
+                    .Replace(".", "_")
+                    .Replace("*", "")
+                    .Replace(">", "")
+                    .TrimEnd('_');
+
+
+            logger.LogWarning("Create Missing Resources? {CreateMissingResources}", config.CreateMissingResources);
+            // TODO: ^ now we need to honor it
+
+            logger.LogTrace("Creating stream {StreamName} for {Subjects}", streamNameClean,
+                config.EndpointSubject);
+            await js.CreateStreamAsync(
+                new StreamConfig(streamNameClean, new[] { config.EndpointSubject }),
+                cancellationToken);
+
+            logger.LogTrace("Creating consumer {ConsumerName} for stream {StreamName}", config.ConsumerName,
+                streamNameClean);
+
+            var consumerConfig = new ConsumerConfig(config.ConsumerName);
+            var consumer = await js.CreateOrUpdateConsumerAsync(streamNameClean, consumerConfig, cancellationToken);
+
+            logger.LogInformation("Subscribing to {Subject}", config.EndpointSubject);
+            await foreach (var msg in consumer.ConsumeAsync<byte[]>().WithCancellation(cancellationToken))
             {
-                logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
-                // Process message
-
-                if (config.MessageTypes.ContainsKey(msg.Subject))
+                try
                 {
-                    await ProcessMessage(msg, handler);
-                    await msg.AckAsync(cancellationToken: cancellationToken);
+                    logger.LogTrace("Subscriber received message from {Subject}", msg.Subject);
+                    if (config.MessageTypes.ContainsKey(msg.Subject))
+                    {
+                        await ProcessMessage(msg);
+                        await msg.AckAsync(cancellationToken: cancellationToken);
+                    }
+                    else
+                    {
+                        logger.LogWarning("No handler found for {Subject} in endpoint ({Endpoint})", msg.Subject,
+                            config.EndpointName);
+
+                        // TODO: need to makes sure this doesn't stop the server from
+                        //       redelivering the message to other processors outside
+                        //       of this application
+                        await msg.AckTerminateAsync(cancellationToken: cancellationToken);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    logger.LogWarning("No handler found for {Subject} in endpoint ({Endpoint})", msg.Subject,
-                        config.EndpointName);
-
-                    // TODO: need to makes sure this doesn't stop the server from
-                    //       redelivering the message to other processors outside
-                    //       of this application
+                    logger.LogError(ex, "Error processing message from {Subject}", msg.Subject);
                     await msg.AckTerminateAsync(cancellationToken: cancellationToken);
                 }
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error processing message from {Subject}", msg.Subject);
-                await msg.AckTerminateAsync(cancellationToken: cancellationToken);
-            }
+        }
+        catch (TaskCanceledException)
+        {
+            logger.LogWarning("TaskCanceledException");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error subscribing to {EndpointSubject}", config.EndpointSubject);
         }
 
         return;
 
-        async Task ProcessMessage(NatsJSMsg<byte[]> msg,
-            Func<ApolloMessage, CancellationToken, Task> messageHandler)
+        async Task ProcessMessage(NatsJSMsg<byte[]> msg)
         {
             var message = new ApolloMessage
             {
@@ -98,11 +105,11 @@ internal class NatsJetStreamSubscriber : ISubscriber
             if (msg.Data != null)
             {
                 var json = Encoding.UTF8.GetString(msg.Data);
-                logger.LogInformation("JSON: {Json}", json);
+                logger.LogTrace("JSON: {Json}", json);
 
                 var type = config.MessageTypes[msg.Subject].GetMessageType();
 
-                logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+                logger.LogTrace("Deserializing message to {TypeName}", type.Name);
 
                 // this will eventually be a configured serializer
                 var deserialized = JsonSerializer.Deserialize(json, type,
@@ -114,7 +121,7 @@ internal class NatsJetStreamSubscriber : ISubscriber
             if (message.ReplyTo != null)
                 message.Replier = new NatsReplier(connection, message.ReplyTo);
 
-            await messageHandler(message, cancellationToken);
+            await handler(message, cancellationToken);
         }
     }
 }

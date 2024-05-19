@@ -17,7 +17,6 @@ public class AzureServiceBusSubscriber : ISubscriber
         ApolloConfig config,
         ServiceBusClient client,
         ILogger<AzureServiceBusSubscriber> logger,
-        ServiceBusAdministrationClient adminClient,
         BusResourceManager resourceManager)
     {
         this.apolloConfig = config;
@@ -31,27 +30,26 @@ public class AzureServiceBusSubscriber : ISubscriber
     {
         try
         {
-            var topicName = config.EndpointSubject = config.EndpointSubject.Replace(".>", "");
+            // this was built for NATS so we need to strip the wildcard
+            var topicName = config.EndpointSubject.Replace(".>", "").Replace(".*", "");
             logger.LogWarning("Subscribing to {EndpointSubject}", topicName);
-            logger.LogInformation("CreateMissingResources: {CreateMissingResources}", config.CreateMissingResources);
+            logger.LogTrace("CreateMissingResources: {CreateMissingResources}", config.CreateMissingResources);
 
-
+            // precious real estate means abbreviations
             var durableSuffix = config.IsDurableConsumer ? "d" : "nd";
             var subscriptionSuffix = $".{topicName}.{durableSuffix}".ToLower();
 
+            // ASB only lets the subscription name be 50 characters
             var safeConsumerLength = 50 - subscriptionSuffix.Length;
             var safeConsumerName = config.ConsumerName.Length > safeConsumerLength
                 ? config.ConsumerName[..safeConsumerLength]
                 : config.ConsumerName;
 
-
-            // TODO: ^ now we need to honor this
-
-            var fullSubscriptionName = $"{config.ConsumerName}{subscriptionSuffix}";
             var safeSubscriptionName = $"{safeConsumerName}{subscriptionSuffix}".ToLower();
             var subscriptionOptions = new CreateSubscriptionOptions(topicName, safeSubscriptionName)
             {
-                UserMetadata = fullSubscriptionName
+                // the original subscription name for full reference
+                UserMetadata = $"{config.ConsumerName}{subscriptionSuffix}"
             };
 
             if (!config.IsDurableConsumer)
@@ -61,17 +59,21 @@ public class AzureServiceBusSubscriber : ISubscriber
             }
 
             var topicExists = await resourceManager.TopicExistsAsync(subscriptionOptions.TopicName, cancellationToken);
-            if (!topicExists /* && config.CreateMissingResources*/)
+            if (!topicExists)
             {
-                logger.LogInformation("Creating topic {TopicName}", subscriptionOptions.TopicName);
+                if (!config.CreateMissingResources) throw new InvalidOperationException($"Missing topic: {subscriptionOptions.TopicName}");
+                logger.LogTrace("Creating topic {TopicName}", subscriptionOptions.TopicName);
                 await resourceManager.CreateTopicAsync(subscriptionOptions.TopicName, cancellationToken);
             }
 
             var subscriptionExists = await resourceManager.SubscriptionExistsAsync(subscriptionOptions.TopicName,
                 subscriptionOptions.SubscriptionName, cancellationToken);
-            if (!subscriptionExists /* && config.CreateMissingResources*/)
+            if (!subscriptionExists)
             {
-                logger.LogInformation("Creating subscription {SubscriptionName} on topic {TopicName}",
+                if (!config.CreateMissingResources) 
+                    throw new InvalidOperationException($"Missing subscription ({subscriptionOptions.SubscriptionName}) on topic ({subscriptionOptions.SubscriptionName})");
+                
+                logger.LogTrace("Creating subscription {SubscriptionName} on topic {TopicName}",
                     subscriptionOptions.SubscriptionName, subscriptionOptions.TopicName);
                 await resourceManager.CreateSubscriptionAsync(subscriptionOptions, cancellationToken);
             }
@@ -95,6 +97,10 @@ public class AzureServiceBusSubscriber : ISubscriber
             await processor.StartProcessingAsync(cancellationToken);
             await Task.Delay(Timeout.Infinite, cancellationToken);
         }
+        catch (TaskCanceledException)
+        {
+            logger.LogWarning("MessageProcessor TaskCanceledException");
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error subscribing to {EndpointSubject}", config.EndpointSubject);
@@ -112,9 +118,9 @@ public class AzureServiceBusSubscriber : ISubscriber
         {
             try
             {
-                logger.LogInformation("Processing message {MessageId}", args.Message.MessageId);
+                logger.LogTrace("Processing message {MessageId}", args.Message.MessageId);
                 await ActuallyProcessMessage(args.Message);
-                logger.LogInformation("Completed message {MessageId}", args.Message.MessageId);
+                logger.LogTrace("Completed message {MessageId}", args.Message.MessageId);
                 
                 await args.CompleteMessageAsync(args.Message, cancellationToken);
             }
@@ -139,7 +145,7 @@ public class AzureServiceBusSubscriber : ISubscriber
             if (msg.Body != null)
             {
                 var json = msg.Body.ToString();
-                logger.LogInformation("JSON:\n{Json}", json);
+                logger.LogTrace("JSON:\n{Json}", json);
 
                 var type = config.GetMessageType(message.Subject);
                 if (type == null)
@@ -151,7 +157,7 @@ public class AzureServiceBusSubscriber : ISubscriber
                     type = typeof(object); // not sure if this is the best idea
                 }
 
-                logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+                logger.LogTrace("Deserializing message to {TypeName}", type.Name);
 
                 // TODO: figure out serializer
                 var deserialized = JsonSerializer.Deserialize(

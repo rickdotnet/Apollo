@@ -1,6 +1,6 @@
 ﻿namespace Apollo.Configuration;
 
-public class SubscriptionConfig
+public record SubscriptionConfig
 {
     public Guid InstanceId { get; set; }
     public required string Namespace { get; set; }

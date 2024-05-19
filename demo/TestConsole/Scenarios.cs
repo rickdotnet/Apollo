@@ -41,7 +41,7 @@ public static class Scenarios
         var publisherFactory = host.Services.GetRequiredService<IPublisherFactory>();
 
         var remotePublisher = publisherFactory.CreatePublisher("TestEndpoint");
-        return remotePublisher.BroadcastAsync(new TestEvent("Hello World!"), default);
+        return remotePublisher.BroadcastAsync(new DemoMessages("Hello World!"), default);
 
         //var response = await remoteDispatcher.SendRequestAsync<MyRequest,bool>(new MyRequest("TestRequest"), default);
         //Console.WriteLine($"Response: {response}");
@@ -65,8 +65,4 @@ public static class Scenarios
         //await publisher.BroadcastAsync(new TestEvent("Hello World!"), default);
         await publisher.SendCommandAsync(new TestCommand("Hello!"), default);
     }
-
-    public record TestCommand(string Message) : ICommand;
-
-    private record MyRequest(string Message) : IRequest<bool>;
 }

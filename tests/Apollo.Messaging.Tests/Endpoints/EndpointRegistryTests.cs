@@ -29,9 +29,9 @@ public class EndpointRegistryTests
         Assert.Contains(typeof(SomeSubscriber), endpointRegistry.SubscriberTypes);
     }
 
-    private class SomeEndpoint : IListenFor<TestEvent>
+    private class SomeEndpoint : IListenFor<DemoMessages>
     {
-        public Task HandleAsync(TestEvent message, CancellationToken cancellationToken = default) 
+        public Task HandleAsync(DemoMessages message, CancellationToken cancellationToken = default) 
             => Task.CompletedTask;
     }
     

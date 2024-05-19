@@ -24,47 +24,68 @@ internal class NatsCoreSubscriber : ISubscriber
     public async Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Subscribing to {Subject}", config.EndpointSubject);
-
-        await foreach (var msg in connection.SubscribeAsync<byte[]>(config.EndpointSubject,
-                           cancellationToken: cancellationToken))
+        try
         {
-            logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
-
-            try
+            logger.LogInformation("Subscribing to {Subject}", config.EndpointSubject);
+            await foreach (var msg in connection.SubscribeAsync<byte[]>(config.EndpointSubject)
+                               .WithCancellation(cancellationToken))
             {
-                var message = new ApolloMessage
+                try
                 {
-                    Subject = msg.Subject,
-                    Headers = msg.Headers,
-                    ReplyTo = msg.ReplyTo
-                };
-
-                if (msg.Data != null)
-                {
-
-                    var json = Encoding.UTF8.GetString(msg.Data);
-                    logger.LogInformation("JSON: {Json}", json);
-
-                    var type = config.MessageTypes[msg.Subject].GetMessageType();
-                    logger.LogInformation("Deserializing message to {TypeName}", type.Name);
-
-                    // TODO: figure out serializer
-                    var deserialized = JsonSerializer.Deserialize(json, type,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    message.Message = deserialized;
+                    logger.LogInformation("Subscriber received message from {Subject}", msg.Subject);
+                    if (config.MessageTypes.ContainsKey(msg.Subject))
+                        await ProcessMessage(msg);
+                    else
+                        logger.LogWarning("No handler found for {Subject} in endpoint ({Endpoint})", msg.Subject,
+                            config.EndpointName);
                 }
 
-                if (message.ReplyTo != null)
-                    message.Replier = new NatsReplier(connection, message.ReplyTo);
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error processing message from {Subject}", msg.Subject);
+                }
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            logger.LogWarning("TaskCanceledException");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error subscribing to {EndpointSubject}", config.EndpointSubject);
+        }
 
-                await handler(message, cancellationToken);
-            }
-            catch (Exception ex)
+        return;
+
+        async Task ProcessMessage(NatsMsg<byte[]> natsMsg)
+        {
+            var message = new ApolloMessage
             {
-                logger.LogError(ex, "Error processing message from {Subject}", msg.Subject);
+                Subject = natsMsg.Subject,
+                Headers = natsMsg.Headers,
+                ReplyTo = natsMsg.ReplyTo
+            };
+
+            if (natsMsg.Data != null)
+            {
+
+                var json = Encoding.UTF8.GetString(natsMsg.Data);
+                logger.LogTrace("JSON: {Json}", json);
+
+                var type = config.MessageTypes[natsMsg.Subject].GetMessageType();
+                logger.LogInformation("Deserializing message to {TypeName}", type.Name);
+
+                // TODO: figure out serializer
+                var deserialized = JsonSerializer.Deserialize(json, type,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                message.Message = deserialized;
             }
+
+            if (message.ReplyTo != null)
+                message.Replier = new NatsReplier(connection, message.ReplyTo);
+
+            await handler(message, cancellationToken);
         }
     }
 }

@@ -100,12 +100,12 @@ public class SubscriptionBackgroundService : BackgroundService
         // start all subscribers
         await Task.WhenAll(tasks);
 
-        logger.LogInformation("Subscription background service task completed");
+        logger.LogWarning("Subscription background service shutting down");
         return;
 
         async Task Handler(ApolloMessage message, CancellationToken cancellationToken)
         {
-            logger.LogInformation("EnqueueMessageAsync message of type {MessageType}", message.Message?.GetType().Name);
+            logger.LogTrace("Enqueue message of type {MessageType}", message.Message?.GetType().Name);
 
             var headers =
                 message.Headers?

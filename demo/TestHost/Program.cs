@@ -1,7 +1,7 @@
 ﻿using Apollo;
 using Apollo.Messaging;
+using Apollo.Messaging.Azure;
 using Apollo.Messaging.Endpoints;
-using Apollo.Messaging.NATS;
 using Microsoft.Extensions.Hosting;
 using TestHost;
 
@@ -11,15 +11,18 @@ builder.Services
         apolloBuilder =>
         {
             apolloBuilder
-                .UseNats()
+                //.UseNats()
+                .UseAzure()
                 .WithEndpoints(
                     endpoints =>
                     {
                         endpoints
-                            .AddEndpoint<MyReplyEndpoint>()
+                            //.AddEndpoint<MyEndpoint>()
                             .AddEndpoint<MyEndpoint>(cfg => cfg.SetDurableConsumer())
                             .AddEndpoint<MyOtherEndpoint>()
-                            .AddSubscriber<NatsSubscriber>();
+                            .AddEndpoint<MyReplyEndpoint>();
+                            //.AddEndpoint<MyReplyEndpoint>(cfg => cfg.SetLocalOnly());
+                        //.AddSubscriber<AzureServiceBusSubscriber>();
                     });
         });
 

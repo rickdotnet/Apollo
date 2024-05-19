@@ -22,9 +22,10 @@ public class SubscriptionBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Starting NATS subscription background service");
+        logger.LogInformation("Starting subscription background service");
 
         var endpointRegistries = serviceProvider.GetRequiredService<IEnumerable<IEndpointRegistry>>();
+        var apolloConfig = serviceProvider.GetRequiredService<ApolloConfig>();
 
         processorTask = CreateRequestProcessor(stoppingToken);
 
@@ -57,6 +58,7 @@ public class SubscriptionBackgroundService : BackgroundService
                     EndpointSubject = filterSubject,
                     ConsumerName = endpoint.Config.ConsumerName,
                     IsDurableConsumer = endpoint.Config.DurableConfig?.IsDurableConsumer ?? false,
+                    CreateMissingResources = apolloConfig.CreateMissingResources,
                     Serializer = null // get from service provider
                 };
 
@@ -66,7 +68,6 @@ public class SubscriptionBackgroundService : BackgroundService
                         Identifier = endpoint.EndpointRoute,
                         Config = config,
                         Subscriber = (ISubscriber)serviceProvider.GetRequiredService(subscriberType),
-                        
                     }).ToArray();
 
                 if (newSubscribers.Any())
@@ -99,7 +100,7 @@ public class SubscriptionBackgroundService : BackgroundService
         // start all subscribers
         await Task.WhenAll(tasks);
 
-        logger.LogInformation("NATS subscription background service task completed");
+        logger.LogInformation("Subscription background service task completed");
         return;
 
         async Task Handler(ApolloMessage message, CancellationToken cancellationToken)

@@ -42,7 +42,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Messaging.NATS", "Ap
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "incubating", "incubating", "{609BF3AE-2316-4F55-BDFA-50527D63C99E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Messaging.ASB", "Apollo.Messaging.ASB\Apollo.Messaging.ASB.csproj", "{8F71E04E-6E28-4271-BE38-AE39CAD20FDA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Messaging.Azure", "Apollo.Messaging.Azure\Apollo.Messaging.Azure.csproj", "{8F71E04E-6E28-4271-BE38-AE39CAD20FDA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Messaging.Tests", "..\tests\Apollo.Messaging.Tests\Apollo.Messaging.Tests.csproj", "{D952774C-4FC8-4CC8-9949-B976C0F9063B}"
 EndProject

@@ -1,4 +1,3 @@
-using Apollo.Configuration;
 using Apollo.Messaging.Endpoints;
 
 namespace Apollo.Messaging.Tests.Endpoints;

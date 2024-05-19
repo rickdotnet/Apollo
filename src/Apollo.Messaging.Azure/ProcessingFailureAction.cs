@@ -1,4 +1,4 @@
-﻿namespace Apollo.Messaging.ASB;
+﻿namespace Apollo.Messaging.Azure;
 
 public enum ProcessingFailureAction
 {

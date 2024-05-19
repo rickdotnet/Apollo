@@ -35,6 +35,10 @@ internal class NatsJetStreamSubscriber : ISubscriber
                 .Replace(">", "")
                 .TrimEnd('_');
 
+
+        logger.LogWarning("Create Missing Resources? {CreateMissingResources}", config.CreateMissingResources);
+        // TODO: ^ now we need to honor it
+        
         logger.LogInformation("Creating stream {StreamName} for {Subjects}", streamNameClean, config.EndpointSubject);
         await js.CreateStreamAsync(
             new StreamConfig(streamNameClean, new[] { config.EndpointSubject }),
@@ -99,14 +103,14 @@ internal class NatsJetStreamSubscriber : ISubscriber
                 var type = config.MessageTypes[msg.Subject].GetMessageType();
 
                 logger.LogInformation("Deserializing message to {TypeName}", type.Name);
-                
+
                 // this will eventually be a configured serializer
                 var deserialized = JsonSerializer.Deserialize(json, type,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 message.Message = deserialized;
             }
-            
+
             if (message.ReplyTo != null)
                 message.Replier = new NatsReplier(connection, message.ReplyTo);
 

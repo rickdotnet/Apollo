@@ -1,4 +1,3 @@
-using System.Collections;
 using Apollo.Configuration;
 using Apollo.Messaging.Endpoints;
 using FakeItEasy;
@@ -32,19 +31,23 @@ public class EndpointBuilderTests
     [Fact]
     public void Build_ShouldAddRegistryToServiceCollection()
     {
-       // endpointBuilder.AddEndpoint<SomeEndpoint>();
+        // endpointBuilder.AddEndpoint<SomeEndpoint>();
         endpointBuilder.Build();
-        
+
         A.CallTo(() => services.Add(
                 A<ServiceDescriptor>.That.Matches(
                     sd => sd.ServiceType == typeof(IEndpointRegistry) && sd.Lifetime == ServiceLifetime.Singleton)))
             .MustHaveHappenedOnceExactly();
     }
-    
-    private class SomeEndpoint {}
+
+    private class SomeEndpoint
+    {
+    }
+
     private class SomeSubscriber : ISubscriber
     {
-        public Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler, CancellationToken cancellationToken)
+        public Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler,
+            CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }

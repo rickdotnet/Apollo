@@ -1,4 +1,3 @@
-using Castle.Core.Logging;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
 

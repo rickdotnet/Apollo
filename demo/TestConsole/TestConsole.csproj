@@ -8,10 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.5" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Apollo.Messaging.Azure\Apollo.Messaging.Azure.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging.Contracts\Apollo.Messaging.Contracts.csproj" />
       <ProjectReference Include="..\..\src\Apollo.Messaging.NATS\Apollo.Messaging.NATS.csproj" />
       <ProjectReference Include="..\..\src\Apollo.Messaging\Apollo.Messaging.csproj" />
       <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />

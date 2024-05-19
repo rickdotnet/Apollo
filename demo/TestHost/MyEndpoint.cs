@@ -25,8 +25,8 @@ public class MyEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>
         logger.LogInformation("MyEndpoint Received TestEvent: {Message}", message.Message);
         //localPublisher.BroadcastAsync(new TestEvent("Hello from MyEndpoint"), cancellationToken);
         
-        var reply = localRequestPublisher.SendRequestAsync<MyRequest, bool>(new MyRequest("MyEndpoint Request"), cancellationToken);
-        logger.LogInformation("MyEndpoint Received Reply: {Reply}", reply.Result);
+        // var reply = localRequestPublisher.SendRequestAsync<MyRequest, bool>(new MyRequest("MyEndpoint Request"), cancellationToken);
+        // logger.LogInformation("MyEndpoint Received Reply: {Reply}", reply.Result);
         return Task.CompletedTask;
     }
 

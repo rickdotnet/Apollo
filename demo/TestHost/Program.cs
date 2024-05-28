@@ -8,13 +8,13 @@ using Microsoft.Extensions.Hosting;
 using TestHost;
 
 var builder = Host.CreateApplicationBuilder(args);
-var config = new ApolloConfig() { CreateMissingResources = true};
+var config = new ApolloConfig() { CreateMissingResources = true };
 builder.Services
     .AddApollo(
         config,
-        apolloBuilder =>
+        apollo =>
         {
-            apolloBuilder
+            apollo
                 .UseNats()
                 .UseAzure()
                 .WithEndpoints(
@@ -25,8 +25,8 @@ builder.Services
                             .AddEndpoint<MyEndpoint>(cfg => cfg.SetDurableConsumer())
                             .AddEndpoint<MyOtherEndpoint>(cfg => cfg.SetLocalOnly())
                             .AddEndpoint<MyReplyEndpoint>()
-                        .AddSubscriber<AzureServiceBusSubscriber>()
-                        .AddSubscriber<NatsSubscriber>();
+                            .AddSubscriber<AzureServiceBusSubscriber>()
+                            .AddSubscriber<NatsSubscriber>();
                     });
         });
 

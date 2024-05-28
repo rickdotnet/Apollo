@@ -7,22 +7,22 @@ namespace Apollo.Messaging.NATS;
 public class NatsSubscriber : ISubscriber
 {
     private readonly INatsConnection connection;
-    private readonly ILogger logger;
+    private readonly ILoggerFactory loggerFactory;
 
     public NatsSubscriber(
         INatsConnection connection,
-        ILogger<NatsSubscriber> logger
+        ILoggerFactory loggerFactory
     )
     {
         this.connection = connection;
-        this.logger = logger;
+        this.loggerFactory = loggerFactory;
     }
 
     public Task SubscribeAsync(SubscriptionConfig config, Func<ApolloMessage, CancellationToken, Task> handler,
         CancellationToken cancellationToken)
     {
         return config.IsDurableConsumer
-            ? new NatsJetStreamSubscriber(connection, logger).SubscribeAsync(config, handler, cancellationToken)
-            : new NatsCoreSubscriber(connection, logger).SubscribeAsync(config, handler, cancellationToken);
+            ? new NatsJetStreamSubscriber(connection, loggerFactory.CreateLogger<NatsJetStreamSubscriber>()).SubscribeAsync(config, handler, cancellationToken)
+            : new NatsCoreSubscriber(connection, loggerFactory.CreateLogger<NatsCoreSubscriber>()).SubscribeAsync(config, handler, cancellationToken);
     }
 }

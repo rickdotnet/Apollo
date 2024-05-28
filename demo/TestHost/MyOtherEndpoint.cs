@@ -4,18 +4,18 @@ using Microsoft.Extensions.Logging;
 
 namespace TestHost;
 
-public class MyOtherEndpoint : IListenFor<TestEvent>
+public class MyOtherEndpoint : IListenFor<DemoMessages>
 {
-    private readonly ILogger<MyOtherEndpoint> logger1;
+    private readonly ILogger<MyOtherEndpoint> logger;
 
     public MyOtherEndpoint(ILogger<MyOtherEndpoint> logger)
     {
-        logger1 = logger;
+        this.logger = logger;
     }
 
-    public Task HandleAsync(TestEvent message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(DemoMessages message, CancellationToken cancellationToken = default)
     {
-        logger1.LogInformation("MyOtherEndpoint: {Message}", message.Message);
+        logger.LogInformation("MyOtherEndpoint: {Message}", message.Message);
         return Task.CompletedTask;
     }
 }

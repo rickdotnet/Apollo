@@ -4,7 +4,6 @@ using Apollo.Messaging.Middleware;
 using Apollo.Messaging.Publishing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace Apollo.Messaging;
 

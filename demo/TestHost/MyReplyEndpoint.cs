@@ -18,11 +18,7 @@ public class MyReplyEndpoint : EndpointBase, IReplyTo<MyRequest, bool>
     public Task<bool> HandleAsync(MyRequest message, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("MyReplyEndpoint Received: {Message}", message.Message);
-        logger.LogInformation("Subject: {Subject}", Context.Subject);
-        logger.LogInformation("Source: {Source}", Context.Source);
-        logger.LogInformation("ReplyTo: {ReplyTo}", Context.ReplyTo);
-        Context.Headers.ToList().ForEach(x => logger.LogInformation("Header: {Key}={Value}", x.Key, x.Value));
-        logger.LogInformation("Returning true");
+        logger.LogTrace("Returning true");
         return Task.FromResult(true);
     }
 }

@@ -7,11 +7,12 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
-  
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging.Contracts\Apollo.Messaging.Contracts.csproj" />
+      <ProjectReference Include="..\..\src\Apollo.Messaging\Apollo.Messaging.csproj" />
     </ItemGroup>
 
 </Project>

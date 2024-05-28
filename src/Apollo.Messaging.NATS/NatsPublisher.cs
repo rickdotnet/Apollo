@@ -40,20 +40,9 @@ internal class NatsPublisher : IRemotePublisher
     
     public Task SendObjectAsync(string subject, object message, CancellationToken cancellationToken)
     {
-        //var bytes = MessagePackSerializer.Serialize(eventMessage);
         var json = JsonSerializer.Serialize(message);
         var bytes = Encoding.UTF8.GetBytes(json);
 
-        // TODO: start landing on header format
-        //       ideally the same path for local and remote
-        //       with different config
-        // ex: Ids should be added consistently
-        // var msgId = idGenerator.CreateId().ToString();
-        // var headers = new NatsHeaders
-        // {
-        //     { "Message-Id", msgId },
-        //     { "Nats-Msg-Id", msgId } // do we want to set this?
-        // };
         return connection.PublishAsync(subject, bytes, headers: null, opts: new NatsPubOpts {   },
             cancellationToken: cancellationToken).AsTask();
     }
@@ -86,8 +75,9 @@ internal class NatsPublisher : IRemotePublisher
             logger.LogWarning("Null Response ({Subject})", subject);
             return default;
         }
+
         var responseJson = Encoding.UTF8.GetString(result.Data);
-        logger.LogInformation("Response JSON2: {Json}", responseJson);
+        logger.LogTrace("Response JSON: {Json}", responseJson);
 
         var deserialized = JsonSerializer.Deserialize<TResponse>(responseJson);
         return deserialized;

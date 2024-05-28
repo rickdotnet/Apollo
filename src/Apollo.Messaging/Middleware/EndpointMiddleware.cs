@@ -6,15 +6,15 @@ namespace Apollo.Messaging.Middleware;
 
 public class EndpointMiddleware : IMessageMiddleware
 {
-    private readonly IEndpointRegistry endpointRegistry;
+    private readonly IEnumerable<IEndpointRegistry> endpointRegistries;
     private readonly IServiceProvider serviceProvider;
     private readonly ILogger<EndpointMiddleware> logger;
 
-    public EndpointMiddleware(IServiceProvider serviceProvider)
+    public EndpointMiddleware(IEnumerable<IEndpointRegistry> endpointRegistries, IServiceProvider serviceProvider, ILogger<EndpointMiddleware> logger)
     {
+        this.endpointRegistries = endpointRegistries;
         this.serviceProvider = serviceProvider;
-        endpointRegistry = serviceProvider.GetRequiredService<IEndpointRegistry>();
-        logger = serviceProvider.GetRequiredService<ILogger<EndpointMiddleware>>();
+        this.logger = logger;
     }
 
     public async Task InvokeAsync(MessageContext messageContext, Func<Task> next, CancellationToken cancellationToken)
@@ -23,9 +23,9 @@ public class EndpointMiddleware : IMessageMiddleware
         ArgumentNullException.ThrowIfNull(messageType, nameof(messageType));
         
         var endpointRegistrations = 
-            endpointRegistry.GetEndpointRegistrations(
-                reg => 
-                    reg.SubjectMapping.ContainsKey(messageContext.Subject));
+            endpointRegistries.SelectMany(x=>x.GetEndpointRegistrations(
+                reg => reg.SubjectMapping.ContainsKey(messageContext.Subject)));
+            
 
         foreach (var registration in endpointRegistrations)
         {

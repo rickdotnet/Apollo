@@ -6,7 +6,7 @@ public class EndpointConfig
 {
     public static EndpointConfig Default => new(ApolloConfig.Default);
 
-    public bool LocalOnly { get; init; }
+    public bool LocalOnly { get; internal set; }
     public bool IsRemoteEndpoint => !LocalOnly;
     public string ConsumerName { get; init; }
     public DurableConfig DurableConfig { get; init; } = DurableConfig.Default;
@@ -29,5 +29,9 @@ public static class EndpointConfigExtensions
     public static void SetDurableConsumer(this EndpointConfig config, bool durable = true)
     {
         config.DurableConfig.IsDurableConsumer = durable;
+    }
+    public static void SetLocalOnly(this EndpointConfig config, bool durable = true)
+    {
+        config.LocalOnly = durable;
     }
 }

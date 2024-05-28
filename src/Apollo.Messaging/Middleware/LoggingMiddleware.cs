@@ -14,10 +14,10 @@ public class LoggingMiddleware : IMessageMiddleware
     public async Task InvokeAsync(MessageContext messageContext, Func<Task> next, CancellationToken cancellationToken)
     {
         var messageTypeName = messageContext.Message?.GetType().Name;
-        logger.LogInformation("Processing message of type {MessageType}", messageTypeName);
+        logger.LogTrace("Processing message of type {MessageType}", messageTypeName);
         
         await next();
 
-        logger.LogInformation("Finished processing message of type {MessageType}", messageTypeName);
+        logger.LogTrace("Finished processing message of type {MessageType}", messageTypeName);
     }
 }

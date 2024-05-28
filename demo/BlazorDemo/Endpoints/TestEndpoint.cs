@@ -16,13 +16,7 @@ public class TestEndpoint : EndpointBase, IListenFor<TestEvent>
     }
     public Task HandleAsync(TestEvent message, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("TestEndpoint Received: {Message}", message.Message);
-        logger.LogInformation("Subject: {Subject}", Context.Subject);
-        logger.LogInformation("Source: {Source}", Context.Source);
-        logger.LogInformation("ReplyTo: {ReplyTo}", Context.ReplyTo);
-        Context.Headers.ToList()
-            .ForEach(x => logger.LogInformation("Header: {Key}={Value}", x.Key, x.Value));
-
+        logger.LogTrace("TestEndpoint Received: {Message}", message.Message);
         return Task.FromResult(true);
     }
 }

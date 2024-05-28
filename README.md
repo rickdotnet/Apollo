@@ -14,7 +14,7 @@ Apollo is a lightweight, high-performance messaging platform designed to provide
 
 ## Getting Started
 
-To get started with Apollo, you'll need to have a running instance of NATS or Azure Service Bus. You can find instructions on setting up NATS [here](https://docs.nats.io/running-a-nats-service/introduction) and Azure Service Bus [here]https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-quickstart-topics-subscriptions-portal).
+To get started with Apollo, you'll need to have a running instance of NATS or Azure Service Bus. You can find instructions on setting up NATS [here](https://docs.nats.io/running-a-nats-service/introduction) and Azure Service Bus [here](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-quickstart-topics-subscriptions-portal).
 
 Azure Service Bus Support
 Apollo now supports Azure Service Bus (ASB). Note that ASB requires topics/subscriptions, so a Standard or Premium tier is necessary.

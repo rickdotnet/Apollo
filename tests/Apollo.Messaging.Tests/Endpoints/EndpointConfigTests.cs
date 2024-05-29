@@ -10,6 +10,6 @@ public class EndpointConfigTests
         var endpointConfig = EndpointConfig.Default;
         endpointConfig.SetDurableConsumer();
 
-        Assert.True(endpointConfig.DurableConfig.IsDurableConsumer);
+        Assert.True(endpointConfig.IsDurableConsumer);
     }
 }

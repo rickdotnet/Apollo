@@ -9,7 +9,7 @@ public class EndpointConfig
     public bool LocalOnly { get; internal set; }
     public bool IsRemoteEndpoint => !LocalOnly;
     public string ConsumerName { get; init; }
-    public DurableConfig DurableConfig { get; init; } = DurableConfig.Default;
+    public bool IsDurableConsumer { get; set; }
     public string Namespace { get; init; }
     public bool UseEndpointNameInRoute { get; init; } = true;
     
@@ -17,7 +17,7 @@ public class EndpointConfig
 
     internal string? MinimalApiRoute { get; set; }
 
-    public EndpointConfig(ApolloConfig apolloConfig, string? minimalApiRoute = null)
+    public EndpointConfig(ApolloConfig apolloConfig)
     {
         ConsumerName = apolloConfig.ConsumerName;
         Namespace = apolloConfig.DefaultNamespace;
@@ -28,7 +28,7 @@ public static class EndpointConfigExtensions
 {
     public static void SetDurableConsumer(this EndpointConfig config, bool durable = true)
     {
-        config.DurableConfig.IsDurableConsumer = durable;
+        config.IsDurableConsumer = durable;
     }
     public static void SetLocalOnly(this EndpointConfig config, bool durable = true)
     {

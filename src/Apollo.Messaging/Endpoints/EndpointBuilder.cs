@@ -7,8 +7,7 @@ namespace Apollo.Messaging.Endpoints;
 public interface IEndpointBuilder
 {
     IEndpointBuilder AddEndpoint<T>();
-    IEndpointBuilder AddEndpoint<T>(string apiRoute);
-    IEndpointBuilder AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null);
+    IEndpointBuilder AddEndpoint<T>(Action<EndpointConfig> action);
     IEndpointBuilder AddSubscriber<T>() where T : ISubscriber;
 }
 
@@ -30,12 +29,9 @@ internal class EndpointBuilder : IEndpointBuilder
     public IEndpointBuilder AddEndpoint<T>()
         => AddEndpoint<T>(_ => { });
 
-    public IEndpointBuilder AddEndpoint<T>(string apiRoute)
-        => AddEndpoint<T>(_ => { }, apiRoute);
-
-    public IEndpointBuilder AddEndpoint<T>(Action<EndpointConfig> action, string? apiRoute = null)
+    public IEndpointBuilder AddEndpoint<T>(Action<EndpointConfig> action)
     {
-        var endpointConfig = new EndpointConfig(config, apiRoute);
+        var endpointConfig = new EndpointConfig(config);
         action(endpointConfig);
 
         var registration = new EndpointRegistration<T>(endpointConfig);

@@ -57,7 +57,7 @@ public class SubscriptionBackgroundService : BackgroundService
                     MessageTypes = subjectTypeMapping,
                     EndpointSubject = filterSubject,
                     ConsumerName = endpoint.Config.ConsumerName,
-                    IsDurableConsumer = endpoint.Config.DurableConfig?.IsDurableConsumer ?? false,
+                    IsDurableConsumer = endpoint.Config.IsDurableConsumer,
                     CreateMissingResources = apolloConfig.CreateMissingResources,
                     Serializer = null // get from service provider
                 };

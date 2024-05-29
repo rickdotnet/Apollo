@@ -32,7 +32,7 @@ internal class EndpointRegistry : IEndpointRegistry
         var handlerTypes = registration.EndpointType.MessageHandlerTypes();
         foreach (var handlerType in handlerTypes)
         {
-            if (registration.Config.DurableConfig.IsDurableConsumer
+            if (registration.Config.IsDurableConsumer
                 && handlerType.IsRequestHandler())
             {
                 // Until we can figure out how to handle durable request handlers

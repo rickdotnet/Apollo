@@ -17,9 +17,4 @@ public class ApolloConfig
     /// Subscribers will create missing resources if set to true
     /// </summary>
     public bool CreateMissingResources { get; set; } = false;
-    public string? CredsFile { get; set; }
-    public string? Jwt { get; set; }
-    public string? Seed { get; set; }
-    public string? NKey { get; }
-    public string? Token { get; }
     public static ApolloConfig Default => new(); }

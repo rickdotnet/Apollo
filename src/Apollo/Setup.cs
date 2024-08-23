@@ -1,4 +1,7 @@
-﻿using Apollo.Configuration;
+﻿using Apollo.Abstractions;
+using Apollo.Configuration;
+using Apollo.Internal;
+using Apollo.Providers.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -6,19 +9,14 @@ namespace Apollo;
 
 public static class Setup
 {
-    public static IServiceCollection AddApollo(this IServiceCollection services)
-        => AddApollo(services, ApolloConfig.Default);
-
-    public static IServiceCollection AddApollo(this IServiceCollection services, Action<ApolloBuilder> builderAction)
-        => AddApollo(services, ApolloConfig.Default, builderAction);
-
-    public static IServiceCollection AddApollo(this IServiceCollection services, ApolloConfig config,
-        Action<ApolloBuilder>? builderAction = null)
+    public static IServiceCollection AddApollo(this IServiceCollection services, ApolloConfig config)
     {
         services.TryAddSingleton(config);
-
-        var builder = new ApolloBuilder(services, config);
-        builderAction?.Invoke(builder);
+        services.AddSingleton(sp => new ApolloClient(
+            sp.GetService<ISubscriptionProvider>() ?? InMemoryProvider.Instance,
+            sp.GetService<IProviderPublisher>() ?? InMemoryProvider.Instance,
+            sp.GetService<IEndpointProvider>() ?? new DefaultEndpointProvider(sp)
+            ));
 
         return services;
     }

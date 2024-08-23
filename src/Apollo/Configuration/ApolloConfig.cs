@@ -8,10 +8,12 @@ public class ApolloConfig
 {
     public ApolloConfig() { }
     public ApolloConfig(string url) { Url = url; }
-    public Guid InstanceId { get; set; } = Guid.Parse("3c083d61-5a40-4476-af60-c200bd67772d");
+    public string InstanceId { get; set; } = Guid.NewGuid().ToString();
     public string Url { get; set; } = "nats://localhost:4222";
     public string ConsumerName { get; set; } = "default-consumer";
     public string DefaultNamespace { get; set; } = "dev";
+    public string Username { get; set; } = "";
+    public string Password { get; set; } = "";
     
     /// <summary>
     /// Subscribers will create missing resources if set to true

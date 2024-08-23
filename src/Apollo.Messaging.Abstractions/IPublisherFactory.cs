@@ -1,2 +1,0 @@
-namespace Apollo.Messaging.Abstractions;
-

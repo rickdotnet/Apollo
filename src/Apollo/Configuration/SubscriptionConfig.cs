@@ -1,17 +1,34 @@
-﻿namespace Apollo.Configuration;
+﻿using Apollo.Internal;
+
+namespace Apollo.Configuration;
 
 public record SubscriptionConfig
 {
-    public Guid InstanceId { get; set; }
-    public required string Namespace { get; set; }
-    public required Type EndpointType { get; init; }
-    public required string EndpointName { get; init; }
-    public required Dictionary<string, Type> MessageTypes { get; init; }
-    public required string EndpointSubject { get; set; }
-    public required string ConsumerName { get; set;}
-    public required bool IsDurableConsumer { get; set;}
+    public required string ConsumerName { get; set; }
+    public string? Namespace { get; set; }
+    public string? EndpointName { get; init; }
+    public string? EndpointSubject { get; set; }
+    public Type? EndpointType { get; set; }
+    // not used yet, but might be used for serialization
+    public required Type[] MessageTypes { get; init; } = [];
+    public required bool IsDurable { get; set; }
     public bool CreateMissingResources { get; set; }
-    public ISerializeThings? Serializer { get; set;}
-}
 
-    
+    public static SubscriptionConfig ForEndpoint(EndpointConfig endpointConfig, Type? endpointType = null, Type[]? messageTypes = null)
+    {
+        return new SubscriptionConfig
+        {
+            ConsumerName = endpointConfig.ConsumerName,
+            Namespace = endpointConfig.Namespace,
+            EndpointName = endpointConfig.EndpointName,
+            EndpointSubject = endpointConfig.EndpointSubject,
+            IsDurable = endpointConfig.IsDurable,
+            CreateMissingResources = endpointConfig.CreateMissingResources,
+            EndpointType = endpointType,
+            MessageTypes = 
+                messageTypes
+                ?? endpointType?.GetHandlerTypes()
+                ?? [],
+        };
+    }
+}

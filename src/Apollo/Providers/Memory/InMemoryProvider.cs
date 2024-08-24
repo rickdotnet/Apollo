@@ -1,7 +1,6 @@
 using System.Threading.Channels;
 using Apollo.Abstractions;
 using Apollo.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace Apollo.Providers.Memory;
 
@@ -43,8 +42,8 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
     public async Task PublishAsync(PublishConfig publishConfig, ApolloMessage message,
         CancellationToken cancellationToken)
     {
-        var typeKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
-        if (!subscriptions.TryGetValue(typeKey, out var subscription))
+        var subjectKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
+        if (!subscriptions.TryGetValue(subjectKey, out var subscription))
         {
             // no handlers for this message type?
             return;
@@ -58,8 +57,8 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
 
     public async Task<byte[]> RequestAsync(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
     {
-        var typeKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
-        if (!subscriptions.TryGetValue(typeKey, out var subscription))
+        var subjectKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
+        if (!subscriptions.TryGetValue(subjectKey, out var subscription))
             throw new InvalidOperationException("No handlers for this message type");
 
         var writer = subscription.First();
@@ -78,7 +77,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         await using (cancellationToken.Register(() => tcs.TrySetCanceled()))
         {
             await writer.WriteAsync(new ApolloContext(message, replyFunc), cancellationToken);
-        
+
             var timeoutTask = Task.Delay(RequestTimeout, cancellationToken);
             var completedTask = await Task.WhenAny(tcs.Task, timeoutTask).ConfigureAwait(false);
 
@@ -89,7 +88,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
             }
 
             // tcs.Task is completed above
-            return tcs.Task.Result; 
+            return tcs.Task.Result;
         }
     }
 

@@ -6,8 +6,6 @@
 /// <param name="url">Defaults to "nats://localhost:4222"</param>
 public class ApolloConfig
 {
-    public ApolloConfig() { }
-    public ApolloConfig(string url) { Url = url; }
     public string InstanceId { get; set; } = Guid.NewGuid().ToString();
     public string Url { get; set; } = "nats://localhost:4222";
     public string ConsumerName { get; set; } = "default-consumer";

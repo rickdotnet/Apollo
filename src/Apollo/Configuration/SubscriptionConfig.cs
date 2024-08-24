@@ -9,7 +9,6 @@ public record SubscriptionConfig
     public string? EndpointName { get; init; }
     public string? EndpointSubject { get; set; }
     public Type? EndpointType { get; set; }
-    // not used yet, but might be used for serialization
     public required Type[] MessageTypes { get; init; } = [];
     public required bool IsDurable { get; set; }
     public bool CreateMissingResources { get; set; }

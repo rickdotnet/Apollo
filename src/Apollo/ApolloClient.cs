@@ -5,25 +5,26 @@ using Apollo.Providers.Memory;
 
 namespace Apollo;
 
-public class ApolloClient //: IPublisher
+public class ApolloClient
 {
-    // eventually used to identify messages from the application
-    private readonly Guid instanceId = Guid.NewGuid();
     private readonly ISubscriptionProvider? defaultSubscriptionProvider;
+    private readonly ApolloConfig apolloConfig;
     private readonly IProviderPublisher? providerPublisher;
     private readonly IEndpointProvider? endpointProvider;
 
     public ApolloClient(
+        ApolloConfig apolloConfig,
         ISubscriptionProvider? defaultSubscriptionProvider = null,
         IProviderPublisher? providerPublisher = null,
         IEndpointProvider? endpointProvider = null
     )
     {
         this.defaultSubscriptionProvider = defaultSubscriptionProvider ?? InMemoryProvider.Instance;
+        this.apolloConfig = apolloConfig;
         this.providerPublisher = providerPublisher;
 
         // the default subscription provider might double as a publisher
-        if (this.providerPublisher is null 
+        if (this.providerPublisher is null
             && this.defaultSubscriptionProvider is IProviderPublisher provider)
         {
             this.providerPublisher = provider;
@@ -32,33 +33,42 @@ public class ApolloClient //: IPublisher
         this.endpointProvider = endpointProvider;
     }
 
-    // add an endpoint with handlers that are invoked when a message is received
-    public IApolloEndpoint AddEndpoint<T>(EndpointConfig config)
+    public IApolloEndpoint AddEndpoint<T>(EndpointConfig endpointConfig)
     {
-        // if config.AsyncMode is false (default)
-        return new SynchronousEndpoint(
-            config,
-            config.SubscriptionProvider ?? defaultSubscriptionProvider ?? throw new InvalidOperationException("No SubscriptionProvider provided"),
-            endpointProvider ?? throw new InvalidOperationException("No EndpointProvider provided"),
-            endpointType: typeof(T)
-        );
+        var config = SetEndpointDefaults(endpointConfig, typeof(T));
+        if (config.AsyncMode)
+            throw new NotImplementedException("Async mode is not implemented yet");
 
-        // if config.AsyncMode is true
-        // return new AsynchronousEndpoint()
+        return new SynchronousEndpoint(config);
     }
 
-    public IApolloEndpoint AddHandler(EndpointConfig config, Func<ApolloContext, CancellationToken, Task> handler)
-        => new SynchronousEndpoint(
-            config,
-            config.SubscriptionProvider ?? defaultSubscriptionProvider ?? throw new InvalidOperationException("No SubscriptionProvider provided"),
-            handler: handler);
+    public IApolloEndpoint AddHandler(EndpointConfig endpointConfig,
+        Func<ApolloContext, CancellationToken, Task> handler)
+    {
+        var config = SetEndpointDefaults(endpointConfig);
+        if (config.AsyncMode)
+            throw new NotImplementedException("Async mode is not implemented yet");
+        
+        return new SynchronousEndpoint(config, handler: handler);
+    }
 
     public IPublisher CreatePublisher(EndpointConfig endpointConfig)
         => CreatePublisher(endpointConfig.ToPublishConfig());
-    
+
     public IPublisher CreatePublisher(PublishConfig publishConfig)
     {
         publishConfig.ProviderPublisher ??= providerPublisher;
         return new DefaultPublisher(publishConfig);
     }
+    
+    private EndpointConfig SetEndpointDefaults(EndpointConfig config, Type? endpointType = null) 
+        => config with
+        {
+            InstanceId = config.InstanceId ?? apolloConfig.InstanceId,
+            ConsumerName = config.ConsumerName ?? apolloConfig.DefaultConsumerName,
+            Namespace = config.Namespace ?? apolloConfig.DefaultNamespace,
+            EndpointType = config.EndpointType ?? endpointType,
+            SubscriptionProvider = config.SubscriptionProvider ?? defaultSubscriptionProvider,
+            EndpointProvider = config.EndpointProvider ?? endpointProvider
+        };
 }

@@ -6,8 +6,8 @@ using Apollo.Configuration;
 namespace Apollo.Internal;
 
 // TLDR: need two config values to determine
-// 1. sync/async mode for message processing
-// 2. singleton vs new endpoint instance for each message
+// 1. sync/async mode for message concurrency
+// 2. singleton vs transient endpoint instance for each message
 
 // the timing and message pipeline of the endpoint is TBD
 // one thought is to send sync/async mode as a config option
@@ -26,6 +26,7 @@ internal class SynchronousEndpoint : IApolloEndpoint
 {
     private readonly EndpointConfig endpointConfig;
     private readonly ISubscriptionProvider subscriptionProvider;
+    private readonly IEndpointProvider? endpointProvider;
     private readonly Type? endpointType;
     private readonly object? endpointInstance;
     private readonly Func<ApolloContext, CancellationToken, Task>? handler;
@@ -36,21 +37,19 @@ internal class SynchronousEndpoint : IApolloEndpoint
     // subject -> `Handle(message)` cache
     private readonly Dictionary<Type, MethodInfo> handlers = new();
 
-    public SynchronousEndpoint(
-        EndpointConfig endpointConfig,
-        ISubscriptionProvider subscriptionProvider,
-        IEndpointProvider? endpointProvider = null,
-        Type? endpointType = null,
+    public SynchronousEndpoint(EndpointConfig endpointConfig,
         Func<ApolloContext, CancellationToken, Task>? handler = null
     )
     {
+        subscriptionProvider = endpointConfig.SubscriptionProvider
+                               ?? throw new ArgumentException("Subscription provider is required");
+
         this.endpointConfig = endpointConfig;
-        this.subscriptionProvider = subscriptionProvider;
-        this.endpointType = endpointType;
         this.handler = handler;
 
-        // in sync mode, the endpoint instance will effectively be a singleton
-        // ^ see comment at the top of the file
+        endpointProvider ??= endpointConfig.EndpointProvider;
+        endpointType = endpointConfig.EndpointType;
+
         if (endpointType is not null)
         {
             if (handler is not null)
@@ -77,71 +76,68 @@ internal class SynchronousEndpoint : IApolloEndpoint
 
         // create the subscription
         var sub = subscriptionProvider.AddSubscription(subscriptionConfig, InternalHandle);
-        
-        // endpointCancellationToken = cancellationToken;
+
+        // track the task for use in the future
+        // prob want to track the sub and control
+        // it via the subscription interface
         endpointTask = sub.SubscribeAsync(cancellationToken);
 
+        // let the caller go do other things
         return Task.CompletedTask;
     }
 
     public ValueTask DisposeAsync()
     {
+        // sub.StopAsync()
         return ValueTask.CompletedTask;
     }
 
     private async Task InternalHandle(ApolloContext context, CancellationToken cancellationToken)
     {
-        // need to queue the messages
-        // and wait for the previous message to finish
-
-        // not sure if we need this, but stubbing it out for now
         if (handlerOnly)
         {
             await handler!(context, cancellationToken);
+            return;
+        }
+
+        if (context.Message.MessageType is null)
+            throw new InvalidOperationException("Message type not found"); // assume byte[]?
+
+        // get or set cache
+        var handleMethod = handlers.GetValueOrDefault(context.Message.MessageType);
+        if (handleMethod is null)
+        {
+            handleMethod = endpointType!.GetMethod("HandleAsync",
+                [context.Message.MessageType!, typeof(CancellationToken)]);
+
+            if (handleMethod is null)
+                throw new InvalidOperationException("HandleAsync method not found");
+
+            handlers.TryAdd(context.Message.MessageType, handleMethod);
+        }
+
+        // invoke the method
+        var stringData = System.Text.Encoding.UTF8.GetString(context.Message.Data!);
+        var messageObject = JsonSerializer.Deserialize(stringData, context.Message.MessageType!);
+
+        var isRequest = context.Message.MessageType.IsRequest();
+        if (isRequest)
+        {
+            if (!context.ReplyAvailable)
+                throw new InvalidOperationException("Uh, oh: No reply available");
+
+            var response =
+                await (dynamic)handleMethod.Invoke(endpointInstance, [messageObject, cancellationToken])!;
+            
+            // TODO: serialization point
+            var responseJson = JsonSerializer.Serialize(response);
+            var responseBytes = System.Text.Encoding.UTF8.GetBytes(responseJson);
+            await context.ReplyAsync(responseBytes, cancellationToken);
         }
         else
         {
-            if (context.Message.MessageType is null)
-                throw new InvalidOperationException("Message type not found"); // assume byte[]?
-
-            var isRequest = context.Message.MessageType.IsRequest();
-
-            // get or set cache
-
-            var handleMethod = handlers.GetValueOrDefault(context.Message.MessageType);
-            if (handleMethod is null)
-            {
-                handleMethod = endpointType!.GetMethod("HandleAsync",
-                    [context.Message.MessageType!, typeof(CancellationToken)]);
-                
-                if (handleMethod is null)
-                    throw new InvalidOperationException("HandleAsync method not found");
-
-                handlers.TryAdd(context.Message.MessageType, handleMethod);
-            }
-
-            // invoke the method
-            var stringData = System.Text.Encoding.UTF8.GetString(context.Message.Data!);
-            var messageObject = JsonSerializer.Deserialize(stringData, context.Message.MessageType!);
-            // if messageType is Request, then we need to await Task<T> and respond
-            // else
-            // await Task
-            if (isRequest)
-            {
-                if (!context.ReplyAvailable)
-                    throw new InvalidOperationException("Uh, oh: No reply available");
-                
-                var response =
-                    await (dynamic)handleMethod.Invoke(endpointInstance, [messageObject, cancellationToken])!;
-                var responseJson = JsonSerializer.Serialize(response);
-                var responseBytes = System.Text.Encoding.UTF8.GetBytes(responseJson);
-                await context.ReplyAsync(responseBytes, cancellationToken);
-            }
-            else
-            {
-                var result = (Task)handleMethod.Invoke(endpointInstance, [messageObject, cancellationToken])!;
-                await result;
-            }
+            var result = (Task)handleMethod.Invoke(endpointInstance, [messageObject, cancellationToken])!;
+            await result;
         }
     }
 

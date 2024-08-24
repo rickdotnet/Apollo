@@ -8,16 +8,13 @@ namespace Apollo;
 
 public static class Setup
 {
-    public static IServiceCollection AddApollo(this IServiceCollection services, ApolloConfig? config = null)
+    public static IServiceCollection AddApollo(this IServiceCollection services, ApolloConfig? apolloConfig = null)
     {
-        if (config != null)
-            services.TryAddSingleton(config);
-        
-        services.AddSingleton(sp => new ApolloClient(
-            sp.GetService<ISubscriptionProvider>(), // default is set in constructor
-            sp.GetService<IProviderPublisher>(), // default is set in constructor
-            sp.GetService<IEndpointProvider>() ?? new DefaultEndpointProvider(sp)
-        ));
+        var config = apolloConfig ?? new();
+        services.TryAddSingleton(config);
+        services.TryAddSingleton<IEndpointProvider, DefaultEndpointProvider>();
+
+        services.AddSingleton<ApolloClient>();
 
         return services;
     }

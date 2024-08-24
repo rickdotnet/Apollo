@@ -1,26 +1,15 @@
-﻿using Apollo;
-using ConsoleDemo;
-using Microsoft.Extensions.DependencyInjection;
+﻿using ConsoleDemo.Demo;
+using Serilog;
+using Serilog.Events;
 
-var host = Demo.CreateHost(addProvider: false); // add NATS or na?
-using var scope = host.Services.CreateScope();
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(LogEventLevel.Debug,
+        "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+    .CreateLogger();
 
-var serviceProvider = scope.ServiceProvider;
-var apollo = serviceProvider.GetRequiredService<ApolloClient>();
-
-var endpoint = Demo.AddEndpoint<TestEndpoint>(apollo);
-_ = endpoint.StartEndpoint(CancellationToken.None);
-
-var anonEndpoint = Demo.AnonEndpoint(apollo);
-_ = anonEndpoint.StartEndpoint(CancellationToken.None);
-
-await Task.Delay(3000);
-
-var publisher = apollo.CreatePublisher(Demo.PublishConfig);
-await publisher.BroadcastAsync(new TestEvent("test message"), CancellationToken.None);
-await publisher.BroadcastAsync(new TestEvent("test message"), CancellationToken.None);
-await publisher.BroadcastAsync(new TestEvent("test message"), CancellationToken.None);
-await publisher.BroadcastAsync(new TestEvent("test message"), CancellationToken.None);
-
-Console.WriteLine("Press any key to exit");
-Console.ReadKey();
+//await OriginalDemo.Demo();
+//await Direct.Demo();
+await HostDemo.Demo();

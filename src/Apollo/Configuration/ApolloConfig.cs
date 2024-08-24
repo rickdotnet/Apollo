@@ -7,11 +7,11 @@
 public class ApolloConfig
 {
     public string InstanceId { get; set; } = Guid.NewGuid().ToString();
-    public string Url { get; set; } = "nats://localhost:4222";
-    public string ConsumerName { get; set; } = "default-consumer";
-    public string DefaultNamespace { get; set; } = "dev";
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
+    public string? ProviderUrl { get; set; } = "nats://localhost:4222";
+    public string? DefaultConsumerName { get; set; }
+    public string? DefaultNamespace { get; set; }
+    public string? Username { get; set; } = "";
+    public string? Password { get; set; } = "";
     
     /// <summary>
     /// Subscribers will create missing resources if set to true

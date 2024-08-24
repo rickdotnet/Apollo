@@ -4,13 +4,13 @@ namespace Apollo.Configuration;
 
 public record EndpointConfig
 {
-    public required string ConsumerName { get; set;}  // instance id?
-    public string? Namespace { get; set; } // namespace will prefix endpoint name
+    public string? ConsumerName { get; set;}  // set to ApolloConfig.DefaultConsumerName if not provided
+    public string? Namespace { get; set; } // set to ApolloConfig.DefaultNamespace if not provided; always prefixes the subject if provided
     public string? EndpointName { get; init; } // endpoint name or subject must be provided
     public string? EndpointSubject { get; set; } // endpoint name or subject must be provided
-    public bool IsDurable { get; set;}
+    public bool IsDurable { get; set;} 
     public bool CreateMissingResources { get; set; }
-    public ISubscriptionProvider? SubscriptionProvider { get; set; }
+    public ISubscriptionProvider? SubscriptionProvider { get; set; } // optionally override the DI subscription provider
 }
 
 public static class EndpointConfigExtensions

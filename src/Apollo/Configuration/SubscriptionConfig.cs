@@ -18,7 +18,7 @@ public record SubscriptionConfig
     {
         return new SubscriptionConfig
         {
-            ConsumerName = endpointConfig.ConsumerName,
+            ConsumerName = endpointConfig.ConsumerName ?? "", // TODO: revist this
             Namespace = endpointConfig.Namespace,
             EndpointName = endpointConfig.EndpointName,
             EndpointSubject = endpointConfig.EndpointSubject,

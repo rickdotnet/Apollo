@@ -15,8 +15,7 @@ public static class Demo
 {
     public static readonly ApolloConfig ApolloConfig = new()
     {
-        Url = "nats://localhost:4222",
-        ConsumerName = "testconsumer",
+        DefaultConsumerName = "testconsumer",
         DefaultNamespace = "dev.myapp",
         Username = "console",
         Password = "console"
@@ -50,7 +49,7 @@ public static class Demo
             builder.Services
                 .AddNatsProvider(opts => opts with
                 {
-                    Url = ApolloConfig.Url,
+                    Url = "nats://localhost:4222",
                     AuthOpts = new NatsAuthOpts
                     {
                         Username = ApolloConfig.Username,

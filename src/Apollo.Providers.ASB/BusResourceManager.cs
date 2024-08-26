@@ -1,19 +1,18 @@
+using Azure.Core;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 
 namespace Apollo.Providers.ASB;
 
-// might end up being a bit more than just a wrapper
-// isolating the resource management logic for now
-public class BusResourceManager
+internal class BusResourceManager : IAsyncDisposable
 {
-    private readonly ServiceBusClient client;
+    public ServiceBusClient Client { get; }
     private readonly ServiceBusAdministrationClient adminClient;
 
-    public BusResourceManager(ServiceBusClient client, ServiceBusAdministrationClient adminClient)
+    public BusResourceManager(string connectionString, TokenCredential creds)
     {
-        this.client = client;
-        this.adminClient = adminClient;
+        Client = new ServiceBusClient(connectionString, creds);
+        adminClient = new ServiceBusAdministrationClient(connectionString, creds);
     }
 
     public async Task<bool> QueueExistsAsync(string name, CancellationToken cancellationToken = default)
@@ -64,5 +63,13 @@ public class BusResourceManager
 
         if (!await SubscriptionExistsAsync(topicName, subscriptionName, cancellationToken))
             await CreateSubscriptionAsync(subscriptionOptions, cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Client is IDisposable disposableClient)
+            disposableClient.Dispose();
+        
+        await Client.DisposeAsync();
     }
 }

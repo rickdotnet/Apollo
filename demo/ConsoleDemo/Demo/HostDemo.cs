@@ -1,13 +1,15 @@
 using Apollo;
 using Apollo.Configuration;
+using Apollo.Providers.NATS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NATS.Client.Core;
 
 namespace ConsoleDemo.Demo;
 
 public static class HostDemo
 {
-    public static async Task Demo()
+    public static async Task Demo(bool useNats = false)
     {
         var endpointConfig = new EndpointConfig { ConsumerName = "endpoint", EndpointName = "Demo" };
         var anonConfig = new EndpointConfig { ConsumerName = "anon", EndpointSubject = "demo.testevent" };
@@ -16,6 +18,20 @@ public static class HostDemo
         builder.Services
             .AddApollo()
             .AddScoped<TestEndpoint>();
+
+        if (useNats)
+        {
+            builder.Services
+                .AddNatsProvider(opts => opts with
+                {
+                    Url = "nats://localhost:4222",
+                    AuthOpts = new NatsAuthOpts
+                    {
+                        Username = "apollo",
+                        Password = "demo"
+                    }
+                });
+        }
 
         var host = builder.Build();
         using var scope = host.Services.CreateScope();

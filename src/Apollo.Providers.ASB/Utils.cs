@@ -4,16 +4,19 @@ namespace Apollo.Providers.ASB;
 
 internal static class Utils
 {
-    public static string GetTopic(PublishConfig config)
+    public static string GetTopic(PublishConfig config, bool toLower = true)
         => GetTopic((config.Namespace, config.EndpointName, EndpointType: null, config.EndpointSubject))
             .TrimWildEnds();
 
-    public static string GetTopic(SubscriptionConfig config)
+    public static string GetTopic(SubscriptionConfig config, bool toLower = true)
         => GetTopic((config.Namespace, config.EndpointName, config.EndpointType, config.EndpointSubject));
 
     private static string GetTopic(
-        (string? Namespace, string? EndpointName, Type? EndpointType, string? EndpointSubject) config)
+        (string? Namespace, string? EndpointName, Type? EndpointType, string? EndpointSubject) config, bool toLower = true)
     {
+        // this entire class is carry over from POC
+        // need to take a proper look at Apollo subject mapping
+        // and stop forcing square pegs into round holes
         if (string.IsNullOrEmpty(config.Namespace)
             && string.IsNullOrEmpty(config.EndpointName)
             && string.IsNullOrEmpty(config.EndpointSubject))
@@ -28,7 +31,12 @@ internal static class Utils
         if (string.IsNullOrEmpty(endpoint))
             endpoint = Slugify(config.EndpointType?.Name);
 
-        var result = $"{config.Namespace}.{endpoint?.TrimWildEnds()}".ToLower();
+
+        var result = $"{endpoint?.TrimWildEnds()}";
+        if (!string.IsNullOrEmpty(config.Namespace))
+            result = $"{config.Namespace}.{result}";
+        
+        return toLower ? result.ToLower() : result;
 
         return result;
     }

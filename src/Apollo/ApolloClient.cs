@@ -65,7 +65,9 @@ public class ApolloClient
         => config with
         {
             InstanceId = config.InstanceId ?? apolloConfig.InstanceId,
-            ConsumerName = config.ConsumerName ?? apolloConfig.DefaultConsumerName,
+            ConsumerName = config.ConsumerName 
+                           ?? apolloConfig.DefaultConsumerName 
+                           ?? throw new Exception("ConsumerName is required."),
             Namespace = config.Namespace ?? apolloConfig.DefaultNamespace,
             EndpointType = config.EndpointType ?? endpointType,
             SubscriptionProvider = config.SubscriptionProvider ?? defaultSubscriptionProvider,

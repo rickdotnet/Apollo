@@ -3,7 +3,7 @@ using Serilog;
 using Serilog.Events;
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .MinimumLevel.Debug()
     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console(LogEventLevel.Debug,
@@ -12,4 +12,5 @@ Log.Logger = new LoggerConfiguration()
 
 //await OriginalDemo.Demo();
 //await Direct.Demo();
-await HostDemo.Demo();
+//await HostDemo.Demo();
+await AsbDemo.Demo();

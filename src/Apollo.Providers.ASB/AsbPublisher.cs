@@ -2,7 +2,7 @@ using Apollo.Abstractions;
 
 namespace Apollo.Providers.ASB;
 
-public class AsbPublisher : IPublisher
+internal class AsbPublisher : IPublisher
 {
     public Task SendAsync<TCommand>(TCommand commandMessage, CancellationToken cancellationToken) where TCommand : ICommand
     {

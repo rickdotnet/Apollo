@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
 using Serilog;
-using Serilog.Events;
 
 namespace ConsoleDemo.Demo;
 

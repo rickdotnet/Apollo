@@ -34,6 +34,8 @@ public static class Direct
 
         Console.WriteLine("Press any key to exit");
         Console.ReadKey();
+        
+        await endpoint.DisposeAsync();
     }
     class EndpointProvider : IEndpointProvider
     {

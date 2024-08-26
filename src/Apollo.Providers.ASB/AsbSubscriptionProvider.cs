@@ -1,13 +1,32 @@
 ﻿using Apollo.Abstractions;
 using Apollo.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Apollo.Providers.ASB;
 
-public class AsbSubscriptionProvider : ISubscriptionProvider
+
+internal class AsbSubscriptionProvider : ISubscriptionProvider
 {
-    public ISubscription AddSubscription(SubscriptionConfig config, Func<ApolloContext, CancellationToken, Task> handler)
+    private readonly ApolloConfig apolloConfig;
+    private readonly BusResourceManager resourceManager;
+    private readonly ILoggerFactory loggerFactory;
+
+    public AsbSubscriptionProvider(ApolloConfig apolloConfig, BusResourceManager resourceManager, ILoggerFactory loggerFactory)
     {
-        throw new NotImplementedException();
+        this.apolloConfig = apolloConfig;
+        this.resourceManager = resourceManager;
+        this.loggerFactory = loggerFactory;
+    }
+    
+    public ISubscription AddSubscription(SubscriptionConfig subscriptionConfig, Func<ApolloContext, CancellationToken, Task> handler)
+    {
+        return new AsbTopicSubscription(
+            apolloConfig,
+            subscriptionConfig,
+            resourceManager,
+            loggerFactory.CreateLogger<AsbTopicSubscription>(),
+            handler
+        );
     }
 }
 

@@ -13,7 +13,6 @@ public static class Setup
         var config = apolloConfig ?? new();
         services.TryAddSingleton(config);
         services.TryAddSingleton<IEndpointProvider, DefaultEndpointProvider>();
-
         services.AddSingleton<ApolloClient>();
 
         return services;

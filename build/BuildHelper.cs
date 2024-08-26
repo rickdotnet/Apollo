@@ -18,6 +18,8 @@ public static class BuildHelper
 
     public static async Task PackProjects(BuildConfiguration config)
     {
+        var cd = Directory.GetCurrentDirectory();
+        var files = Directory.GetFiles(Path.Combine(cd, "src"), "Apollo*.csproj", SearchOption.AllDirectories);
         foreach (var project in config.ProjectFiles)
         {
             await RunAsync("dotnet", $"pack {project} -c Release -o \"{config.PackOutput}\" --no-build --nologo");

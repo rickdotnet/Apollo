@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <PropertyGroup Label="Package">
-        <PackageId>RickDotNet.Apollo.Providers.ASB</PackageId>
+        <PackageId>RickDotNet.Apollo.Providers.NATS</PackageId>
     </PropertyGroup>
 
     <ItemGroup>

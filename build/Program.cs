@@ -14,6 +14,6 @@ Target(Targets.Pack, DependsOn(Targets.Test, Targets.CleanPackOutput),
 
 Target(Targets.Publish, DependsOn(Targets.Pack), () => BuildHelper.PublishPackage(configuration));
 
-Target("default", DependsOn(Targets.Test));
+Target("default", DependsOn(Targets.Pack));
 
 await RunTargetsAndExitAsync(args);

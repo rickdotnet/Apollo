@@ -37,8 +37,6 @@ internal static class Utils
             result = $"{config.Namespace}.{result}";
         
         return toLower ? result.ToLower() : result;
-
-        return result;
     }
 
     private static string? Slugify(string? input)

@@ -6,6 +6,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Label="Package">
+        <PackageId>RickDotNet.Apollo.Providers.ASB</PackageId>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\Apollo\Apollo.csproj" />
     </ItemGroup>

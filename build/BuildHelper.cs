@@ -16,13 +16,12 @@ public static class BuildHelper
             Directory.Delete(folder, true);
     }
 
-    public static Task PackProjects(BuildConfiguration config)
+    public static async Task PackProjects(BuildConfiguration config)
     {
-        return Task.WhenAll(
-            config.ProjectFiles.Select(
-                project => RunAsync("dotnet",
-                    $"pack {project} -c Release -o \"{config.PackOutput}\" --no-build --nologo")
-            ));
+        foreach (var project in config.ProjectFiles)
+        {
+            await RunAsync("dotnet", $"pack {project} -c Release -o \"{config.PackOutput}\" --no-build --nologo");
+        }
     }
 
     public static async Task PublishPackage(BuildConfiguration config)

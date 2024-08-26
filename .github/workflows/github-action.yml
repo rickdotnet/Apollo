@@ -4,7 +4,7 @@ name: Apollo Publish
 on:
   push:
     branches: [ "main" ]
-    paths: "build/default.props"
+    paths: "build/version.props"
 
 jobs:
   publish:

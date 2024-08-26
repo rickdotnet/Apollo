@@ -1,6 +1,7 @@
 <Project>
 	<Import Project="..\build\version.props" />
 	<PropertyGroup Label="Package">
+		<PackageIcon>image.jpg</PackageIcon>
 		<Authors>RickDotNet</Authors>
 		<RepositoryUrl>https://github.com/rickdotnet/Apollo</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -14,6 +15,7 @@
 	
 	<ItemGroup>
         	<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+        	<None Include="..\..\build\image.jpg" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 
 	<!-- Using SourceLink -->

@@ -30,11 +30,14 @@ internal static class Utils
         if (string.IsNullOrEmpty(endpoint))
             endpoint = Slugify(config.EndpointType?.Name);
 
-        var result = $"{config.Namespace}.{endpoint?.TrimWildEnds()}".ToLower();
+        endpoint = endpoint?.TrimWildEnds();
+        if(!string.IsNullOrWhiteSpace(config.Namespace))
+            endpoint = $"{config.Namespace}.{endpoint}";
+        
         if (config.EndpointType != null)
-            result += ".>";
+            endpoint += ".>";
 
-        return result;
+        return endpoint!;
     }
 
     private static string? Slugify(string? input)

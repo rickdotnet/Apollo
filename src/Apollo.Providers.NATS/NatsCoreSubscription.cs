@@ -27,8 +27,12 @@ internal class NatsCoreSubscription : ISubscription
         this.handler = handler;
 
         endpointSubject = Utils.GetSubject(config);
+        
+        // temp fix for NATS case sensitivity
+        if (endpointSubject.StartsWith('$'))
+            endpointSubject = endpointSubject.ToUpper();
 
-        var trimmedSubject = endpointSubject.TrimEnd('*').TrimEnd('>').TrimEnd('.');
+        var trimmedSubject = endpointSubject.TrimWildEnds();
         subjectTypeMapping = config.MessageTypes.ToDictionary(x => $"{trimmedSubject}.{x.Name.ToLower()}", x => x);
     }
 

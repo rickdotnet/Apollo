@@ -29,8 +29,11 @@ internal class NatsJetStreamSubscription : ISubscription
         this.handler = handler;
 
         endpointSubject = Utils.GetSubject(config);
+        
+        // temp fix for NATS case sensitivity
+        if (endpointSubject.StartsWith('$'))
+            endpointSubject = endpointSubject.ToUpper();
 
-        // trim .> and .* from the end of the subject
         var trimmedSubject = endpointSubject.TrimWildEnds();
         subjectTypeMapping = config.MessageTypes.ToDictionary(x => $"{trimmedSubject}.{x.Name.ToLower()}", x => x);
     }
@@ -47,9 +50,9 @@ internal class NatsJetStreamSubscription : ISubscription
             if (config.CreateMissingResources)
             {
                 logger.LogTrace("Creating stream {StreamName} for {Subjects}", streamNameClean,
-                    config.EndpointSubject);
+                    endpointSubject);
                 await js.CreateStreamAsync(
-                    new StreamConfig(streamNameClean, new[] { config.EndpointSubject }),
+                    new StreamConfig(streamNameClean, new[] { endpointSubject }),
                     cancellationToken);
             }
 
@@ -61,7 +64,7 @@ internal class NatsJetStreamSubscription : ISubscription
                 ? await js.CreateOrUpdateConsumerAsync(streamNameClean, consumerConfig, cancellationToken)
                 : await js.GetConsumerAsync(streamNameClean, config.ConsumerName, cancellationToken);
 
-            logger.LogInformation("Subscribing to {Subject}", config.EndpointSubject);
+            logger.LogInformation("Subscribing to {Subject}", endpointSubject);
             await foreach (var msg in consumer.ConsumeAsync<byte[]>().WithCancellation(cancellationToken))
             {
                 var handlerOnly = config.EndpointType == null;
@@ -95,7 +98,7 @@ internal class NatsJetStreamSubscription : ISubscription
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error subscribing to {EndpointSubject}", config.EndpointSubject);
+            logger.LogError(ex, "Error subscribing to {EndpointSubject}", endpointSubject);
         }
 
         return;

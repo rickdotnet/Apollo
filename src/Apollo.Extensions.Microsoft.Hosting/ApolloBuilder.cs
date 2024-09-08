@@ -17,6 +17,7 @@ public class ApolloBuilder : IApolloBuilder
 {
     public IServiceCollection Services { get; }
     private IEndpointProvider? defaultEndpointProvider;
+    private bool publishOnly;
 
     public ApolloBuilder(IServiceCollection services)
     {
@@ -42,10 +43,19 @@ public class ApolloBuilder : IApolloBuilder
         defaultEndpointProvider = endpointProvider;
         return this;
     }
-    
+
+    public IApolloBuilder PublishOnly(bool publishOnly = true)
+    {
+        this.publishOnly = publishOnly;
+        return this;
+    }
+
     public void Build()
     {
         Services.AddSingleton<ApolloClient>();
+
+        if (publishOnly) return;
+        
         Services.AddHostedService<ApolloBackgroundService>();
 
         if (defaultEndpointProvider is not null)

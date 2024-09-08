@@ -11,6 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Apollo.Extensions.Microsoft.Hosting\Apollo.Extensions.Microsoft.Hosting.csproj" />
       <ProjectReference Include="..\Apollo\Apollo.csproj" />
     </ItemGroup>
 

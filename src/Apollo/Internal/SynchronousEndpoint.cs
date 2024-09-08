@@ -62,6 +62,9 @@ internal class SynchronousEndpoint : IApolloEndpoint
 
             // grab the instance from the DI container 
             endpointInstance = endpointProvider.GetService(endpointType);
+            
+            if(endpointInstance is null)
+                throw new InvalidOperationException("Endpoint instance not found");
         }
         else if (handler is null)
         {

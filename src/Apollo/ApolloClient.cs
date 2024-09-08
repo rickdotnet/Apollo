@@ -34,8 +34,11 @@ public class ApolloClient
     }
 
     public IApolloEndpoint AddEndpoint<T>(EndpointConfig endpointConfig)
+        => AddEndpoint(typeof(T), endpointConfig);
+    
+    public IApolloEndpoint AddEndpoint(Type endpointType, EndpointConfig endpointConfig)
     {
-        var config = SetEndpointDefaults(endpointConfig, typeof(T));
+        var config = SetEndpointDefaults(endpointConfig, endpointType);
         if (config.AsyncMode)
             throw new NotImplementedException("Async mode is not implemented yet");
 

@@ -12,11 +12,6 @@ public record ApolloConfig
     public string InstanceId { get; set; } = Guid.NewGuid().ToString();
     
     /// <summary>
-    /// Connection string forwarded to the provider
-    /// </summary>
-    public string? ProviderUrl { get; set; } = "nats://localhost:4222";
-    
-    /// <summary>
     /// Default consumer name to use when not specified by Endpoints
     /// </summary>
     public string? DefaultConsumerName { get; set; }

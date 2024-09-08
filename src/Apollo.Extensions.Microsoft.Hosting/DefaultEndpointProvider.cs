@@ -1,6 +1,6 @@
 using Apollo.Abstractions;
 
-namespace Apollo.Internal;
+namespace Apollo.Extensions.Microsoft.Hosting;
 
 internal class DefaultEndpointProvider(IServiceProvider provider) : IEndpointProvider
 {

@@ -1,4 +1,5 @@
 ﻿using Apollo.Abstractions;
+using Apollo.Extensions.Microsoft.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NATS.Client.Core;
 using NATS.Extensions.Microsoft.DependencyInjection;
@@ -7,16 +8,12 @@ namespace Apollo.Providers.NATS;
 
 public static class Setup
 {
-    public static IServiceCollection AddNatsProvider(this IServiceCollection services, Func<NatsOpts, NatsOpts> configureOptions)
+    public static IApolloBuilder AddNatsProvider(this IApolloBuilder builder, Func<NatsOpts, NatsOpts> configureOptions)
     {
-        services.AddNatsClient(
-            nats => nats.ConfigureOptions(
-                opts => configureOptions(opts)
-            )
-        );
+        builder.Services.AddNatsClient(nats => nats.ConfigureOptions(configureOptions));
 
-        services.AddSingleton<ISubscriptionProvider, NatsSubscriptionProvider>();
-        services.AddSingleton<IProviderPublisher, NatsPublisher>();
-        return services;
+        builder.Services.AddSingleton<ISubscriptionProvider, NatsSubscriptionProvider>();
+        builder.Services.AddSingleton<IProviderPublisher, NatsPublisher>();
+        return builder;
     }
 }

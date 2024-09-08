@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using System.Text.Json;
 using Apollo;
 using Apollo.Configuration;
+using Apollo.Extensions.Microsoft.Hosting;
 using Apollo.Providers.ASB;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,27 +11,28 @@ namespace ConsoleDemo.Demo;
 
 public class AsbDemo
 {
-    public static ValueTask Demo()
+    public static async ValueTask Demo()
     {
-        // will get fancy later
-        var apolloConfig = new ApolloConfig
+        var anonConfig = new EndpointConfig
         {
-            ProviderUrl = "", // asb connection string
-            DefaultConsumerName = "", // default subscription name
-            CreateMissingResources = false
+            EndpointSubject = "topic-test", // topic name
+            ConsumerName = "Sandbox.Test", // subscription name
+            EndpointName = "Topic Test", // display only when subject is sent
         };
-
+        
         var asbConfig = new AsbConfig
         {
-            ConnectionString = apolloConfig.ProviderUrl,
+            ConnectionString = "",
             // SubscriptionName = "",
             // CreateMissingResources = false
         };
 
         var builder = Host.CreateApplicationBuilder();
         builder.Services
-            .AddApollo(apolloConfig)
-            .AddAsbProvider(asbConfig);
+            .AddApollo(apolloBuilder => apolloBuilder
+                    .AddHandler(anonConfig, Handle)
+                    .AddAsbProvider(asbConfig)
+                );
         //.AddScoped<TestEndpoint>();
 
         var host = builder.Build();
@@ -39,28 +40,21 @@ public class AsbDemo
         var serviceProvider = scope.ServiceProvider;
         var apollo = serviceProvider.GetRequiredService<ApolloClient>();
 
-        // public required string TopicName { get; init; }
-        // public required string SubscriptionName { get; init; }
-        // public bool IsDurable => true;
-        // public bool CreateMissingResources { get; set; }
-        var anonConfig = new EndpointConfig
-        {
-            EndpointSubject = "topic-test", // topic name
-            ConsumerName = "Sandbox.Test", // subscription name
-            EndpointName = "Topic Test", // display only when subject is sent
-        };
+        var publisher = apollo.CreatePublisher(anonConfig);
 
-        var anonEndpoint = apollo.AddHandler(anonConfig, Handle);
-
-        _ = anonEndpoint.StartEndpoint(CancellationToken.None);
+        await Task.WhenAll(
+            publisher.BroadcastAsync(new TestEvent("test 1"), CancellationToken.None),
+            publisher.BroadcastAsync(new TestEvent("test 2"), CancellationToken.None),
+            publisher.BroadcastAsync(new TestEvent("test 3"), CancellationToken.None),
+            publisher.BroadcastAsync(new TestEvent("test 4"), CancellationToken.None),
+            publisher.BroadcastAsync(new TestEvent("test 5"), CancellationToken.None)
+        );        
 
         Log.Verbose("Press any key to exit");
         Console.ReadKey();
-
-        return anonEndpoint.DisposeAsync();
     }
 
-    static int count = 0; // demo concurrency
+    static int count; // demo concurrency
 
     private static Task Handle(ApolloContext context, CancellationToken token)
     {

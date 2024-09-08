@@ -1,5 +1,5 @@
 ﻿using Apollo.Abstractions;
-using Apollo.Configuration;
+using Apollo.Extensions.Microsoft.Hosting;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,15 +9,15 @@ namespace Apollo.Providers.ASB;
 public static class Setup
 {
     [Obsolete("The ASB provider is not fully implemented .", false)]
-    public static IServiceCollection AddAsbProvider(this IServiceCollection services, AsbConfig asbConfig)
+    public static IApolloBuilder AddAsbProvider(this IApolloBuilder builder, AsbConfig asbConfig)
     {
-        services.AddSingleton(asbConfig);
-        services.AddSingleton(new BusResourceManager(asbConfig.ConnectionString, GetCreds(asbConfig)));
-        services.AddSingleton<AsbSubscriptionProvider>();
-        services.AddSingleton<ISubscriptionProvider>(x => x.GetRequiredService<AsbSubscriptionProvider>());
+        builder.Services.AddSingleton(asbConfig);
+        builder.Services.AddSingleton(new BusResourceManager(asbConfig.ConnectionString, GetCreds(asbConfig)));
+        builder.Services.AddSingleton<AsbSubscriptionProvider>();
+        builder.Services.AddSingleton<ISubscriptionProvider>(x => x.GetRequiredService<AsbSubscriptionProvider>());
         
         
-        return services;
+        return builder;
     }
 
     private static TokenCredential GetCreds(AsbConfig asbConfig)

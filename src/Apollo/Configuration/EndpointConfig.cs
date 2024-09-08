@@ -7,7 +7,7 @@ public record EndpointConfig
     public string? InstanceId { get; internal set; } // set by apollo
     public string? ConsumerName { get; set;}  // set to ApolloConfig.DefaultConsumerName if not provided
     public string? Namespace { get; set; } // set to ApolloConfig.DefaultNamespace if not provided; always prefixes the subject if provided
-    public Type? EndpointType { get; internal set; } // set by ApolloClient
+    internal Type? EndpointType { get; set; } // set by ApolloClient
     public string? EndpointName { get; init; } // endpoint name or subject must be provided
     public string? EndpointSubject { get; set; } // endpoint name or subject must be provided
     public bool IsDurable { get; set;} 

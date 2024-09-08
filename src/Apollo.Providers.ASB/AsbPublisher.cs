@@ -14,7 +14,7 @@ internal class AsbPublisher : IPublisher
         throw new NotImplementedException();
     }
 
-    public Task<TResponse?> RequestAsync<TRequest, TResponse>(TRequest requestMessage, CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
+    public Task<TResponse?> RequestAsync<TRequest, TResponse>(TRequest requestMessage, CancellationToken cancellationToken) where TRequest : IRequest
     {
         throw new NotImplementedException();
     }

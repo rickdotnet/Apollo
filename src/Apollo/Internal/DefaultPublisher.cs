@@ -36,7 +36,7 @@ internal class DefaultPublisher : IPublisher
         return providerPublisher.PublishAsync(publishConfig, apolloMessage, cancellationToken);
     }
 
-    public  async Task<TResponse?> RequestAsync<TRequest, TResponse>(TRequest requestMessage, CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
+    public  async Task<TResponse?> RequestAsync<TRequest, TResponse>(TRequest requestMessage, CancellationToken cancellationToken) where TRequest : IRequest
     {
         var apolloMessage = new ApolloMessage
         {

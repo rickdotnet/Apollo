@@ -25,6 +25,6 @@ internal static class TypeExtensions
     
     public static bool IsRequest(this Type type)
     {
-        return type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>));
+        return type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest));
     }
 }

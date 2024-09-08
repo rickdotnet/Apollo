@@ -2,8 +2,6 @@
 
 namespace Apollo.Abstractions;
 
-//public record ApolloMessage : ApolloMessage<object>;
-//public record ApolloMessage<T>
 public record ApolloMessage
 {
     public string Subject { get; set; } = string.Empty;

@@ -95,6 +95,6 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
     private static bool IsRequest(Type? type)
     {
         return type?.GetInterfaces()
-            .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>)) is true;
+            .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest)) is true;
     }
 }

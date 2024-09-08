@@ -21,12 +21,12 @@ public record EndpointConfig
     /// <summary>
     /// Optionally override the DI subscription provider
     /// </summary>
-    public ISubscriptionProvider? SubscriptionProvider { get; set; } // optionally override the DI subscription provider
+    public ISubscriptionProvider? SubscriptionProvider { get; set; }
     
     /// <summary>
     /// Optionally override the DI endpoint provider
     /// </summary>
-    public IEndpointProvider? EndpointProvider { get; set; } // optionally override the DI endpoint provider
+    public IEndpointProvider? EndpointProvider { get; set; }
 }
 
 public static class EndpointConfigExtensions

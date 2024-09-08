@@ -1,3 +1,3 @@
 ﻿namespace Apollo.Abstractions;
 
-public interface IRequest<T> : IMessage { }
+public interface IRequest : IMessage { }

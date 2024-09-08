@@ -22,16 +22,6 @@ public record ApolloConfig
     public string? DefaultNamespace { get; set; }
     
     /// <summary>
-    /// Username forwarded to the provider
-    /// </summary>
-    public string? Username { get; set; } = "";
-
-    /// <summary>
-    /// Password forwarded to the provider
-    /// </summary>
-    public string? Password { get; set; } = "";
-    
-    /// <summary>
     /// Subscribers will create missing resources if set to true
     /// </summary>
     public bool CreateMissingResources { get; set; } = false;

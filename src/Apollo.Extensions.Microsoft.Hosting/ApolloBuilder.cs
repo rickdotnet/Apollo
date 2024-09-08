@@ -11,6 +11,8 @@ public interface IApolloBuilder
     IApolloBuilder AddEndpoint<TEndpoint>(EndpointConfig config) where TEndpoint : class;
     IApolloBuilder AddHandler(EndpointConfig config, Func<ApolloContext, CancellationToken, Task> handler);
     IApolloBuilder WithEndpointProvider(IEndpointProvider endpointProvider);
+
+    IApolloBuilder PublishOnly(bool publishOnly = true);
 }
 
 public class ApolloBuilder : IApolloBuilder

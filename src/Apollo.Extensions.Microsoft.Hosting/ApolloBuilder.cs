@@ -26,14 +26,14 @@ public class ApolloBuilder : IApolloBuilder
     public IApolloBuilder AddEndpoint<TEndpoint>(EndpointConfig config) where TEndpoint : class
     {
         Services.TryAddSingleton<TEndpoint>();
-        Services.TryAddSingleton<IEndpointRegistration>(EndpointRegistration.From<TEndpoint>(config));
+        Services.AddSingleton<IEndpointRegistration>(EndpointRegistration.From<TEndpoint>(config));
 
         return this;
     }
 
     public IApolloBuilder AddHandler(EndpointConfig config, Func<ApolloContext, CancellationToken, Task> handler)
     {
-        Services.TryAddSingleton<IEndpointRegistration>(EndpointRegistration.From(config, handler));
+        Services.AddSingleton<IEndpointRegistration>(EndpointRegistration.From(config, handler));
         return this;
     }
 

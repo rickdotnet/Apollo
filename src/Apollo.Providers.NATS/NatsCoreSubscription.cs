@@ -7,7 +7,7 @@ namespace Apollo.Providers.NATS;
 
 internal class NatsCoreSubscription : ISubscription
 {
-    private readonly NatsConnection connection;
+    private readonly INatsConnection connection;
     private readonly ILogger<NatsCoreSubscription> logger;
     private readonly SubscriptionConfig config;
     private readonly Func<ApolloContext, CancellationToken, Task> handler;
@@ -15,7 +15,7 @@ internal class NatsCoreSubscription : ISubscription
     private readonly Dictionary<string, Type> subjectTypeMapping;
 
     public NatsCoreSubscription(
-        NatsConnection connection,
+        INatsConnection connection,
         ILogger<NatsCoreSubscription> logger,
         SubscriptionConfig config,
         Func<ApolloContext, CancellationToken, Task> handler

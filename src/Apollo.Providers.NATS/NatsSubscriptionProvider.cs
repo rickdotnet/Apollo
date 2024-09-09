@@ -7,10 +7,10 @@ namespace Apollo.Providers.NATS;
 
 internal class NatsSubscriptionProvider : ISubscriptionProvider
 {
-    private readonly NatsConnection connection;
+    private readonly INatsConnection connection;
     private readonly ILoggerFactory loggerFactory;
 
-    public NatsSubscriptionProvider(NatsConnection connection, ILoggerFactory loggerFactory)
+    public NatsSubscriptionProvider(INatsConnection connection, ILoggerFactory loggerFactory)
     {
         this.connection = connection;
         this.loggerFactory = loggerFactory;

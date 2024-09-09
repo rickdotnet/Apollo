@@ -380,3 +380,10 @@ MigrationBackup/
 # JetBrains Rider
 *.sln.iml
 .idea/
+
+# Doc Generation
+docs/source/*.md
+docs/source/*.yml
+docs/source/.manifest
+docs/_site
+docs/source/.manifest

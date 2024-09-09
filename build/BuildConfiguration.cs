@@ -5,6 +5,7 @@ public class BuildConfiguration
     public string RootDirectory { get; }
     public string SolutionFile => Path.Combine(RootDirectory, "src", "Apollo.sln");
     public string PackOutput => Path.Combine(RootDirectory, "dist");
+    public string DocsConfigFile => Path.Combine(RootDirectory, "docs", "docfx.json");
     public string TestSearchPattern => Path.Combine(".", "tests", "*");
     public string ProjectsSearchPattern => "Apollo*.csproj";
     

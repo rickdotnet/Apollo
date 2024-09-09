@@ -1,4 +1,5 @@
-﻿using static SimpleExec.Command;
+﻿using Docfx.Dotnet;
+using static SimpleExec.Command;
 
 namespace build;
 
@@ -15,15 +16,20 @@ public static class BuildHelper
         if (Directory.Exists(folder))
             Directory.Delete(folder, true);
     }
+    
+    public static async Task GenerateDocs(BuildConfiguration config)
+    {
+        // build source file docs 
+        await DotnetApiCatalog.GenerateManagedReferenceYamlFiles(config.DocsConfigFile);
+        
+        // build doc site
+        await Docfx.Docset.Build(config.DocsConfigFile);
+    }
 
     public static async Task PackProjects(BuildConfiguration config)
     {
-        var cd = Directory.GetCurrentDirectory();
-        var files = Directory.GetFiles(Path.Combine(cd, "src"), "Apollo*.csproj", SearchOption.AllDirectories);
         foreach (var project in config.ProjectFiles)
-        {
             await RunAsync("dotnet", $"pack {project} -c Release -o \"{config.PackOutput}\" --no-build --nologo");
-        }
     }
 
     public static async Task PublishPackage(BuildConfiguration config)

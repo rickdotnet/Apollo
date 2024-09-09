@@ -14,6 +14,9 @@ Target(Targets.Pack, DependsOn(Targets.Test, Targets.CleanPackOutput),
 
 Target(Targets.Publish, DependsOn(Targets.Pack), () => BuildHelper.PublishPackage(configuration));
 
-Target("default", DependsOn(Targets.Pack));
+Target(Targets.GenerateDocs, DependsOn(Targets.Build), async () => await BuildHelper.GenerateDocs(configuration));
+
+//Target("default", DependsOn(Targets.Pack));
+Target("default", DependsOn(Targets.GenerateDocs));
 
 await RunTargetsAndExitAsync(args);

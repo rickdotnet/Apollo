@@ -1,21 +1,53 @@
-# See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 name: Apollo Publish
+
+permissions:
+  actions: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages-publishing-group"
+  cancel-in-progress: false
 
 on:
   push:
     branches: [ "main" ]
-    paths: "build/version.props"
+    paths:
+      - "build/version.props" # trigger publish only for version changes
+  workflow_dispatch: # enable manual trigger (for off-publish doc updates)
 
 jobs:
   publish:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup Dotnet
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.x
-    - name: Build and Publish
+    - name: Build and Publish Package
       run: dotnet run --project ./build/build.csproj -- publish
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+  generate_docs:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.x
+    - name: Build Docs
+      run: dotnet run --project ./build/build.csproj -- generate-docs
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: 'docs/_site'
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
+      id: deployment

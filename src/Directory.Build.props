@@ -6,10 +6,10 @@
 		<RepositoryUrl>https://github.com/rickdotnet/Apollo</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
-		<PackageProjectUrl>https://github.com/rickdotnet/Apollo</PackageProjectUrl>
+		<PackageProjectUrl>https://apollo.rickdot.net</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageTags>Apollo;NATS;Distributed-Messaging;pubsub</PackageTags>
-		<Description>Distributed messaging built on top of NATS.</Description>
+		<PackageTags>Apollo;NATS;Distributed-Messaging;pubsub;endpoint;</PackageTags>
+		<Description>Distributed messaging library.</Description>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 	

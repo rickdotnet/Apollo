@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "build", "..\build\build.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Extensions.Microsoft.Hosting", "Apollo.Extensions.Microsoft.Hosting\Apollo.Extensions.Microsoft.Hosting.csproj", "{479DA004-8B35-4DB5-A932-F0A447092351}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{534F973C-2822-477E-B930-9ADBE47C9F3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Apollo.Providers.NATS.Tests", "..\tests\Apollo.Providers.NATS.Tests\Apollo.Providers.NATS.Tests.csproj", "{4C7EE670-3C9A-4DD8-9FC4-9DAF98B544FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +52,10 @@ Global
 		{479DA004-8B35-4DB5-A932-F0A447092351}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{479DA004-8B35-4DB5-A932-F0A447092351}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{479DA004-8B35-4DB5-A932-F0A447092351}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C7EE670-3C9A-4DD8-9FC4-9DAF98B544FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C7EE670-3C9A-4DD8-9FC4-9DAF98B544FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C7EE670-3C9A-4DD8-9FC4-9DAF98B544FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C7EE670-3C9A-4DD8-9FC4-9DAF98B544FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9BDF9386-096A-43B1-AE6B-85EDE94AC743} = {FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}
@@ -56,5 +64,6 @@ Global
 		{9C0E4983-FE32-4DC4-AFBA-0EA5BA9A0B3C} = {FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}
 		{4CB2ED5A-4DA7-4908-A9D8-7D8B345E4007} = {30C30859-8FA1-4399-9556-0D435B6357DB}
 		{479DA004-8B35-4DB5-A932-F0A447092351} = {FB5261E1-CCA4-4F5A-B87B-F8F48B14A249}
+		{4C7EE670-3C9A-4DD8-9FC4-9DAF98B544FF} = {534F973C-2822-477E-B930-9ADBE47C9F3A}
 	EndGlobalSection
 EndGlobal

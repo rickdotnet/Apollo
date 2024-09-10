@@ -8,8 +8,6 @@ internal static class Utils
         => GetSubject((config.Namespace, config.EndpointName, EndpointType: null, config.EndpointSubject))
             .TrimWildEnds();
 
-    
-
     public static string GetSubject(SubscriptionConfig config)
         => GetSubject((config.Namespace, config.EndpointName, config.EndpointType, config.EndpointSubject));
 
@@ -24,27 +22,37 @@ internal static class Utils
         }
 
         var endpoint = config.EndpointSubject;
+        var explicitSubject = !string.IsNullOrEmpty(endpoint);
         if (string.IsNullOrEmpty(endpoint))
             endpoint = Slugify(config.EndpointName);
 
         if (string.IsNullOrEmpty(endpoint))
             endpoint = Slugify(config.EndpointType?.Name);
 
-        endpoint = endpoint?.TrimWildEnds();
-        if(!string.IsNullOrWhiteSpace(config.Namespace))
-            endpoint = $"{config.Namespace}.{endpoint}";
-        
-        if (config.EndpointType != null)
-            endpoint += ".>";
+        if (!string.IsNullOrWhiteSpace(config.Namespace))
+        {
+            endpoint = !string.IsNullOrWhiteSpace(endpoint) 
+                ? $"{config.Namespace}.{endpoint}" 
+                : config.Namespace;
+        }
 
-        return endpoint!;
+        if (string.IsNullOrWhiteSpace(endpoint))
+            throw new ArgumentException("Endpoint could not be determined");
+
+        if (!explicitSubject)
+            endpoint = $"{endpoint.TrimWildEnds()}.>";
+
+        // temp fix for NATS case sensitivity
+        return endpoint.StartsWith('$')
+            ? endpoint.ToUpper()
+            : endpoint;
     }
 
     private static string? Slugify(string? input)
     {
         return input?.ToLower().Replace(" ", "-");
     }
-    
+
     /// <summary>
     /// Trims '.>' and '.*' from the end of the string
     /// </summary>
@@ -52,6 +60,7 @@ internal static class Utils
     /// <returns></returns>
     public static string TrimWildEnds(this string subject)
         => subject.TrimEnd('>').TrimEnd('*').TrimEnd('.');
+
     public static string CleanStreamName(this string streamName)
     {
         return streamName.Replace(".", "_")

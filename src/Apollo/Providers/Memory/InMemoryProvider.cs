@@ -8,7 +8,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
 {
     public static readonly InMemoryProvider Instance = new();
     private readonly Dictionary<string, List<ChannelWriter<ApolloContext>>> subscriptions = new();
-    private readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(30);
+    private readonly TimeSpan requestTimeout = TimeSpan.FromSeconds(30);
 
     public ISubscription AddSubscription(SubscriptionConfig config,
         Func<ApolloContext, CancellationToken, Task> handler)
@@ -16,26 +16,10 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         var sub = new InMemorySubscription(handler);
         var subjectKey = MemoryUtils.GetSubject(config);
 
-        var isHandlerOnly = config.EndpointType is null;
-        if (isHandlerOnly)
-        {
-            if (!subscriptions.ContainsKey(subjectKey))
-                subscriptions[subjectKey] = [];
+        if (!subscriptions.ContainsKey(subjectKey))
+            subscriptions[subjectKey] = [];
 
-            subscriptions[subjectKey].Add(sub.Writer);
-        }
-        else
-        {
-            foreach (var messageType in config.MessageTypes)
-            {
-                var compositeKey = $"{subjectKey}.{messageType?.Name}".ToLower();
-                if (!subscriptions.ContainsKey(compositeKey))
-                    subscriptions[compositeKey] = [];
-
-                subscriptions[compositeKey].Add(sub.Writer);
-            }
-        }
-
+        subscriptions[subjectKey].Add(sub.Writer);
         return sub;
     }
 
@@ -78,7 +62,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         {
             await writer.WriteAsync(new ApolloContext(message, replyFunc), cancellationToken);
 
-            var timeoutTask = Task.Delay(RequestTimeout, cancellationToken);
+            var timeoutTask = Task.Delay(requestTimeout, cancellationToken);
             var completedTask = await Task.WhenAny(tcs.Task, timeoutTask).ConfigureAwait(false);
 
             if (completedTask == timeoutTask)

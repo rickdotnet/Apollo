@@ -7,8 +7,10 @@ namespace Apollo.Providers.Memory;
 internal static class MemoryUtils
 {
     public static string GetSubject(PublishConfig config, Type? messageType = null)
-        => GetSubject((config.Namespace, config.EndpointName, EndpointType: null, config.EndpointSubject))
-            .TrimWildEnds() + $".{messageType?.Name.ToLower()}";
+    {
+        return GetSubject((config.Namespace, config.EndpointName, EndpointType: null, config.EndpointSubject))
+            .TrimWildEnds();// + $".{messageType?.Name.ToLower()}";
+    }
 
     private static string TrimWildEnds(this string subject)
         => subject.TrimEnd('>').TrimEnd('*').TrimEnd('.');

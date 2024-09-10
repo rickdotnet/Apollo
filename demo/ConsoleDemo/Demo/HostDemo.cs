@@ -23,7 +23,7 @@ public static class HostDemo
                 {
                     apolloBuilder
                         .AddEndpoint<TestEndpoint>(endpointConfig)
-                        .AddHandler(anonConfig, (context, token) =>
+                        .AddHandler(anonConfig, (_, _) =>
                         {
                             Console.WriteLine($"Anonymous handler received: {count++}");
                             return Task.CompletedTask;

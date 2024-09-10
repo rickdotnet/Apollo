@@ -1,3 +1,4 @@
 ﻿namespace Apollo.Abstractions;
 
-public interface IRequest : IMessage { }
+// ReSharper disable once UnusedTypeParameter
+public interface IRequest<T> :  IMessage { }

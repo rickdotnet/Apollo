@@ -39,7 +39,8 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         await Task.WhenAll(tasks);
     }
 
-    public async Task<byte[]> RequestAsync(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
+    public async Task<byte[]> RequestAsync(PublishConfig publishConfig, ApolloMessage message,
+        CancellationToken cancellationToken)
     {
         var subjectKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
         if (!subscriptions.TryGetValue(subjectKey, out var subscription))
@@ -76,9 +77,6 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         }
     }
 
-    private static bool IsRequest(Type? type)
-    {
-        return type?.GetInterfaces()
-            .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest)) is true;
-    }
+    private static bool IsRequest(Type? type) 
+        => type?.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRequest<>)) is true;
 }

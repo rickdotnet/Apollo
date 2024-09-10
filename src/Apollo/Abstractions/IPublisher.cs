@@ -10,5 +10,5 @@ public interface IPublisher
 
     Task<TResponse?> RequestAsync<TRequest, TResponse>(TRequest requestMessage,
         CancellationToken cancellationToken)
-        where TRequest : IRequest;
+        where TRequest : IRequest<TResponse>;
 }

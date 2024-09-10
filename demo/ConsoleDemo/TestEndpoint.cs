@@ -5,7 +5,7 @@ namespace ConsoleDemo;
 
 public record TestEvent(string Message) : IEvent;
 public record TestCommand(string Message) : ICommand;
-public record TestRequest(string Message) : IRequest;
+public record TestRequest(string Message) : IRequest<TestResponse>;
 public record TestResponse(string Message);
 
 public class TestEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>, IReplyTo<TestRequest, TestResponse>

@@ -8,6 +8,6 @@ Apollo aims to be a lightweight, high-performance messaging client designed to p
 
 ## Now what?
 
-[Documentation](content/introduction.html) is the best place to start.
+[Documentation](content/introduction.md) is the best place to start.
 
-[Source](source/Apollo.html) is also available.
+[Source](/source/Apollo.html) is also available.

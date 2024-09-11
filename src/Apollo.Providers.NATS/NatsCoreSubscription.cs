@@ -74,7 +74,7 @@ internal class NatsCoreSubscription : ISubscription
             var message = new ApolloMessage
             {
                 Subject = natsMsg.Subject,
-                Headers = natsMsg.Headers,
+                Headers = natsMsg.Headers ?? new NatsHeaders(),
                 Data = natsMsg.Data,
             };
 

@@ -67,4 +67,11 @@ Subscription configurations contain more properties for providers to use when ma
 
 Providers are the backbone of the routing mechanism within Apollo. They control the route mapping based on the subscription configuration, making it possible to listen on multiple providers and proxy them to others.
 
+### Visual
+
+This is roughly the in-memory implementation, with the `InMemoryProvider` pulling double provider duty.
+
+![Apollo In-Memory](/images/apollo-in-memory.png)
+
+
 

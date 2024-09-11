@@ -69,7 +69,7 @@ Providers are the backbone of the routing mechanism within Apollo. They control 
 
 ### Visual
 
-This is roughly the in-memory implementation, with the `InMemoryProvider` pulling double provider duty.
+This is roughly the in-memory implementation, with the `InMemoryProvider` pulling double provider duty. `InMemorySubscription` is the other half of the equation. `DefaultEndpointProvider` also comes free with the `Apollo.Extensions.Microsoft.Hosting` package.
 
 ![Apollo In-Memory](/images/apollo-in-memory.png)
 

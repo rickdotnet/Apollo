@@ -4,7 +4,7 @@ namespace Apollo.Abstractions;
 
 public interface IProviderPublisher
 {
-    Task PublishAsync(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken);
+    Task Publish(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken);
     
-    Task<byte[]> RequestAsync(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken);
+    Task<byte[]> Request(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken);
 }

@@ -14,7 +14,8 @@ internal class DefaultPublisher : IPublisher
         this.publishConfig = publishConfig;
         this.providerPublisher = publishConfig.ProviderPublisher!;
     }
-    public Task SendAsync<TCommand>(TCommand commandMessage, CancellationToken cancellationToken) where TCommand : ICommand
+
+    public Task Send<TCommand>(TCommand commandMessage, CancellationToken cancellationToken) where TCommand : ICommand
     {
         var apolloMessage = new ApolloMessage
         {
@@ -22,10 +23,10 @@ internal class DefaultPublisher : IPublisher
             MessageType = typeof(TCommand),
         };
 
-        return providerPublisher.PublishAsync(publishConfig, apolloMessage, cancellationToken);
+        return providerPublisher.Publish(publishConfig, apolloMessage, cancellationToken);
     }
 
-    public Task BroadcastAsync<TEvent>(TEvent eventMessage, CancellationToken cancellationToken) where TEvent : IEvent
+    public Task Broadcast<TEvent>(TEvent eventMessage, CancellationToken cancellationToken) where TEvent : IEvent
     {
         var apolloMessage = new ApolloMessage
         {
@@ -33,10 +34,10 @@ internal class DefaultPublisher : IPublisher
             MessageType = typeof(TEvent),
         };
 
-        return providerPublisher.PublishAsync(publishConfig, apolloMessage, cancellationToken);
+        return providerPublisher.Publish(publishConfig, apolloMessage, cancellationToken);
     }
 
-    public  async Task<TResponse?> RequestAsync<TRequest, TResponse>(TRequest requestMessage, CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
+    public async Task<TResponse?> Request<TRequest, TResponse>(TRequest requestMessage, CancellationToken cancellationToken) where TRequest : IRequest<TResponse>
     {
         var apolloMessage = new ApolloMessage
         {
@@ -44,7 +45,7 @@ internal class DefaultPublisher : IPublisher
             MessageType = typeof(TRequest),
         };
 
-        var response = await providerPublisher.RequestAsync(publishConfig, apolloMessage, cancellationToken);
+        var response = await providerPublisher.Request(publishConfig, apolloMessage, cancellationToken);
 
         // yolo?
         return JsonSerializer.Deserialize<TResponse>(response);

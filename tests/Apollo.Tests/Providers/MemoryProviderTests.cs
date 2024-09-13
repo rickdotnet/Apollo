@@ -33,12 +33,12 @@ public class MemoryProviderTests
         var handler = A.Fake<Func<ApolloContext, CancellationToken, Task>>();
 
         var sub = provider.AddSubscription(subscriptionConfig, handler);
-        _ = sub.SubscribeAsync(CancellationToken.None);
+        _ = sub.Subscribe(CancellationToken.None);
         
         await Task.Delay(500);
 
         var message = new ApolloMessage { MessageType = typeof(TestMessage) };
-        await provider.PublishAsync(publishConfig, message, CancellationToken.None);
+        await provider.Publish(publishConfig, message, CancellationToken.None);
         await Task.Delay(500);
         
         // Assert
@@ -53,18 +53,18 @@ public class MemoryProviderTests
         {
             if (context.ReplyAvailable)
             {
-                await context.ReplyAsync([1, 2, 3], token);
+                await context.Reply([1, 2, 3], token);
             }
         });
         
-        _ = sub.SubscribeAsync(CancellationToken.None);
+        _ = sub.Subscribe(CancellationToken.None);
         await Task.Delay(500);
 
         // timeout to prevent jammed reply
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         
         var message = new ApolloMessage { MessageType = typeof(TestRequest) };
-        var response = await provider.RequestAsync(publishConfig, message, cts.Token);
+        var response = await provider.Request(publishConfig, message, cts.Token);
 
         Assert.Equal([1, 2, 3 ], response);
     }
@@ -79,12 +79,12 @@ public class MemoryProviderTests
         var sub1 = provider.AddSubscription(subscriptionConfig, handler1);
         var sub2 = provider.AddSubscription(subscriptionConfig, handler2);
 
-        _ = sub1.SubscribeAsync(CancellationToken.None);
-        _ = sub2.SubscribeAsync(CancellationToken.None);
+        _ = sub1.Subscribe(CancellationToken.None);
+        _ = sub2.Subscribe(CancellationToken.None);
         await Task.Delay(500);
 
         var message = new ApolloMessage { MessageType = typeof(TestMessage) };
-        await provider.PublishAsync(publishConfig, message, CancellationToken.None);
+        await provider.Publish(publishConfig, message, CancellationToken.None);
         await Task.Delay(500);
         
         // Asserting both handlers received the message
@@ -103,11 +103,11 @@ public class MemoryProviderTests
             throw new Exception("Test handler exception");
         });
 
-        _ = sub.SubscribeAsync(CancellationToken.None);
+        _ = sub.Subscribe(CancellationToken.None);
         await Task.Delay(500);
 
         var message = new ApolloMessage { MessageType = typeof(TestMessage) };
-        await provider.PublishAsync(publishConfig, message, CancellationToken.None);
+        await provider.Publish(publishConfig, message, CancellationToken.None);
         await Task.Delay(500);
 
         // Assert: No crash, handled the exception internally

@@ -14,7 +14,7 @@ public class ApolloContext
         ReplyFunc = replyFunc;
     }
     
-    public Task ReplyAsync(byte[] response, CancellationToken cancellationToken)
+    public Task Reply(byte[] response, CancellationToken cancellationToken)
     {
         if (ReplyFunc is null)
             throw new InvalidOperationException("Reply function is not available");

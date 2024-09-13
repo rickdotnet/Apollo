@@ -16,7 +16,7 @@ internal class InMemorySubscription : ISubscription
         Writer = channel.Writer;
     }
 
-    public async Task SubscribeAsync(CancellationToken cancellationToken)
+    public async Task Subscribe(CancellationToken cancellationToken)
     {
         // channel reader
         await foreach (var context in channel.Reader.ReadAllAsync(cancellationToken))

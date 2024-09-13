@@ -57,11 +57,11 @@ public static class HostDemo
         var publisher = apollo.CreatePublisher(endpointConfig);
 
         await Task.WhenAll(
-            publisher.BroadcastAsync(new TestEvent("test 1"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 2"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 3"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 4"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 5"), CancellationToken.None)
+            publisher.Broadcast(new TestEvent("test 1"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 2"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 3"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 4"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 5"), CancellationToken.None)
         );
 
         Console.WriteLine("Press any key to exit");

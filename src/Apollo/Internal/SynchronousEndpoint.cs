@@ -83,7 +83,7 @@ internal class SynchronousEndpoint : IApolloEndpoint
         // track the task for use in the future
         // prob want to track the sub and control
         // it via the subscription interface
-        endpointTask = sub.SubscribeAsync(cancellationToken);
+        endpointTask = sub.Subscribe(cancellationToken);
 
         // let the caller go do other things
         return Task.CompletedTask;
@@ -135,7 +135,7 @@ internal class SynchronousEndpoint : IApolloEndpoint
             // TODO: serialization point
             var responseJson = JsonSerializer.Serialize(response);
             var responseBytes = System.Text.Encoding.UTF8.GetBytes(responseJson);
-            await context.ReplyAsync(responseBytes, cancellationToken);
+            await context.Reply(responseBytes, cancellationToken);
         }
         else
         {

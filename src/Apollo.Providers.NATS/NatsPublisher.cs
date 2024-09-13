@@ -12,7 +12,7 @@ internal class NatsPublisher : IProviderPublisher
     {
         this.connection = connection;
     }
-    public Task PublishAsync(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
+    public Task Publish(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
     {
         var subject = Utils.GetSubject(publishConfig).TrimEnd('>').TrimEnd('*').TrimEnd('.');
         if(message.MessageType != null)
@@ -21,7 +21,7 @@ internal class NatsPublisher : IProviderPublisher
         return connection.PublishAsync($"{subject}", message.Data, cancellationToken: cancellationToken).AsTask();
     }
 
-    public async Task<byte[]> RequestAsync(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
+    public async Task<byte[]> Request(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
     {
         var subject = Utils.GetSubject(publishConfig).TrimEnd('>').TrimEnd('*').TrimEnd('.');
         if(message.MessageType != null)

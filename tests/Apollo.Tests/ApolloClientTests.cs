@@ -45,7 +45,7 @@ public class ApolloClientTests
         await Task.Delay(500); // Ensure subscription is set up
 
         var publisher = client.CreatePublisher(publishConfig);
-        await publisher.BroadcastAsync(new TestMessage(), CancellationToken.None);
+        await publisher.Broadcast(new TestMessage(), CancellationToken.None);
 
         await Task.Delay(1000);
         
@@ -66,7 +66,7 @@ public class ApolloClientTests
             if (context.ReplyAvailable)
             {
                 var bytes = JsonSerializer.SerializeToUtf8Bytes(new TestResponse("Response"));
-                await context.ReplyAsync(bytes, token);
+                await context.Reply(bytes, token);
             }
         });
 
@@ -74,7 +74,7 @@ public class ApolloClientTests
         await Task.Delay(500); // Ensure subscription is set up
 
         var publisher = client.CreatePublisher(publishConfig);
-        var response = await publisher.RequestAsync<TestRequest,TestResponse>(new TestRequest("Request"), CancellationToken.None);
+        var response = await publisher.Request<TestRequest,TestResponse>(new TestRequest("Request"), CancellationToken.None);
 
         Assert.Equal(new TestResponse("Response"), response);
     }

@@ -32,7 +32,7 @@ internal class NatsCoreSubscription : ISubscription
         subjectTypeMapping = config.MessageTypes.ToDictionary(x => $"{trimmedSubject}.{x.Name.ToLower()}", x => x);
     }
 
-    public async Task SubscribeAsync(CancellationToken cancellationToken)
+    public async Task Subscribe(CancellationToken cancellationToken)
     {
         try
         {

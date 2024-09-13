@@ -43,11 +43,11 @@ public class AsbDemo
         var publisher = apollo.CreatePublisher(anonConfig);
 
         await Task.WhenAll(
-            publisher.BroadcastAsync(new TestEvent("test 1"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 2"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 3"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 4"), CancellationToken.None),
-            publisher.BroadcastAsync(new TestEvent("test 5"), CancellationToken.None)
+            publisher.Broadcast(new TestEvent("test 1"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 2"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 3"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 4"), CancellationToken.None),
+            publisher.Broadcast(new TestEvent("test 5"), CancellationToken.None)
         );        
 
         Log.Verbose("Press any key to exit");

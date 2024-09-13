@@ -46,7 +46,7 @@ internal class AsbTopicSubscription : ISubscription
             subscriptionConfig.MessageTypes.ToDictionary(x => $"{trimmedSubject.ToLower()}.{x.Name.ToLower()}", x => x);
     }
 
-    public async Task SubscribeAsync(CancellationToken cancellationToken)
+    public async Task Subscribe(CancellationToken cancellationToken)
     {
         try
         {

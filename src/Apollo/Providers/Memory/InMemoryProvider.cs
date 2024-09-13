@@ -23,7 +23,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         return sub;
     }
 
-    public async Task PublishAsync(PublishConfig publishConfig, ApolloMessage message,
+    public async Task Publish(PublishConfig publishConfig, ApolloMessage message,
         CancellationToken cancellationToken)
     {
         var subjectKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
@@ -39,7 +39,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         await Task.WhenAll(tasks);
     }
 
-    public async Task<byte[]> RequestAsync(PublishConfig publishConfig, ApolloMessage message,
+    public async Task<byte[]> Request(PublishConfig publishConfig, ApolloMessage message,
         CancellationToken cancellationToken)
     {
         var subjectKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);

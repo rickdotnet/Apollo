@@ -1,5 +1,6 @@
 using Apollo.Abstractions;
 using Apollo.Configuration;
+using Microsoft.Extensions.Primitives;
 using NATS.Client.Core;
 
 namespace Apollo.Providers.NATS;
@@ -12,22 +13,31 @@ internal class NatsPublisher : IProviderPublisher
     {
         this.connection = connection;
     }
+
     public Task Publish(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
     {
-        var subject = Utils.GetSubject(publishConfig).TrimEnd('>').TrimEnd('*').TrimEnd('.');
-        if(message.MessageType != null)
-            subject = $"{subject}.{message.MessageType.Name.ToLower()}";
-        
-        return connection.PublishAsync($"{subject}", message.Data, cancellationToken: cancellationToken).AsTask();
+        var subject = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
+
+        return connection.PublishAsync(
+            $"{subject}",
+            message.Data,
+            headers: new NatsHeaders((Dictionary<string, StringValues>)message.Headers),
+            cancellationToken: cancellationToken).AsTask();
     }
 
-    public async Task<byte[]> Request(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
+    public async Task<byte[]> Request(
+        PublishConfig publishConfig,
+        ApolloMessage message,
+        CancellationToken cancellationToken)
     {
-        var subject = Utils.GetSubject(publishConfig).TrimEnd('>').TrimEnd('*').TrimEnd('.');
-        if(message.MessageType != null)
-            subject = $"{subject}.{message.MessageType.Name.ToLower()}";
-        
-        var response = await connection.RequestAsync<byte[], byte[]>($"{subject}", message.Data, cancellationToken: cancellationToken).AsTask();
+        var subject = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
+
+        var response = await connection
+            .RequestAsync<byte[], byte[]>(
+                $"{subject}",
+                message.Data,
+                headers: new NatsHeaders((Dictionary<string, StringValues>)message.Headers),
+                cancellationToken: cancellationToken).AsTask();
         return response.Data!;
     }
 }

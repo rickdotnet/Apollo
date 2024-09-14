@@ -110,11 +110,11 @@ internal class SynchronousEndpoint : IApolloEndpoint
         var handleMethod = handlers.GetValueOrDefault(context.Message.MessageType);
         if (handleMethod is null)
         {
-            handleMethod = endpointType!.GetMethod("HandleAsync",
+            handleMethod = endpointType!.GetMethod("Handle",
                 [context.Message.MessageType!, typeof(CancellationToken)]);
 
             if (handleMethod is null)
-                throw new InvalidOperationException("HandleAsync method not found");
+                throw new InvalidOperationException("Handle method not found");
 
             handlers.TryAdd(context.Message.MessageType, handleMethod);
         }

@@ -13,6 +13,7 @@ internal class NatsCoreSubscription : ISubscription
     private readonly Func<ApolloContext, CancellationToken, Task> handler;
     private readonly string endpointSubject;
     private readonly Dictionary<string, Type> subjectTypeMapping;
+    private readonly DefaultSubjectTypeMapper subjectTypeMapper;
 
     public NatsCoreSubscription(
         INatsConnection connection,
@@ -26,24 +27,28 @@ internal class NatsCoreSubscription : ISubscription
         this.config = config;
         this.handler = handler;
 
-        endpointSubject = Utils.GetSubject(config);
-        
-        var trimmedSubject = endpointSubject.TrimWildEnds();
-        subjectTypeMapping = config.MessageTypes.ToDictionary(x => $"{trimmedSubject}.{x.Name.ToLower()}", x => x);
+        subjectTypeMapper = DefaultSubjectTypeMapper.From(config);
+        endpointSubject = subjectTypeMapper.EndpointSubject;
+        subjectTypeMapping = subjectTypeMapper.SubjectTypeMapping;
     }
 
     public async Task Subscribe(CancellationToken cancellationToken)
     {
         try
         {
-            logger.LogInformation("Subscribing to {Subject}", endpointSubject);
+            logger.LogInformation("Subscribing to {Endpoint} - {Subject}", config.EndpointName, endpointSubject);
             await foreach (var msg in connection.SubscribeAsync<byte[]>(endpointSubject)
                                .WithCancellation(cancellationToken))
             {
                 var handlerOnly = config.EndpointType == null;
                 try
                 {
-                    if (handlerOnly || subjectTypeMapping.ContainsKey(msg.Subject))
+                    // type mapping is for endpoint types only
+                    var subjectMapping = "";
+                    if (msg.Headers != null && msg.Headers.TryGetValue(ApolloHeader.MessageType, out var apolloType))
+                        subjectMapping = apolloType.First() ?? "";
+
+                    if (handlerOnly || subjectTypeMapping.ContainsKey(subjectMapping))
                         await ProcessMessage(msg);
                     else
                         logger.LogWarning(
@@ -78,8 +83,12 @@ internal class NatsCoreSubscription : ISubscription
                 Data = natsMsg.Data,
             };
 
-            subjectTypeMapping.TryGetValue(message.Subject, out var messageType);
-            message.MessageType = messageType; // ?? typeof(byte[]);
+            if (message.Headers.TryGetValue(ApolloHeader.MessageType, out var headerType)
+                && headerType.Count > 0)
+            {
+                message.MessageType =
+                    subjectTypeMapper.TypeFromApolloMessageType(headerType.First()!); // ?? typeof(byte[]);
+            }
 
             var replyFunc = natsMsg.ReplyTo != null
                 ? new Func<byte[], CancellationToken, Task>(

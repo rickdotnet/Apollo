@@ -13,43 +13,43 @@ public static class HostDemo
     public static async Task Demo(bool useNats = false)
     {
         var endpointConfig = new EndpointConfig { ConsumerName = "endpoint", EndpointName = "Demo" };
-        var anonConfig = new EndpointConfig { ConsumerName = "anon", EndpointSubject = "demo.testevent" };
+        var anonConfig = new EndpointConfig { ConsumerName = "anon", Subject = "demo" };
 
         int count = 1; // thread-safe when in sync mode
         var builder = Host.CreateApplicationBuilder();
-        builder.Services
-            .AddApollo(
-                apolloBuilder =>
-                {
-                    apolloBuilder
-                        .AddEndpoint<TestEndpoint>(endpointConfig)
-                        .AddHandler(anonConfig, (_, _) =>
+        builder.Services.AddApollo(
+            ab =>
+            {
+                ab
+                    .AddEndpoint<TestEndpoint>(endpointConfig)
+                    .AddHandler(anonConfig, (_, _) =>
                         {
                             Console.WriteLine($"Anonymous handler received: {count++}");
                             return Task.CompletedTask;
-                        });
+                        }
+                    );
 
-                    if (useNats)
-                    {
-                        apolloBuilder.AddNatsProvider(
-                            opts => opts with
+                if (useNats)
+                {
+                    ab.AddNatsProvider(
+                        opts => opts with
+                        {
+                            Url = "nats://localhost:4222",
+                            AuthOpts = new NatsAuthOpts
                             {
-                                Url = "nats://localhost:4222",
-                                AuthOpts = new NatsAuthOpts
-                                {
-                                    Username = "apollo",
-                                    Password = "demo"
-                                }
+                                Username = "apollo",
+                                Password = "demo"
                             }
-                        );
-                    }
+                        }
+                    );
                 }
-            );
+            }
+        );
 
         var host = builder.Build();
         var hostTask = host.RunAsync();
 
-        await Task.Delay(8000);
+        await Task.Delay(3000);
         using var scope = host.Services.CreateScope();
         var serviceProvider = scope.ServiceProvider;
         var apollo = serviceProvider.GetRequiredService<ApolloClient>();

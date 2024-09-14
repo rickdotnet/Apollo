@@ -15,7 +15,7 @@ public class AsbDemo
     {
         var anonConfig = new EndpointConfig
         {
-            EndpointSubject = "topic-test", // topic name
+            Subject = "topic-test", // topic name
             ConsumerName = "Sandbox.Test", // subscription name
             EndpointName = "Topic Test", // display only when subject is sent
         };

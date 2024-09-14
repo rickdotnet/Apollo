@@ -4,13 +4,44 @@ namespace Apollo.Configuration;
 
 public record EndpointConfig
 {
-    public string? InstanceId { get; internal set; } // set by apollo
-    public string? ConsumerName { get; set;}  // set to ApolloConfig.DefaultConsumerName if not provided
-    public string? Namespace { get; set; } // set to ApolloConfig.DefaultNamespace if not provided; always prefixes the subject if provided
-    internal Type? EndpointType { get; set; } // set by ApolloClient
-    public string? EndpointName { get; init; } // endpoint name or subject must be provided
-    public string? EndpointSubject { get; set; } // endpoint name or subject must be provided
+    /// <summary>
+    /// Defaults to ApolloConfig.InstanceId
+    /// </summary>
+    public string? InstanceId { get; internal set; }
+    
+    /// <summary>
+    /// Consumer name is required for durable subscriptions and load balancing 
+    /// </summary>
+    public string? ConsumerName { get; set;}
+    
+    /// <summary>
+    /// Optional namespace for isolation. Defaults to ApolloConfig.DefaultNamespace
+    /// </summary>
+    public string? Namespace { get; set; }
+    
+    /// <summary>
+    /// Set by ApolloClient
+    /// </summary>
+    internal Type? EndpointType { get; set; }
+    
+    /// <summary>
+    /// Used to create a unique endpoint name if no subject is provided
+    /// </summary>
+    public string? EndpointName { get; init; }
+    
+    /// <summary>
+    /// The subject to use for the endpoint. If not provided, the endpoint name will be slugified. If neither are provided, the namespace will be used.
+    /// </summary>
+    public string? Subject { get; set; } // endpoint name or subject must be provided
+    
+    /// <summary>
+    /// Indicates to the subscription provider that the endpoint should be created as a durable subscription
+    /// </summary>
     public bool IsDurable { get; set;} 
+    
+    /// <summary>
+    /// Provides create/update/delete permissions for resources
+    /// </summary>
     public bool CreateMissingResources { get; set; }
 
     /// <summary>
@@ -37,7 +68,7 @@ public static class EndpointConfigExtensions
         {
             Namespace = config.Namespace,
             EndpointName = config.EndpointName,
-            EndpointSubject = config.EndpointSubject
+            EndpointSubject = config.Subject
         };
     }
 }

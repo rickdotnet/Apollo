@@ -20,7 +20,7 @@ public record SubscriptionConfig
             ConsumerName = endpointConfig.ConsumerName ?? "", // TODO: revist this
             Namespace = endpointConfig.Namespace,
             EndpointName = endpointConfig.EndpointName,
-            EndpointSubject = endpointConfig.EndpointSubject,
+            EndpointSubject = endpointConfig.Subject,
             IsDurable = endpointConfig.IsDurable,
             CreateMissingResources = endpointConfig.CreateMissingResources,
             EndpointType = endpointType,

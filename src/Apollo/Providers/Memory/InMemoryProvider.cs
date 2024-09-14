@@ -9,13 +9,14 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
     public static readonly InMemoryProvider Instance = new();
     private readonly Dictionary<string, List<ChannelWriter<ApolloContext>>> subscriptions = new();
     private readonly TimeSpan requestTimeout = TimeSpan.FromSeconds(30);
-
+    
     public ISubscription AddSubscription(SubscriptionConfig config,
         Func<ApolloContext, CancellationToken, Task> handler)
     {
         var sub = new InMemorySubscription(handler);
-        var subjectKey = MemoryUtils.GetSubject(config);
-
+        var subjectTypeMapper = DefaultSubjectTypeMapper.From(config);
+        
+        var subjectKey = subjectTypeMapper.EndpointSubject;
         if (!subscriptions.ContainsKey(subjectKey))
             subscriptions[subjectKey] = [];
 
@@ -26,7 +27,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
     public async Task Publish(PublishConfig publishConfig, ApolloMessage message,
         CancellationToken cancellationToken)
     {
-        var subjectKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
+        var subjectKey = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
         if (!subscriptions.TryGetValue(subjectKey, out var subscription))
         {
             // no handlers for this message type?
@@ -42,7 +43,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
     public async Task<byte[]> Request(PublishConfig publishConfig, ApolloMessage message,
         CancellationToken cancellationToken)
     {
-        var subjectKey = MemoryUtils.GetSubject(publishConfig, message.MessageType);
+        var subjectKey = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
         if (!subscriptions.TryGetValue(subjectKey, out var subscription))
             throw new InvalidOperationException("No handlers for this message type");
 

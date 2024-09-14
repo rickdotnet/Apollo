@@ -2,7 +2,7 @@
 
 namespace Apollo.Abstractions;
 
-public record ApolloMessage
+public sealed record ApolloMessage
 {
     public string Subject { get; set; } = string.Empty;
     public IDictionary<string, StringValues> Headers { get; set; } = new Dictionary<string, StringValues>();

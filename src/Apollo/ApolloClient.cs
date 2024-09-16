@@ -60,9 +60,16 @@ public class ApolloClient
 
     public IPublisher CreatePublisher(PublishConfig publishConfig)
     {
-        publishConfig.ProviderPublisher ??= providerPublisher;
-        return new DefaultPublisher(publishConfig);
+        var config = SetPublishDefaults(publishConfig);
+        return new DefaultPublisher(config);
     }
+    
+    private PublishConfig SetPublishDefaults(PublishConfig config, Type? endpointType = null) 
+        => config with
+        {
+            Namespace = config.Namespace ?? apolloConfig.DefaultNamespace,
+            ProviderPublisher = config.ProviderPublisher ?? providerPublisher
+        };
     
     private EndpointConfig SetEndpointDefaults(EndpointConfig config, Type? endpointType = null) 
         => config with

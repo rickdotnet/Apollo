@@ -68,7 +68,7 @@ public static class EndpointConfigExtensions
         {
             Namespace = config.Namespace,
             EndpointName = config.EndpointName,
-            EndpointSubject = config.Subject
+            Subject = config.Subject
         };
     }
 }

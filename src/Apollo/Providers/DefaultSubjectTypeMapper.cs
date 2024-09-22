@@ -4,13 +4,13 @@ namespace Apollo.Providers;
 
 public interface ISubjectTypeMapper
 {
-    string EndpointSubject { get; }
+    string Subject { get; }
     Dictionary<string, Type> SubjectTypeMapping { get; }
 }
 
 public class DefaultSubjectTypeMapper : ISubjectTypeMapper
 {
-    public required string EndpointSubject { get; init; }
+    public required string Subject { get; init; }
     public Dictionary<string, Type> SubjectTypeMapping { get; init; } = new();
 
     public static DefaultSubjectTypeMapper From(SubscriptionConfig subscriptionConfig)
@@ -18,15 +18,15 @@ public class DefaultSubjectTypeMapper : ISubjectTypeMapper
         var subject = GetSubject(subscriptionConfig);
         return new DefaultSubjectTypeMapper()
         {
-            EndpointSubject = subject,
+            Subject = subject,
             SubjectTypeMapping =
                 subscriptionConfig.MessageTypes.ToDictionary(x => TypeMappedSubject(subject, x), x => x)
         };
     }
     
-    public static DefaultSubjectTypeMapper From(PublishConfig publishConfig) => new() { EndpointSubject = GetSubject(publishConfig) };
+    public static DefaultSubjectTypeMapper From(PublishConfig publishConfig) => new() { Subject = GetSubject(publishConfig) };
 
-    public string ApolloMessageType(string messageType) => $"{EndpointSubject}.{messageType.ToLower()}";
+    public string ApolloMessageType(string messageType) => $"{Subject}.{messageType.ToLower()}";
     
     public Type? TypeFromApolloMessageType(string headerMessageType) 
         => SubjectTypeMapping.GetValueOrDefault(headerMessageType);
@@ -36,10 +36,10 @@ public class DefaultSubjectTypeMapper : ISubjectTypeMapper
         $"{subject}.{messageType.Name.ToLower()}";
 
     private static string GetSubject(PublishConfig config)
-        => GetSubject((config.Namespace, config.EndpointName, EndpointType: null, config.EndpointSubject));
+        => GetSubject((config.Namespace, config.EndpointName, EndpointType: null, config.Subject));
 
     private static string GetSubject(SubscriptionConfig config)
-        => GetSubject((config.Namespace, config.EndpointName, config.EndpointType, config.EndpointSubject));
+        => GetSubject((config.Namespace, config.EndpointName, config.EndpointType, config.Subject));
 
     private static string GetSubject(
         (string? Namespace, string? EndpointName, Type? EndpointType, string? EndpointSubject) config)

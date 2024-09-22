@@ -34,7 +34,7 @@ internal class AsbTopicSubscription : ISubscription
 
         // if they send a subject, don't adjust case
         // this will all be addressed during a config refactor
-        var toLower = string.IsNullOrEmpty(subscriptionConfig.EndpointSubject);
+        var toLower = string.IsNullOrEmpty(subscriptionConfig.Subject);
         topicName = Utils.GetTopic(subscriptionConfig, toLower);
 
 
@@ -120,7 +120,7 @@ internal class AsbTopicSubscription : ISubscription
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error subscribing to {EndpointSubject}", subscriptionConfig.EndpointSubject);
+            logger.LogError(ex, "Error subscribing to {EndpointSubject}", subscriptionConfig.Subject);
         }
 
         return;

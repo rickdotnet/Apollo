@@ -5,11 +5,11 @@ namespace Apollo.Providers.ASB;
 internal static class Utils
 {
     public static string GetTopic(PublishConfig config, bool toLower = true)
-        => GetTopic((config.Namespace, config.EndpointName, EndpointType: null, config.EndpointSubject))
+        => GetTopic((config.Namespace, config.EndpointName, EndpointType: null, config.Subject))
             .TrimWildEnds();
 
     public static string GetTopic(SubscriptionConfig config, bool toLower = true)
-        => GetTopic((config.Namespace, config.EndpointName, config.EndpointType, config.EndpointSubject));
+        => GetTopic((config.Namespace, config.EndpointName, config.EndpointType, config.Subject));
 
     private static string GetTopic(
         (string? Namespace, string? EndpointName, Type? EndpointType, string? EndpointSubject) config, bool toLower = true)

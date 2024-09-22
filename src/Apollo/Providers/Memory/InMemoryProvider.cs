@@ -16,7 +16,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
         var sub = new InMemorySubscription(handler);
         var subjectTypeMapper = DefaultSubjectTypeMapper.From(config);
         
-        var subjectKey = subjectTypeMapper.EndpointSubject;
+        var subjectKey = subjectTypeMapper.Subject;
         if (!subscriptions.ContainsKey(subjectKey))
             subscriptions[subjectKey] = [];
 
@@ -27,7 +27,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
     public async Task Publish(PublishConfig publishConfig, ApolloMessage message,
         CancellationToken cancellationToken)
     {
-        var subjectKey = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
+        var subjectKey = DefaultSubjectTypeMapper.From(publishConfig).Subject;
         if (!subscriptions.TryGetValue(subjectKey, out var subscription))
         {
             // no handlers for this message type?
@@ -43,7 +43,7 @@ internal class InMemoryProvider : ISubscriptionProvider, IProviderPublisher
     public async Task<byte[]> Request(PublishConfig publishConfig, ApolloMessage message,
         CancellationToken cancellationToken)
     {
-        var subjectKey = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
+        var subjectKey = DefaultSubjectTypeMapper.From(publishConfig).Subject;
         if (!subscriptions.TryGetValue(subjectKey, out var subscription))
             throw new InvalidOperationException("No handlers for this message type");
 

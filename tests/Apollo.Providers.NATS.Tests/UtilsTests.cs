@@ -67,12 +67,12 @@ public class UtilsTests
     {
         var publishConfig = new PublishConfig
         {
-            EndpointSubject = "$SYS.ENDPOINT.>"
+            Subject = "$SYS.ENDPOINT.>"
         };
         
         var subscriptionConfig = new SubscriptionConfig
         {
-            EndpointSubject = "$SYS.ENDPOINT.>",
+            Subject = "$SYS.ENDPOINT.>",
             ConsumerName = null!,
             MessageTypes = [],
             IsDurable = false

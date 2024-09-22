@@ -16,8 +16,12 @@ internal class NatsPublisher : IProviderPublisher
 
     public Task Publish(PublishConfig publishConfig, ApolloMessage message, CancellationToken cancellationToken)
     {
-        var subject = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
+        var subject = DefaultSubjectTypeMapper.From(publishConfig).Subject;
 
+        // add exception handling
+        // broken connections don't 
+        // always seem to get re-established
+        // need a way to re-establish the connection
         return connection.PublishAsync(
             $"{subject}",
             message.Data,
@@ -30,7 +34,7 @@ internal class NatsPublisher : IProviderPublisher
         ApolloMessage message,
         CancellationToken cancellationToken)
     {
-        var subject = DefaultSubjectTypeMapper.From(publishConfig).EndpointSubject;
+        var subject = DefaultSubjectTypeMapper.From(publishConfig).Subject;
 
         var response = await connection
             .RequestAsync<byte[], byte[]>(

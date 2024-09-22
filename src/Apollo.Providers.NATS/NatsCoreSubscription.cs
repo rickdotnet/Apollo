@@ -28,7 +28,7 @@ internal class NatsCoreSubscription : ISubscription
         this.handler = handler;
 
         subjectTypeMapper = DefaultSubjectTypeMapper.From(config);
-        endpointSubject = subjectTypeMapper.EndpointSubject;
+        endpointSubject = subjectTypeMapper.Subject;
         subjectTypeMapping = subjectTypeMapper.SubjectTypeMapping;
     }
 

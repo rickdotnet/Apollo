@@ -5,11 +5,11 @@ namespace Apollo.Providers.NATS;
 internal static class Utils
 {
     public static string GetSubject(PublishConfig config)
-        => GetSubject((config.Namespace, config.EndpointName, EndpointType: null, config.EndpointSubject))
+        => GetSubject((config.Namespace, config.EndpointName, EndpointType: null, config.Subject))
             .TrimWildEnds();
 
     public static string GetSubject(SubscriptionConfig config)
-        => GetSubject((config.Namespace, config.EndpointName, config.EndpointType, config.EndpointSubject));
+        => GetSubject((config.Namespace, config.EndpointName, config.EndpointType, config.Subject));
 
     private static string GetSubject(
         (string? Namespace, string? EndpointName, Type? EndpointType, string? EndpointSubject) config)

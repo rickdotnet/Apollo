@@ -24,5 +24,10 @@ public record ApolloConfig
     /// <summary>
     /// Subscribers will create missing resources if set to true
     /// </summary>
-    public bool CreateMissingResources { get; set; } = false;
+    public bool CreateMissingResources { get; set; }
+    
+    /// <summary>
+    /// Publish only mode
+    /// </summary>
+    public bool PublishOnly { get; set; }
 }

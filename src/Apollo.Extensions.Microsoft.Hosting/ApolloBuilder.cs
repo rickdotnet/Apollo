@@ -8,24 +8,85 @@ namespace Apollo.Extensions.Microsoft.Hosting;
 public interface IApolloBuilder
 {
     public IServiceCollection Services { get; }
+    IApolloBuilder WithConfig(ApolloConfig config);
+    IApolloBuilder WithInstanceId(string instanceId);
+    IApolloBuilder WithDefaultConsumerName(string consumerName);
+    IApolloBuilder WithDefaultNamespace(string defaultNamespace);
+    IApolloBuilder CreateMissingResources(bool createMissingResources = true);
+    IApolloBuilder PublishOnly(bool publishOnly = true);
     IApolloBuilder AddEndpoint<TEndpoint>(EndpointConfig config) where TEndpoint : class;
     IApolloBuilder AddHandler(EndpointConfig config, Func<ApolloContext, CancellationToken, Task> handler);
     IApolloBuilder WithEndpointProvider(IEndpointProvider endpointProvider);
-
-    IApolloBuilder PublishOnly(bool publishOnly = true);
+    IApolloBuilder WithEndpointProvider<TProvider>() where TProvider : class, IEndpointProvider;
 }
 
 public class ApolloBuilder : IApolloBuilder
 {
     public IServiceCollection Services { get; }
-    private IEndpointProvider? defaultEndpointProvider;
-    private bool publishOnly;
-
+    private ApolloConfig config = new();
+    
     public ApolloBuilder(IServiceCollection services)
     {
         Services = services;
     }
 
+    /// <summary>
+    /// Set the Apollo configuration
+    /// </summary>
+    public IApolloBuilder WithConfig(ApolloConfig apolloConfig)
+    {
+        config = apolloConfig;
+        return this;
+    }
+
+    /// <summary>
+    /// Unique identifier for the process
+    /// </summary>
+    public IApolloBuilder WithInstanceId(string instanceId)
+    {
+        config.InstanceId = instanceId;
+        return this;
+    }
+
+    /// <summary>
+    /// Uniquely identifies the consumer of messages
+    /// </summary>
+    public IApolloBuilder WithDefaultConsumerName(string consumerName)
+    {
+        config.DefaultConsumerName = consumerName;
+        return this;
+    }
+
+    /// <summary>
+    /// Set the default namespace for endpoint and publisher messages
+    /// </summary>
+    public IApolloBuilder WithDefaultNamespace(string defaultNamespace)
+    {
+        config.DefaultNamespace = defaultNamespace;
+        return this;
+    }
+
+    /// <summary>
+    ///  Allow subscribers to create missing resources
+    /// </summary>
+    public IApolloBuilder CreateMissingResources(bool createMissingResources = true)
+    {
+        config.CreateMissingResources = createMissingResources;
+        return this;
+    }
+
+    /// <summary>
+    /// Set the service to publish only mode
+    /// </summary>
+    public IApolloBuilder PublishOnly(bool publishOnly = true)
+    {
+        config.PublishOnly = publishOnly;
+        return this;
+    }
+
+    /// <summary>
+    /// Add an endpoint to the service collection and register it with Apollo
+    /// </summary>
     public IApolloBuilder AddEndpoint<TEndpoint>(EndpointConfig config) where TEndpoint : class
     {
         Services.TryAddSingleton<TEndpoint>();
@@ -34,35 +95,46 @@ public class ApolloBuilder : IApolloBuilder
         return this;
     }
 
+    /// <summary>
+    /// Add a handler registration to the service collection
+    /// </summary>
     public IApolloBuilder AddHandler(EndpointConfig config, Func<ApolloContext, CancellationToken, Task> handler)
     {
         Services.AddSingleton<IEndpointRegistration>(EndpointRegistration.From(config, handler));
         return this;
     }
 
+    /// <summary>
+    /// Set the default endpoint provider implementation to use
+    /// </summary>
     public IApolloBuilder WithEndpointProvider(IEndpointProvider endpointProvider)
     {
-        defaultEndpointProvider = endpointProvider;
+        Services.TryAddSingleton<IEndpointProvider>(endpointProvider);
         return this;
     }
 
-    public IApolloBuilder PublishOnly(bool publishOnly = true)
+    /// <summary>
+    /// Add and use an endpoint provider from the service collection
+    /// </summary>
+    /// <typeparam name="TProvider"></typeparam>
+    /// <returns></returns>
+    public IApolloBuilder WithEndpointProvider<TProvider>() where TProvider : class, IEndpointProvider
     {
-        this.publishOnly = publishOnly;
+        Services.TryAddSingleton<IEndpointProvider, TProvider>();
         return this;
     }
 
     public void Build()
     {
+        Services.AddSingleton(config);
         Services.AddSingleton<ApolloClient>();
 
-        if (publishOnly) return;
-        
+        // If in publish only mode, do not register subscription services
+        if (config.PublishOnly) return;
+
         Services.AddHostedService<ApolloBackgroundService>();
 
-        if (defaultEndpointProvider is not null)
-            Services.AddSingleton<IEndpointProvider>(defaultEndpointProvider);
-        else
-            Services.TryAddSingleton<IEndpointProvider, DefaultEndpointProvider>();
+        // If no endpoint provider has been set, use the DefaultEndpointProvider
+        Services.TryAddSingleton<IEndpointProvider, DefaultEndpointProvider>();
     }
 }

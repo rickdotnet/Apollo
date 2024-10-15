@@ -60,15 +60,14 @@ public class AsbDemo
     {
         Log.Warning($"Anonymous handler received: {count++}");
         Log.Debug("Headers");
-        var msg = context.Message;
-        foreach (var header in msg.Headers)
+        foreach (var header in context.Headers)
         {
             Log.Debug("{Key}: {Value}", header.Key, header.Value);
         }
 
         Log.Debug("Payload");
-        if (msg.Data != null)
-            Log.Debug(Encoding.UTF8.GetString(msg.Data));
+        if (context.Data != null)
+            Log.Debug(Encoding.UTF8.GetString(context.Data));
 
 
         // let me see some messages before they spam through

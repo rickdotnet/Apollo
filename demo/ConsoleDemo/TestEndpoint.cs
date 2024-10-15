@@ -1,4 +1,5 @@
-﻿using Apollo.Abstractions;
+﻿using Apollo;
+using Apollo.Abstractions;
 using Serilog;
 
 namespace ConsoleDemo;
@@ -11,7 +12,7 @@ public record TestResponse(string Message);
 public class TestEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>, IReplyTo<TestRequest, TestResponse>
 {
     private static int count = 0;
-    public Task Handle(TestEvent message, CancellationToken cancellationToken = default)
+    public Task Handle(TestEvent message, ApolloContext context, CancellationToken cancellationToken = default)
     {
         count++;
         Log.Information("Endpoint: {Message}, Count: {Count}", message, count);
@@ -19,14 +20,14 @@ public class TestEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>, IReplyT
         return Task.Delay(500);
     }
 
-    public Task Handle(TestCommand message, CancellationToken cancellationToken)
+    public Task Handle(TestCommand message, ApolloContext context, CancellationToken cancellationToken)
     {
         Log.Information("TestEndpoint Received TestCommand");
         Log.Information("Message: {Message}", message);
         return Task.CompletedTask;
     }
 
-    public Task<TestResponse> Handle(TestRequest message, CancellationToken cancellationToken = default)
+    public Task<TestResponse> Handle(TestRequest message, ApolloContext context, CancellationToken cancellationToken = default)
     { 
         Log.Information("TestEndpoint Received TestRequest");
         Log.Information("Message: {Message}", message);

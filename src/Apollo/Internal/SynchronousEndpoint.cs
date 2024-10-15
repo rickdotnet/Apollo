@@ -111,7 +111,7 @@ internal class SynchronousEndpoint : IApolloEndpoint
         if (handleMethod is null)
         {
             handleMethod = endpointType!.GetMethod("Handle",
-                [context.Message.MessageType!, typeof(CancellationToken)]);
+                [context.Message.MessageType!, typeof(ApolloContext), typeof(CancellationToken)]);
 
             if (handleMethod is null)
                 throw new InvalidOperationException("Handle method not found");
@@ -130,7 +130,7 @@ internal class SynchronousEndpoint : IApolloEndpoint
                 throw new InvalidOperationException("Uh, oh: No reply available");
 
             var response =
-                await (dynamic)handleMethod.Invoke(endpointInstance, [messageObject, cancellationToken])!;
+                await (dynamic)handleMethod.Invoke(endpointInstance, [messageObject, context,  cancellationToken])!;
             
             // TODO: serialization point
             var responseJson = JsonSerializer.Serialize(response);
@@ -139,7 +139,7 @@ internal class SynchronousEndpoint : IApolloEndpoint
         }
         else
         {
-            var result = (Task)handleMethod.Invoke(endpointInstance, [messageObject, cancellationToken])!;
+            var result = (Task)handleMethod.Invoke(endpointInstance, [messageObject, context, cancellationToken])!;
             await result;
         }
     }

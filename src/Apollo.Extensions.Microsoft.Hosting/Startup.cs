@@ -1,6 +1,4 @@
-using Apollo.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Apollo.Extensions.Microsoft.Hosting;
 

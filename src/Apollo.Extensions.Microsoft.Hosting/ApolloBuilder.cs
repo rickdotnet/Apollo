@@ -20,7 +20,7 @@ public interface IApolloBuilder
     IApolloBuilder WithEndpointProvider<TProvider>() where TProvider : class, IEndpointProvider;
 }
 
-public class ApolloBuilder : IApolloBuilder
+internal class ApolloBuilder : IApolloBuilder
 {
     public IServiceCollection Services { get; }
     private ApolloConfig config = new();
@@ -124,7 +124,7 @@ public class ApolloBuilder : IApolloBuilder
         return this;
     }
 
-    public void Build()
+    internal void Build()
     {
         Services.AddSingleton(config);
         Services.AddSingleton<ApolloClient>();

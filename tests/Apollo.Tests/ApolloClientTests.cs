@@ -1,9 +1,7 @@
-using System.Text;
 using Apollo.Abstractions;
 using Apollo.Configuration;
 using Apollo.Providers.Memory;
 using FakeItEasy;
-using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Apollo.Tests;

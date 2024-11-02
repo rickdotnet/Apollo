@@ -37,12 +37,21 @@ public record EndpointConfig
     /// <summary>
     /// Indicates to the subscription provider that the endpoint should be created as a durable subscription
     /// </summary>
-    public bool IsDurable { get; set;} 
-    
+    public bool IsDurable { get; set;}
+
+    /// <summary>
+    /// Provides internal access to backing field for CreateMissingResources
+    /// </summary>
+    internal bool? InternalCreateMissingResources { get; set; } = null;
+
     /// <summary>
     /// Provides create/update/delete permissions for resources
     /// </summary>
-    public bool CreateMissingResources { get; set; }
+    public bool CreateMissingResources
+    {
+        get => InternalCreateMissingResources ?? false;
+        set => InternalCreateMissingResources = value;
+    }
 
     /// <summary>
     /// Not implemented yet

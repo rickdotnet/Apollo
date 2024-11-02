@@ -78,7 +78,7 @@ public class ApolloClient
             ConsumerName = config.ConsumerName 
                            ?? apolloConfig.DefaultConsumerName 
                            ?? throw new Exception("ConsumerName is required."),
-            CreateMissingResources = config.CreateMissingResources || apolloConfig.CreateMissingResources,
+            CreateMissingResources = config.InternalCreateMissingResources.HasValue ? config.CreateMissingResources : apolloConfig.CreateMissingResources,
             Namespace = config.Namespace ?? apolloConfig.DefaultNamespace,
             EndpointType = config.EndpointType ?? endpointType,
             SubscriptionProvider = config.SubscriptionProvider ?? defaultSubscriptionProvider,

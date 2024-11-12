@@ -53,12 +53,6 @@ public class ApolloClientTests
     [Fact]
     public async Task ShouldHandleRequestResponse()
     {
-        var apolloConfig = new ApolloConfig
-        {
-            DefaultNamespace = "test",
-            InstanceId = "instance-1"
-        };
-        //var client = new ApolloClient(apolloConfig, subscriptionProvider);
         var endpoint = client.AddHandler(endpointConfig, async (context, token) =>
         {
             if (context.ReplyAvailable)

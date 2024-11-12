@@ -12,7 +12,6 @@ Apollo is under rapid development. Please refer to the [Apollo Docs](https://apo
 ```csharp
 builder.Services.AddApollo(ab => ab
             .CreateMissingResources()
-
             .WithDefaultNamespace("instance-1")
             .WithDefaultConsumerName("default-consumer")
             .AddEndpoint<HostEventsEndpoint>(HostEventsEndpointConfig.Default)

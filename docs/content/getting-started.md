@@ -14,7 +14,6 @@ The following example demonstrates how to set up Apollo with an In-Memory provid
 ```csharp
 builder.Services.AddApollo(ab => ab
             .CreateMissingResources()
-
             .WithDefaultNamespace("instance-1")
             .WithDefaultConsumerName("default-consumer")
             .AddEndpoint<HostEventsEndpoint>(HostEventsEndpointConfig.Default)

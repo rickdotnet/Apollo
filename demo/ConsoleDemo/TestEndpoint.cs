@@ -1,5 +1,6 @@
 ﻿using Apollo;
 using Apollo.Abstractions;
+using Apollo.Configuration;
 using Serilog;
 
 namespace ConsoleDemo;
@@ -11,6 +12,7 @@ public record TestResponse(string Message);
 
 public class TestEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>, IReplyTo<TestRequest, TestResponse>
 {
+    public static readonly EndpointConfig Default =  new EndpointConfig { ConsumerName = "endpoint", EndpointName = "Demo" };
     private static int count = 0;
     public Task Handle(TestEvent message, ApolloContext context, CancellationToken cancellationToken = default)
     {

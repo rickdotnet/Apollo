@@ -8,6 +8,27 @@ Apollo is under rapid development. Please refer to the [Apollo Docs](https://apo
 
 ## Example Usage
 
+**Hosted Example**
+```csharp
+builder.Services.AddApollo(ab => ab
+            .CreateMissingResources()
+
+            .WithDefaultNamespace("instance-1")
+            .WithDefaultConsumerName("default-consumer")
+            .AddEndpoint<HostEventsEndpoint>(HostEventsEndpointConfig.Default)
+            .AddNatsProvider(opts => opts with
+            {
+                Url = "nats://localhost:4222",
+                AuthOpts = new NatsAuthOpts
+                {
+                    Username = "username",
+                    Password = "password"
+                }
+            })
+        );
+```
+
+**Direct Usage**
 ```csharp
 var apolloConfig = new ApolloConfig { InstanceId = "my-instance", DefaultConsumerName = "my-consumer" };
 var client = new ApolloClient(apolloConfig, endpointProvider: new EndpointProvider());

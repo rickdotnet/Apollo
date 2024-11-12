@@ -10,6 +10,27 @@ dotnet add package RickDotNet.Apollo
 
 The following example demonstrates how to set up Apollo with an In-Memory provider. This basic example will help you understand the core concepts and get up and running quickly.
 
+**Hosted Example**
+```csharp
+builder.Services.AddApollo(ab => ab
+            .CreateMissingResources()
+
+            .WithDefaultNamespace("instance-1")
+            .WithDefaultConsumerName("default-consumer")
+            .AddEndpoint<HostEventsEndpoint>(HostEventsEndpointConfig.Default)
+            .AddNatsProvider(opts => opts with
+            {
+                Url = "nats://localhost:4222",
+                AuthOpts = new NatsAuthOpts
+                {
+                    Username = "username",
+                    Password = "password"
+                }
+            })
+        );
+```
+
+**Direct Usage**
 ```csharp
 var apolloConfig = new ApolloConfig { InstanceId = "my-instance", DefaultConsumerName = "my-consumer" };
 var client = new ApolloClient(apolloConfig, endpointProvider: new EndpointProvider());

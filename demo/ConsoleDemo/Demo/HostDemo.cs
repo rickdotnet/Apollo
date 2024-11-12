@@ -15,13 +15,14 @@ public static class HostDemo
         var endpointConfig = new EndpointConfig { ConsumerName = "endpoint", EndpointName = "Demo" };
         var anonConfig = new EndpointConfig { ConsumerName = "anon", Subject = "demo" };
 
-        int count = 1; // thread-safe when in sync mode
+        var count = 1; // thread-safe when in sync mode
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddApollo(
-            ab =>
-            {
+            ab => {
                 ab
-                    .AddEndpoint<TestEndpoint>(endpointConfig)
+                    .WithConfig(new ApolloConfig())
+                    .WithDefaultConsumerName("default-consumer")
+                    .AddEndpoint<TestEndpoint>(TestEndpoint.Default)
                     .AddHandler(anonConfig, (_, _) =>
                         {
                             Console.WriteLine($"Anonymous handler received: {count++}");

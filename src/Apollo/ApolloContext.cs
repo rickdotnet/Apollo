@@ -9,7 +9,7 @@ public class ApolloContext
     public string Subject => Message.Subject;
     public byte[]? Data => Message.Data;
     internal ApolloMessage Message { get; }
-    public bool ReplyAvailable => ReplyFunc is not null;
+    internal bool ReplyAvailable => ReplyFunc is not null;
     private Func<byte[] , CancellationToken, Task>? ReplyFunc { get; }
     
     public ApolloContext(ApolloMessage message, Func<byte[] , CancellationToken, Task>? replyFunc = null)
@@ -19,7 +19,7 @@ public class ApolloContext
         Headers = Message.Headers.AsReadOnly();
     }
     
-    public Task Reply(byte[] response, CancellationToken cancellationToken)
+    internal Task Reply(byte[] response, CancellationToken cancellationToken)
     {
         if (ReplyFunc is null)
             throw new InvalidOperationException("Reply function is not available");

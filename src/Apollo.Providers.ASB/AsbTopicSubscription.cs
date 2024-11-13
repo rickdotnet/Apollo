@@ -136,10 +136,15 @@ internal class AsbTopicSubscription : ISubscription
             try
             {
                 logger.LogTrace("Processing message {MessageId}", args.Message.MessageId);
+
+                if (subscriptionConfig.AckStrategy == AckStrategy.AutoAck)
+                    await args.CompleteMessageAsync(args.Message, cancellationToken);
+
                 await ActuallyProcessMessage(args.Message);
                 logger.LogTrace("Completed message {MessageId}", args.Message.MessageId);
 
-                await args.CompleteMessageAsync(args.Message, cancellationToken);
+                if (subscriptionConfig.AckStrategy == AckStrategy.Default)
+                    await args.CompleteMessageAsync(args.Message, cancellationToken);
             }
             catch (Exception ex)
             {

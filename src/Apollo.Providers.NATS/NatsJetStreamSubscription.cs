@@ -72,8 +72,13 @@ internal class NatsJetStreamSubscription : ISubscription
 
                     if (handlerOnly || subjectTypeMapping.ContainsKey(subjectMapping))
                     {
+                        if (config.AckStrategy == AckStrategy.AutoAck)
+                            await msg.AckAsync(cancellationToken: cancellationToken);
+
                         await ProcessMessage(msg);
-                        await msg.AckAsync(cancellationToken: cancellationToken);
+
+                        if (config.AckStrategy == AckStrategy.Default)
+                            await msg.AckAsync(cancellationToken: cancellationToken);
                     }
                     else
                     {
@@ -111,11 +116,11 @@ internal class NatsJetStreamSubscription : ISubscription
                 Headers = natsMsg.Headers ?? new NatsHeaders(),
                 Data = natsMsg.Data,
             };
-            
+
             var subjectMapping = "";
             if (natsMsg.Headers != null && natsMsg.Headers.TryGetValue(ApolloHeader.MessageType, out var apolloType))
                 subjectMapping = apolloType.First() ?? "";
-            
+
             subjectTypeMapping.TryGetValue(subjectMapping, out var messageType);
             message.MessageType = messageType ?? typeof(byte[]);
 

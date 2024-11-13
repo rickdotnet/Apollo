@@ -52,6 +52,17 @@ public record EndpointConfig
         get => InternalCreateMissingResources ?? false;
         set => InternalCreateMissingResources = value;
     }
+    
+    internal AckStrategy? InternalAckStrategy { get; set; }
+    
+    /// <summary>
+    /// For Destrugter
+    /// </summary>
+    public AckStrategy AckStrategy
+    {
+        get => InternalAckStrategy ?? AckStrategy.Default;
+        set => InternalAckStrategy = value;
+    }
 
     /// <summary>
     /// Not implemented yet

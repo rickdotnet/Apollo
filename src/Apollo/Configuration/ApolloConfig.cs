@@ -30,4 +30,9 @@ public record ApolloConfig
     /// Publish only mode
     /// </summary>
     public bool PublishOnly { get; set; }
+    
+    /// <summary>
+    /// For Destrugter
+    /// </summary>
+    public AckStrategy AckStrategy { get; set; } = AckStrategy.Default;
 }

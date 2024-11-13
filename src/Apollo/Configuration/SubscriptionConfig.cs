@@ -12,6 +12,7 @@ public record SubscriptionConfig
     public required Type[] MessageTypes { get; init; } = [];
     public required bool IsDurable { get; set; }
     public bool CreateMissingResources { get; set; }
+    public AckStrategy AckStrategy { get; set; } = AckStrategy.Default;
 
     public static SubscriptionConfig ForEndpoint(EndpointConfig endpointConfig, Type? endpointType = null, Type[]? messageTypes = null)
     {
@@ -23,6 +24,7 @@ public record SubscriptionConfig
             Subject = endpointConfig.Subject,
             IsDurable = endpointConfig.IsDurable,
             CreateMissingResources = endpointConfig.CreateMissingResources,
+            AckStrategy = endpointConfig.AckStrategy,
             EndpointType = endpointType,
             MessageTypes = 
                 messageTypes

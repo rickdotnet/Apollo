@@ -27,7 +27,7 @@ _ = endpoint.StartEndpoint(CancellationToken.None);
 
 public class TestEndpoint : IListenFor<TestEvent>
 {
-    public Task HandleAsync(TestEvent message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(TestEvent message, ApolloContext context, CancellationToken cancellationToken = default)
     {
         Log.Information("Endpoint: {Message}", message);
 

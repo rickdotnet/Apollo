@@ -2,7 +2,7 @@
 
 ### Overview
 
-Apollo is a flexible library originally designed for NATS that has since evolved to support a generic in-memory provider and an in-preview provider for Azure Service Bus (ASB). At its core, Apollo simplifies communication between different parts of your system by offering a plug-and-play mechanism for routing messages dynamically between local and remote endpoints.
+Apollo is a flexible library designed for NATS, with support for a generic in-memory provider. To extend Apollo, developers can implement their own custom providers.
 
 ### Key Concepts and Components
 

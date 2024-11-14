@@ -13,18 +13,23 @@ public interface IApolloBuilder
     IApolloBuilder WithDefaultConsumerName(string consumerName);
     IApolloBuilder WithDefaultNamespace(string defaultNamespace);
     IApolloBuilder CreateMissingResources(bool createMissingResources = true);
+    IApolloBuilder WithAckStrategy(AckStrategy ackStrategy);
     IApolloBuilder PublishOnly(bool publishOnly = true);
     IApolloBuilder AddEndpoint<TEndpoint>(EndpointConfig config) where TEndpoint : class;
     IApolloBuilder AddHandler(EndpointConfig config, Func<ApolloContext, CancellationToken, Task> handler);
     IApolloBuilder WithEndpointProvider(IEndpointProvider endpointProvider);
     IApolloBuilder WithEndpointProvider<TProvider>() where TProvider : class, IEndpointProvider;
+    IApolloBuilder WithSubscriberProvider(ISubscriptionProvider subscriberProvider);
+    IApolloBuilder WithSubscriberProvider<TProvider>() where TProvider : class, ISubscriptionProvider;
+    IApolloBuilder WithProviderPublisher(IProviderPublisher providerPublisher);
+    IApolloBuilder WithProviderPublisher<TPublisher>() where TPublisher : class, IProviderPublisher;
 }
 
 internal class ApolloBuilder : IApolloBuilder
 {
     public IServiceCollection Services { get; }
     private ApolloConfig config = new();
-    
+
     public ApolloBuilder(IServiceCollection services)
     {
         Services = services;
@@ -75,6 +80,12 @@ internal class ApolloBuilder : IApolloBuilder
         return this;
     }
 
+    public IApolloBuilder WithAckStrategy(AckStrategy ackStrategy)
+    {
+        config.AckStrategy = ackStrategy;
+        return this;
+    }
+
     /// <summary>
     /// Set the service to publish only mode
     /// </summary>
@@ -120,7 +131,34 @@ internal class ApolloBuilder : IApolloBuilder
     /// <returns></returns>
     public IApolloBuilder WithEndpointProvider<TProvider>() where TProvider : class, IEndpointProvider
     {
-        Services.TryAddSingleton<IEndpointProvider, TProvider>();
+        Services.TryAddSingleton<TProvider>();
+        Services.TryAddSingleton<IEndpointProvider>(serviceProvider => serviceProvider.GetRequiredService<TProvider>());
+        return this;
+    }
+
+    public IApolloBuilder WithSubscriberProvider(ISubscriptionProvider subscriberProvider)
+    {
+        Services.TryAddSingleton<ISubscriptionProvider>(subscriberProvider);
+        return this;
+    }
+
+    public IApolloBuilder WithSubscriberProvider<TProvider>() where TProvider : class, ISubscriptionProvider
+    {
+        Services.TryAddSingleton<TProvider>();
+        Services.TryAddSingleton<ISubscriptionProvider>(serviceProvider => serviceProvider.GetRequiredService<TProvider>());
+        return this;
+    }
+
+    public IApolloBuilder WithProviderPublisher(IProviderPublisher providerPublisher)
+    {
+        Services.TryAddSingleton<IProviderPublisher>(providerPublisher);
+        return this;
+    }
+
+    public IApolloBuilder WithProviderPublisher<TPublisher>() where TPublisher : class, IProviderPublisher
+    {
+        Services.TryAddSingleton<TPublisher>();
+        Services.TryAddSingleton<IProviderPublisher>(serviceProvider => serviceProvider.GetRequiredService<TPublisher>());
         return this;
     }
 

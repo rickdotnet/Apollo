@@ -13,4 +13,8 @@
       <ProjectReference Include="..\..\src\Apollo.Providers.NATS\Apollo.Providers.NATS.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="xunit" Version="2.9.2" />
+    </ItemGroup>
+
 </Project>

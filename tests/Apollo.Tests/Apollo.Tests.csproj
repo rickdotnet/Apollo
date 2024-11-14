@@ -13,4 +13,8 @@
       <ProjectReference Include="..\..\src\Apollo\Apollo.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="xunit" Version="2.9.2" />
+    </ItemGroup>
+
 </Project>

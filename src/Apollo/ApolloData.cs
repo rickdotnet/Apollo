@@ -16,10 +16,7 @@ public sealed class ApolloData
     public static implicit operator ApolloData(byte[] data) => new(data);
     public static implicit operator byte[](ApolloData data) => data.ToArray();
 
-    public override string ToString()
-    {
-        return System.Text.Encoding.UTF8.GetString(Data.Span);
-    }
+    public override string ToString() => System.Text.Encoding.UTF8.GetString(Data.Span);
 
     /// <summary>
     /// Attempts to deserialize the data into the specified type.

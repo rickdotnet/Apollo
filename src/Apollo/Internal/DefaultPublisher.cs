@@ -51,9 +51,10 @@ internal class DefaultPublisher : IPublisher
             MessageType = messageType,
             Headers = new Dictionary<string, StringValues>
             {
-                {ApolloHeader.MessageType, subjectTypeMapper.ApolloMessageType(messageType.Name)},
-                {ApolloHeader.MessageClrType, messageType.AssemblyQualifiedName!},
-                {ApolloHeader.MessageAction, action}
+                [ApolloHeader.MessageType] = messageType.Name,
+                [ApolloHeader.SubjectMapping] = subjectTypeMapper.ApolloMessageType(messageType.Name),
+                [ApolloHeader.MessageClrType] = messageType.AssemblyQualifiedName!,
+                [ApolloHeader.MessageAction] = action
             }
         };
     }

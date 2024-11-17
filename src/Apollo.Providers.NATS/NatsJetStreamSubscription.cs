@@ -67,7 +67,7 @@ internal class NatsJetStreamSubscription : ISubscription
                 try
                 {
                     var subjectMapping = "";
-                    if (msg.Headers != null && msg.Headers.TryGetValue(ApolloHeader.MessageType, out var apolloType))
+                    if (msg.Headers != null && msg.Headers.TryGetValue(ApolloHeader.SubjectMapping, out var apolloType))
                         subjectMapping = apolloType.First() ?? "";
 
                     if (handlerOnly || subjectTypeMapping.ContainsKey(subjectMapping))
@@ -118,7 +118,7 @@ internal class NatsJetStreamSubscription : ISubscription
             };
 
             var subjectMapping = "";
-            if (natsMsg.Headers != null && natsMsg.Headers.TryGetValue(ApolloHeader.MessageType, out var apolloType))
+            if (natsMsg.Headers != null && natsMsg.Headers.TryGetValue(ApolloHeader.SubjectMapping, out var apolloType))
                 subjectMapping = apolloType.First() ?? "";
 
             subjectTypeMapping.TryGetValue(subjectMapping, out var messageType);

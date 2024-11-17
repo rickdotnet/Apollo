@@ -45,7 +45,7 @@ internal class NatsCoreSubscription : ISubscription
                 {
                     // type mapping is for endpoint types only
                     var subjectMapping = "";
-                    if (msg.Headers != null && msg.Headers.TryGetValue(ApolloHeader.MessageType, out var apolloType))
+                    if (msg.Headers != null && msg.Headers.TryGetValue(ApolloHeader.SubjectMapping, out var apolloType))
                         subjectMapping = apolloType.First() ?? "";
 
                     if (handlerOnly || subjectTypeMapping.ContainsKey(subjectMapping))
@@ -83,7 +83,7 @@ internal class NatsCoreSubscription : ISubscription
                 Data = natsMsg.Data,
             };
 
-            if (message.Headers.TryGetValue(ApolloHeader.MessageType, out var headerType)
+            if (message.Headers.TryGetValue(ApolloHeader.SubjectMapping, out var headerType)
                 && headerType.Count > 0)
             {
                 message.MessageType =

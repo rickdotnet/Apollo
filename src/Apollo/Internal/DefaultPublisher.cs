@@ -47,7 +47,7 @@ internal class DefaultPublisher : IPublisher
         var messageType = typeof(TMessage);
         return new ApolloMessage
         {
-            Data = JsonSerializer.SerializeToUtf8Bytes(message),
+            Data = ApolloData.From(message),
             MessageType = messageType,
             Headers = new Dictionary<string, StringValues>
             {

@@ -62,8 +62,8 @@ internal class SynchronousEndpoint : IApolloEndpoint
 
             // grab the instance from the DI container 
             endpointInstance = endpointProvider.GetService(endpointType);
-            
-            if(endpointInstance is null)
+
+            if (endpointInstance is null)
                 throw new InvalidOperationException("Endpoint instance not found");
         }
         else if (handler is null)
@@ -119,19 +119,17 @@ internal class SynchronousEndpoint : IApolloEndpoint
             handlers.TryAdd(context.Message.MessageType, handleMethod);
         }
 
-        // invoke the method
-        var stringData = System.Text.Encoding.UTF8.GetString(context.Message.Data!);
-        var messageObject = JsonSerializer.Deserialize(stringData, context.Message.MessageType!);
-
+        var messageObject = context.Message.Data!.As(context.Message.MessageType!);
         var isRequest = context.Message.MessageType.IsRequest();
+        
         if (isRequest)
         {
             if (!context.ReplyAvailable)
                 throw new InvalidOperationException("Uh, oh: No reply available");
 
             var response =
-                await (dynamic)handleMethod.Invoke(endpointInstance, [messageObject, context,  cancellationToken])!;
-            
+                await (dynamic)handleMethod.Invoke(endpointInstance, [messageObject, context, cancellationToken])!;
+
             // TODO: serialization point
             var responseJson = JsonSerializer.Serialize(response);
             var responseBytes = System.Text.Encoding.UTF8.GetBytes(responseJson);
@@ -142,11 +140,5 @@ internal class SynchronousEndpoint : IApolloEndpoint
             var result = (Task)handleMethod.Invoke(endpointInstance, [messageObject, context, cancellationToken])!;
             await result;
         }
-    }
-
-    private Task Reply(object message, CancellationToken cancellationToken)
-    {
-        // instance.Handle((type)context.Message);
-        throw new NotImplementedException();
     }
 }

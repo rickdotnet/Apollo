@@ -39,7 +39,7 @@ internal class NatsPublisher : IProviderPublisher
         var response = await connection
             .RequestAsync<byte[], byte[]>(
                 $"{subject}",
-                message.Data,
+                message.Data!.ToArray(),
                 headers: new NatsHeaders((Dictionary<string, StringValues>)message.Headers),
                 cancellationToken: cancellationToken).AsTask();
         return response.Data!;

@@ -7,7 +7,7 @@ public class ApolloContext
 {
     public IReadOnlyDictionary<string, StringValues> Headers { get; }
     public string Subject => Message.Subject;
-    public byte[]? Data => Message.Data;
+    public ApolloData? Data => Message.Data;
     internal ApolloMessage Message { get; }
     internal bool ReplyAvailable => ReplyFunc is not null;
     private Func<byte[] , CancellationToken, Task>? ReplyFunc { get; }

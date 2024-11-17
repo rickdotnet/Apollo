@@ -23,12 +23,13 @@ public static class HostDemo
                     .WithConfig(new ApolloConfig())
                     .WithDefaultConsumerName("default-consumer")
                     .AddEndpoint<TestEndpoint>(TestEndpoint.Default)
-                    .AddHandler(anonConfig, (_, _) =>
-                        {
-                            Console.WriteLine($"Anonymous handler received: {count++}");
-                            return Task.CompletedTask;
-                        }
-                    );
+                    .AddHandler(anonConfig, (context, _) =>
+                    {
+                        var message = context.Data!.As<TestEvent>();
+                        Console.WriteLine($"AnonHandler: {message.Message}");
+        
+                        return Task.CompletedTask;
+                    });
 
                 if (useNats)
                 {
@@ -36,11 +37,11 @@ public static class HostDemo
                         opts => opts with
                         {
                             Url = "nats://localhost:4222",
-                            AuthOpts = new NatsAuthOpts
-                            {
-                                Username = "apollo",
-                                Password = "demo"
-                            }
+                            // AuthOpts = new NatsAuthOpts
+                            // {
+                            //     Username = "apollo",
+                            //     Password = "demo"
+                            // }
                         }
                     );
                 }

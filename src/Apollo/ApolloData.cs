@@ -14,6 +14,7 @@ public sealed class ApolloData
     }
 
     public static implicit operator ApolloData(byte[] data) => new(data);
+    public static implicit operator byte[](ApolloData data) => data.ToArray();
 
     public override string ToString()
     {
@@ -30,7 +31,7 @@ public sealed class ApolloData
         var result = Result.Try(() => System.Text.Json.JsonSerializer.Deserialize<T>(Data.Span));
         return result.ValueOrDefault();
     }
-    
+
     public object? As(Type type)
     {
         var result = Result.Try(() => System.Text.Json.JsonSerializer.Deserialize(Data.Span, type));

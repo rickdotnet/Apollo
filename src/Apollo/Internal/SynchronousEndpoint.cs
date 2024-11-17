@@ -119,7 +119,7 @@ internal class SynchronousEndpoint : IApolloEndpoint
             handlers.TryAdd(context.Message.MessageType, handleMethod);
         }
 
-        var messageObject = context.Message.Data!.As(context.Message.MessageType!);
+        var messageObject = context.Data!.As(context.Message.MessageType!);
         var isRequest = context.Message.MessageType.IsRequest();
         
         if (isRequest)

@@ -41,7 +41,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x
+        dotnet-version: 9.x
     - name: Build Docs
       run: dotnet run --project ./build/build.csproj -- generate-docs
     - name: Upload Artifact

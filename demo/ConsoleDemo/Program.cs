@@ -11,6 +11,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 //await OriginalDemo.Demo();
-//await Direct.Demo();
-await HostDemo.Demo();
+await Direct.Demo();
+//await HostDemo.Demo();
 //await AsbDemo.Demo();

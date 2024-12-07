@@ -5,15 +5,21 @@ using Serilog;
 
 namespace ConsoleDemo;
 
+#region docs-snippet
+
 public record TestEvent(string Message) : IEvent;
+
 public record TestCommand(string Message) : ICommand;
+
 public record TestRequest(string Message) : IRequest<TestResponse>;
+
 public record TestResponse(string Message);
 
 public class TestEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>, IReplyTo<TestRequest, TestResponse>
 {
-    public static readonly EndpointConfig Default =  new EndpointConfig { ConsumerName = "endpoint", EndpointName = "Demo" };
+    public static readonly EndpointConfig EndpointConfig = new() { ConsumerName = "endpoint", EndpointName = "Demo" };
     private static int count = 0;
+
     public Task Handle(TestEvent message, ApolloContext context, CancellationToken cancellationToken = default)
     {
         count++;
@@ -22,18 +28,21 @@ public class TestEndpoint : IListenFor<TestEvent>, IHandle<TestCommand>, IReplyT
         return Task.Delay(500);
     }
 
-    public Task Handle(TestCommand message, ApolloContext context, CancellationToken cancellationToken)
+    public Task Handle(TestCommand message, ApolloContext context, CancellationToken cancellationToken = default)
     {
         Log.Information("TestEndpoint Received TestCommand");
         Log.Information("Message: {Message}", message);
         return Task.CompletedTask;
     }
 
-    public Task<TestResponse> Handle(TestRequest message, ApolloContext context, CancellationToken cancellationToken = default)
-    { 
+    public Task<TestResponse> Handle(TestRequest message, ApolloContext context,
+        CancellationToken cancellationToken = default)
+    {
         Log.Information("TestEndpoint Received TestRequest");
         Log.Information("Message: {Message}", message);
-        
+
         return Task.FromResult(new TestResponse("TestResponse"));
     }
 }
+
+#endregion

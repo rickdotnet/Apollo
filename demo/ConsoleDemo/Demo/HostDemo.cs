@@ -12,22 +12,23 @@ public static class HostDemo
 {
     public static async Task Demo(bool useNats = false)
     {
-        var endpointConfig = new EndpointConfig { ConsumerName = "endpoint", EndpointName = "Demo" };
+        #region docs-snippet-host
+
         var anonConfig = new EndpointConfig { ConsumerName = "anon", Subject = "demo" };
 
-        var count = 1; // thread-safe when in sync mode
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddApollo(
-            ab => {
+            ab =>
+            {
                 ab
                     .WithConfig(new ApolloConfig())
                     .WithDefaultConsumerName("default-consumer")
-                    .AddEndpoint<TestEndpoint>(TestEndpoint.Default)
+                    .AddEndpoint<TestEndpoint>(TestEndpoint.EndpointConfig)
                     .AddHandler(anonConfig, (context, _) =>
                     {
                         var message = context.Data!.As<TestEvent>();
-                        Console.WriteLine($"AnonHandler: {message.Message}");
-        
+                        Console.WriteLine($"AnonHandler: {message?.Message}");
+
                         return Task.CompletedTask;
                     });
 
@@ -48,15 +49,19 @@ public static class HostDemo
             }
         );
 
+        #endregion
+
         var host = builder.Build();
         var hostTask = host.RunAsync();
 
         await Task.Delay(3000);
         using var scope = host.Services.CreateScope();
         var serviceProvider = scope.ServiceProvider;
-        var apollo = serviceProvider.GetRequiredService<ApolloClient>();
 
-        var publisher = apollo.CreatePublisher(endpointConfig);
+        #region docs-snippet-publish
+
+        var apollo = serviceProvider.GetRequiredService<ApolloClient>();
+        var publisher = apollo.CreatePublisher(TestEndpoint.EndpointConfig);
 
         await Task.WhenAll(
             publisher.Broadcast(new TestEvent("test 1"), CancellationToken.None),
@@ -65,6 +70,8 @@ public static class HostDemo
             publisher.Broadcast(new TestEvent("test 4"), CancellationToken.None),
             publisher.Broadcast(new TestEvent("test 5"), CancellationToken.None)
         );
+
+        #endregion
 
         Console.WriteLine("Press any key to exit");
         Console.ReadKey();

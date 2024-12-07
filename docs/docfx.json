@@ -41,7 +41,9 @@
       "_appName": "Apollo",
       "_appTitle": "Apollo",
       "_appLogoPath":"images/logo.png",
+      "_appFaviconPath": "images/logo.png",
       "_enableSearch": true,
+      "_enableNewTab": true,
       "pdf": true
     }
   }

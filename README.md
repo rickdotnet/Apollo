@@ -1,5 +1,10 @@
 # Apollo
 
+> [!WARNING] 
+Apollo is evolving. The journey continues as part of [Aether](https://github.com/rickdotnet/aether).  
+
+---
+
 Apollo aims to be a lightweight, high-performance messaging client designed to provide developers with a simple yet powerful way to incorporate flexible architectures into their .NET applications. 
 
 ## Documentation
